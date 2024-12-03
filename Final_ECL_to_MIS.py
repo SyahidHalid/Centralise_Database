@@ -211,7 +211,15 @@ try:
       FROM [param_ccy_exchange_rate] r inner join param_system_param p on p.param_reference ='Root>>Currency' and currency_id=p.param_id
       order by param_name asc;""", conn)
     
-    MRate = aa.iloc[np.where(aa.valuedate==reportingDate)]
+    MRate1 = aa.iloc[np.where(aa.valuedate==reportingDate)]
+
+    df_add = pd.DataFrame([['MYR',
+                          '1',
+                          reportingDate]], columns=['param_name','exchange_rate','valuedate'])
+
+    MRate = pd.concat([MRate1, df_add])
+
+    MRate['exchange_rate'] = MRate['exchange_rate'].astype(float)
 
     #====================================================================================================================================
     #import pandas as pd
@@ -351,7 +359,7 @@ try:
     conn.commit() 
 
     sql_query4 = """UPDATE [jobPython]
-    SET [jobCompleted] = getdate(), [jobStatus]= 'PY002'
+    SET [jobCompleted] = getdate(), [jobStatus]= 'PY002', [jobErrDetail]=NULL
     WHERE [jobName] = 'ECL to MIS';
                 """
     cursor.execute(sql_query4)

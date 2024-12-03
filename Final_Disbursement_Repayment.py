@@ -375,7 +375,7 @@ try:
     conn.commit() 
 
     sql_query4 = """UPDATE [jobPython]
-    SET [jobCompleted] = getdate(), [jobStatus]= 'PY002'
+    SET [jobCompleted] = getdate(), [jobStatus]= 'PY002', [jobErrDetail]=NULL
     WHERE [jobName] = 'Disbursement & Repayment';
                 """
     cursor.execute(sql_query4)
