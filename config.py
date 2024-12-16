@@ -9,8 +9,21 @@ CONNECTION_STRING = (
 )
 # Folder paths
 FOLDER_CONFIG = {
-    'FTP_directory': r'D:\\mis_doc\\PythonProjects\\misPython\\misPython_doc\\'
+    'FTP_directory': r'misPython_doc\\'
 }
 
 # import config
 #  conn = pyodbc.connect(config.CONNECTION_STRING)
+
+
+# =================================UAT
+# # Folder paths
+# PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+
+# # FTP directory (use a valid key-value pair)
+# FOLDER_CONFIG = {
+#     "FTP_directory": os.path.join(PROJECT_ROOT,"misPython_doc") 
+# }
+
+# # import config
+# #  conn = pyodbc.connect(config.CONNECTION_STRING)
