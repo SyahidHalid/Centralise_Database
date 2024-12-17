@@ -821,13 +821,39 @@ try:
                                 "Ta`widh Payment/Penalty Repayment (MYR)":'acc_penalty_myr',
                                 "Ta'widh (Compensation) (Facility Currency)":'acc_penalty_compensation_fc',
                                 "Ta'widh (Compensation) (MYR)":'acc_penalty_compensation_myr',
-                                'Total Loans Outstanding (Facility Currency)':'acc_balance_outstanding_fc',
-                                'Total Loans Outstanding (MYR)':'acc_balance_outstanding_myr',
+                                'Total Loans Outstanding (Facility Currency)':'acc_balance_outstanding_audited_fc',
+                                'Total Loans Outstanding (MYR)':'acc_balance_outstanding_audited_myr',
                                 'Disbursement/Drawdown (MYR)':'acc_drawdown_myr',
                                 'Cost Payment/Principal Repayment (MYR)':'acc_repayment_myr'},inplace=True)
     appendfinal3.drop_duplicates('finance_sap_number',keep='first',inplace=True)
 
+    appendfinal3['acc_balance_outstanding_fc'] = appendfinal3['facility_amount_outstanding'] +\
+                                                 appendfinal3['acc_accurate_interest']+\
+                                                 appendfinal3['acc_modification_loss']+\
+                                                 appendfinal3['acc_other_charges']+\
+                                                 appendfinal3['acc_penalty']+\
+                                                 appendfinal3['acc_penalty_compensation_fc']+\
+                                                 appendfinal3['acc_suspended_interest']
+
+    appendfinal3['acc_balance_outstanding_myr'] = appendfinal3['acc_principal_amount_outstanding'] +\
+                                                 appendfinal3['acc_accrued_interest_myr']+\
+                                                 appendfinal3['acc_modification_loss_myr']+\
+                                                 appendfinal3['acc_other_charges_myr']+\
+                                                 appendfinal3['acc_penalty_myr']+\
+                                                 appendfinal3['acc_penalty_compensation_myr']+\
+                                                 appendfinal3['acc_interest_suspense_myr']
+
+    appendfinal3['acc_balance_outstanding_cust_fc'] = appendfinal3['facility_amount_outstanding'] +\
+                                                 appendfinal3['acc_accurate_interest']
+
+    appendfinal3['acc_balance_outstanding_cust_myr'] = appendfinal3['acc_principal_amount_outstanding'] +\
+                                                 appendfinal3['acc_accrued_interest_myr']
+
     df_add_Humm = pd.DataFrame([['500776A',
+                        0,
+                        0,
+                        0,
+                        0,
                         0,
                         0,
                         0,
@@ -864,10 +890,14 @@ try:
                                               'acc_penalty_myr',
                                               'acc_penalty_compensation_fc',
                                               'acc_penalty_compensation_myr',
+                                              'acc_balance_outstanding_audited_fc',
+                                              'acc_balance_outstanding_audited_myr',
+                                              'acc_drawdown_myr',
+                                              'acc_repayment_myr',
                                               'acc_balance_outstanding_fc',
                                               'acc_balance_outstanding_myr',
-                                              'acc_drawdown_myr',
-                                              'acc_repayment_myr'])
+                                              'acc_balance_outstanding_cust_fc',
+                                              'acc_balance_outstanding_cust_myr'])
 
     appendfinal3 = pd.concat([appendfinal3, df_add_Humm])
 
@@ -889,10 +919,14 @@ try:
     n_humm = sum(appendfinal3.fillna(0).iloc[np.where(appendfinal3['finance_sap_number']=='500776')]['acc_penalty_myr'])
     o_humm = sum(appendfinal3.fillna(0).iloc[np.where(appendfinal3['finance_sap_number']=='500776')]['acc_penalty_compensation_fc'])
     p_humm = sum(appendfinal3.fillna(0).iloc[np.where(appendfinal3['finance_sap_number']=='500776')]['acc_penalty_compensation_myr'])
-    q_humm = sum(appendfinal3.fillna(0).iloc[np.where(appendfinal3['finance_sap_number']=='500776')]['acc_balance_outstanding_fc'])
-    r_humm = sum(appendfinal3.fillna(0).iloc[np.where(appendfinal3['finance_sap_number']=='500776')]['acc_balance_outstanding_myr'])
+    q_humm = sum(appendfinal3.fillna(0).iloc[np.where(appendfinal3['finance_sap_number']=='500776')]['acc_balance_outstanding_audited_fc'])
+    r_humm = sum(appendfinal3.fillna(0).iloc[np.where(appendfinal3['finance_sap_number']=='500776')]['acc_balance_outstanding_audited_myr'])
     s_humm = sum(appendfinal3.fillna(0).iloc[np.where(appendfinal3['finance_sap_number']=='500776')]['acc_drawdown_myr'])
     t_humm = sum(appendfinal3.fillna(0).iloc[np.where(appendfinal3['finance_sap_number']=='500776')]['acc_repayment_myr'])
+    u_humm = sum(appendfinal3.fillna(0).iloc[np.where(appendfinal3['finance_sap_number']=='500776')]['acc_balance_outstanding_fc'])
+    v_humm = sum(appendfinal3.fillna(0).iloc[np.where(appendfinal3['finance_sap_number']=='500776')]['acc_balance_outstanding_myr'])
+    w_humm = sum(appendfinal3.fillna(0).iloc[np.where(appendfinal3['finance_sap_number']=='500776')]['acc_balance_outstanding_cust_fc'])
+    x_humm = sum(appendfinal3.fillna(0).iloc[np.where(appendfinal3['finance_sap_number']=='500776')]['acc_balance_outstanding_cust_myr'])
 
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'facility_amount_outstanding'] = 0.79*a_humm
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_principal_amount_outstanding'] = 0.79*b_humm
@@ -910,10 +944,14 @@ try:
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_penalty_myr'] = 0.79*n_humm
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_penalty_compensation_fc'] = 0.79*o_humm
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_penalty_compensation_myr'] = 0.79*p_humm
-    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_balance_outstanding_fc'] = 0.79*q_humm
-    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_balance_outstanding_myr'] = 0.79*r_humm
+    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_balance_outstanding_audited_fc'] = 0.79*q_humm
+    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_balance_outstanding_audited_myr'] = 0.79*r_humm
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_drawdown_myr'] = 0.79*s_humm
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_repayment_myr'] = 0.79*t_humm
+    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_balance_outstanding_fc'] = 0.79*u_humm
+    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_balance_outstanding_myr'] = 0.79*v_humm
+    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_balance_outstanding_cust_fc'] = 0.79*w_humm
+    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776'),'acc_balance_outstanding_cust_myr'] = 0.79*x_humm
 
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'facility_amount_outstanding'] = 0.21*a_humm
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_principal_amount_outstanding'] = 0.21*b_humm
@@ -931,10 +969,14 @@ try:
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_penalty_myr'] = 0.21*n_humm
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_penalty_compensation_fc'] = 0.21*o_humm
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_penalty_compensation_myr'] = 0.21*p_humm
-    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_balance_outstanding_fc'] = 0.21*q_humm
-    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_balance_outstanding_myr'] = 0.21*r_humm
+    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_balance_outstanding_audited_fc'] = 0.21*q_humm
+    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_balance_outstanding_audited_myr'] = 0.21*r_humm
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_drawdown_myr'] = 0.21*s_humm
     appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_repayment_myr'] = 0.21*t_humm
+    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_balance_outstanding_fc'] = 0.21*u_humm
+    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_balance_outstanding_myr'] = 0.21*v_humm
+    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_balance_outstanding_cust_fc'] = 0.21*w_humm
+    appendfinal3.loc[(appendfinal3['finance_sap_number']=='500776A'),'acc_balance_outstanding_cust_myr'] = 0.21*x_humm
 
     convert_time = str(current_time).replace(":","-")
     appendfinal3['position_as_at'] = reportingDate
@@ -1102,10 +1144,14 @@ try:
                 target.acc_penalty_myr = source.acc_penalty_myr,
                 target.acc_penalty_compensation_fc = source.acc_penalty_compensation_fc,
                 target.acc_penalty_compensation_myr = source.acc_penalty_compensation_myr,
-                target.acc_balance_outstanding_fc = source.acc_balance_outstanding_fc,
-                target.acc_balance_outstanding_myr = source.acc_balance_outstanding_myr,
+                target.acc_balance_outstanding_audited_fc = source.acc_balance_outstanding_audited_fc,
+                target.acc_balance_outstanding_audited_myr = source.acc_balance_outstanding_audited_myr,
                 target.acc_drawdown_myr = source.acc_drawdown_myr,
                 target.acc_repayment_myr = source.acc_repayment_myr,
+                target.acc_balance_outstanding_fc = source.acc_balance_outstanding_fc,
+                target.acc_balance_outstanding_myr = source.acc_balance_outstanding_myr,
+                target.acc_balance_outstanding_cust_fc = source.acc_balance_outstanding_cust_fc,
+                target.acc_balance_outstanding_cust_myr = source.acc_balance_outstanding_cust_myr,
                 target.position_as_at = source.position_as_at;
     """)
     conn.commit() 
