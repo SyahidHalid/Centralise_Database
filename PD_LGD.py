@@ -247,15 +247,22 @@ try:
                     'PD (%)',
                     'LGD Segment',
                     'LGD rate',
-                    'Watchlist (Yes/No)']].rename(columns={'Finance (SAP) Number':'finance_sap_number',
+                    'Watchlist (Yes/No)',
+                    'EXIM Account No.']].rename(columns={'Finance (SAP) Number':'finance_sap_number',
                                                 'Borrower name':'Borrower',
                                                 'Reporting date':'Reporting_Date',
                                                 'Maturity date':'Maturity_Date',
                                                 'PD segment':'PD_Segment','LGD Segment':'LGD_Segment',
                                                  'PD (%)':'acc_pd_percent',
                                                  'LGD rate':'acc_lgd_percent',
-                                                 'Watchlist (Yes/No)':'Watchlist_Tagging'}).fillna(0)
-    
+                                                 'Watchlist (Yes/No)':'Watchlist_Tagging',
+                                                 'EXIM Account No.':'EXIM_Account'}).fillna(0)
+
+
+    Active3['EXIM_Account'] = Active3['EXIM_Account'].astype(str)
+    Active3['EXIM_Account'] = Active3['EXIM_Account'].str.replace("-","")
+    Active3['EXIM_Account'] = Active3['EXIM_Account'].str.strip()
+
     Active3['finance_sap_number'] =Active3['finance_sap_number'].astype(str)
 
     Active3['Reporting_Date'] =Active3['Reporting_Date'].astype(str)
@@ -274,7 +281,7 @@ try:
     'Maturity_Date',
     'YOB',
     'PD_Segment',
-    'acc_pd_percent','LGD_Segment','acc_lgd_percent','position_as_at','Watchlist_Tagging']]
+    'acc_pd_percent','LGD_Segment','acc_lgd_percent','position_as_at','Watchlist_Tagging','EXIM_Account']]
 
     #Active4.to_excel(config.FOLDER_CONFIG["FTP_directory"]+"Result_PD_LGD.xlsx",index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
     #Active4.to_excel(config.FOLDER_CONFIG["FTP_directory"]+"Result_PD_LGD_"+str(convert_time)[:19]+".xlsx",index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
@@ -416,7 +423,7 @@ try:
     conn.commit()
 
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_PD_LGD AS source
-    ON target.finance_sap_number = source.finance_sap_number
+    ON target.facility_exim_account_num = source.EXIM_Account
     WHEN MATCHED THEN
         UPDATE SET target.acc_pd_percent = source.acc_pd_percent,
                 target.acc_lgd_percent = source.acc_lgd_percent,

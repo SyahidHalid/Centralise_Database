@@ -829,19 +829,19 @@ try:
 
     appendfinal3['acc_balance_outstanding_fc'] = appendfinal3['facility_amount_outstanding'] +\
                                                  appendfinal3['acc_accurate_interest']+\
-                                                 appendfinal3['acc_modification_loss']+\
                                                  appendfinal3['acc_other_charges']+\
                                                  appendfinal3['acc_penalty']+\
                                                  appendfinal3['acc_penalty_compensation_fc']+\
                                                  appendfinal3['acc_suspended_interest']
+                                                 #appendfinal3['acc_modification_loss']+\ sbb ccris amik iis
 
     appendfinal3['acc_balance_outstanding_myr'] = appendfinal3['acc_principal_amount_outstanding'] +\
                                                  appendfinal3['acc_accrued_interest_myr']+\
-                                                 appendfinal3['acc_modification_loss_myr']+\
                                                  appendfinal3['acc_other_charges_myr']+\
                                                  appendfinal3['acc_penalty_myr']+\
                                                  appendfinal3['acc_penalty_compensation_myr']+\
                                                  appendfinal3['acc_interest_suspense_myr']
+                                                 #appendfinal3['acc_modification_loss_myr']+\ sbb ccris amik iis
 
     appendfinal3['acc_balance_outstanding_cust_fc'] = appendfinal3['facility_amount_outstanding'] +\
                                                  appendfinal3['acc_accurate_interest']
@@ -1128,9 +1128,7 @@ try:
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DEBTOR AS source
     ON target.finance_sap_number = source.finance_sap_number
     WHEN MATCHED THEN
-        UPDATE SET target.facility_amount_outstanding = source.facility_amount_outstanding,
-                target.acc_principal_amount_outstanding = source.acc_principal_amount_outstanding,
-                target.acc_accrued_interest_month_fc = source.acc_accrued_interest_month_fc,
+        UPDATE SET target.acc_accrued_interest_month_fc = source.acc_accrued_interest_month_fc,
                 target.acc_accrued_interest_month_myr = source.acc_accrued_interest_month_myr,
                 target.acc_modification_loss = source.acc_modification_loss,
                 target.acc_modification_loss_myr = source.acc_modification_loss_myr,
@@ -1143,18 +1141,29 @@ try:
                 target.acc_penalty = source.acc_penalty,
                 target.acc_penalty_myr = source.acc_penalty_myr,
                 target.acc_penalty_compensation_fc = source.acc_penalty_compensation_fc,
-                target.acc_penalty_compensation_myr = source.acc_penalty_compensation_myr,
-                target.acc_balance_outstanding_audited_fc = source.acc_balance_outstanding_audited_fc,
-                target.acc_balance_outstanding_audited_myr = source.acc_balance_outstanding_audited_myr,
-                target.acc_drawdown_myr = source.acc_drawdown_myr,
-                target.acc_repayment_myr = source.acc_repayment_myr,
-                target.acc_balance_outstanding_fc = source.acc_balance_outstanding_fc,
-                target.acc_balance_outstanding_myr = source.acc_balance_outstanding_myr,
-                target.acc_balance_outstanding_cust_fc = source.acc_balance_outstanding_cust_fc,
-                target.acc_balance_outstanding_cust_myr = source.acc_balance_outstanding_cust_myr,
+                target.acc_penalty_compensation_myr = source.acc_penalty_compensation_myr
                 target.position_as_at = source.position_as_at;
     """)
     conn.commit() 
+
+    #redundant
+    #target.facility_amount_outstanding = source.facility_amount_outstanding,
+    #target.acc_principal_amount_outstanding = source.acc_principal_amount_outstanding,
+    #target.acc_drawdown_myr = source.acc_drawdown_myr,
+    #target.acc_repayment_myr = source.acc_repayment_myr,
+
+    #formulakn kat java,
+                #audited
+                #target.acc_balance_outstanding_audited_fc = source.acc_balance_outstanding_audited_fc,
+                #target.acc_balance_outstanding_audited_myr = source.acc_balance_outstanding_audited_myr,
+                #CCRIS
+                #target.acc_balance_outstanding_fc = source.acc_balance_outstanding_fc,
+                #target.acc_balance_outstanding_myr = source.acc_balance_outstanding_myr,
+                #Customer
+                #target.acc_balance_outstanding_cust_fc = source.acc_balance_outstanding_cust_fc,
+                #target.acc_balance_outstanding_cust_myr = source.acc_balance_outstanding_cust_myr,
+
+    
 
     cursor.execute("drop table A_DEBTOR")
     conn.commit() 

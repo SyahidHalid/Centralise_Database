@@ -2,6 +2,7 @@ update by:
 
 select param_id from param_system_param where param_code='PY002'
 
+target.processed_status_id = (select param_id from param_system_param where param_code=source.processed_status_id)
 
 param:
 

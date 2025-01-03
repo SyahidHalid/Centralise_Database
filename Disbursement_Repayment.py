@@ -548,17 +548,20 @@ try:
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DIS_N_REPAYMENT AS source
     ON target.finance_sap_number = source.Account
     WHEN MATCHED THEN
-        UPDATE SET target.acc_drawdown_fc = source.acc_drawdown_fc,
-                target.acc_drawdown_myr = source.acc_drawdown_myr,
-                target.acc_cumulative_drawdown = source.acc_cumulative_drawdown,
-                target.acc_cumulative_drawdown_myr = source.acc_cumulative_drawdown_myr,
-                target.acc_repayment_fc = source.acc_repayment_fc,
-                target.acc_repayment_myr = source.acc_repayment_myr,
-                target.acc_cumulative_repayment = source.acc_cumulative_repayment,
-                target.acc_cumulative_repayment_myr = source.acc_cumulative_repayment_myr,
-                target.position_as_at = source.position_as_at;
+        UPDATE SET target.position_as_at = source.position_as_at;
     """)
     conn.commit() 
+
+    #redundant
+    #target.acc_drawdown_fc = source.acc_drawdown_fc,
+    #            target.acc_drawdown_myr = source.acc_drawdown_myr,
+    #            target.acc_cumulative_drawdown = source.acc_cumulative_drawdown,
+    #            target.acc_cumulative_drawdown_myr = source.acc_cumulative_drawdown_myr,
+    #target.acc_repayment_fc = source.acc_repayment_fc,
+    #            target.acc_repayment_myr = source.acc_repayment_myr,
+    #            target.acc_cumulative_repayment = source.acc_cumulative_repayment,
+    #            target.acc_cumulative_repayment_myr = source.acc_cumulative_repayment_myr,
+
 
     cursor.execute("drop table A_DIS_N_REPAYMENT")
     conn.commit() 
