@@ -434,6 +434,8 @@ try:
     Ta_AR = pd.concat([Ta_A1,Ta_R1])
     Ta_AR.fillna(0, inplace=True)
 
+    Ta_AR = Ta_AR.groupby(['Company','Customer_Account','Financing_Type'])[["Penalty_Tawidh","Recovery_Tawidh"]].sum().reset_index()
+
     #st.write(Ta_AR)
 
     A006_1 = A006.merge(Ta_AR,on=['Customer_Account','Company','Financing_Type'],how='outer',indicator=True)
@@ -605,7 +607,7 @@ try:
     #-------------------------------------------------combine-------------------------------------------------
     C005_1['Recovery_Tawidh'] = 0
     C005_1['Cost_Payment'] = 0
-    C005_1['Unearned_Profit'] = C005['Interest_For_the_Month']
+    C005_1['Unearned_Profit'] = C005_1['Interest_For_the_Month']
     #C005['Profit_Payment'] = 0
     C005_1['Mora'] = 0
     C005_1['Rental(Ijarah)'] = 0
