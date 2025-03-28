@@ -1,5 +1,8 @@
 # python Debtor_Listing.py 11,"Debtors Listing and Customer Balance Report as at October 2024_Adjusted.xlsx","Debtor Listing","Pending Processing","0","syahidhalid@exim.com.my","2024-03-29"
 # python Debtor_Listing.py 11 "Debtors Listing and Customer Balance Report as at October 2024_Adjusted.xlsx" "Debtor Listing" "Pending Processing" "0" "syahidhalid@exim.com.my" "2024-03-29"
+# python Debtor_Listing.py 11 "2. Debtors Listing and Customer Balance Report as at February 2025 - P13.xlsx" "Debtor Listing" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-02-28"
+# python Debtor_Listing.py 11 "2. Debtors Listing and Customer Balance Report as at February 2025 - P13 - Copy.xlsx" "Debtor Listing" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-02-28"
+
 # position_as_at
 #aftd_id = DocumentId
 #tmbh update result table
@@ -170,6 +173,8 @@ try:
     D10 = "Penalty"
     D11 = "Ta'widh (Active)"
     D12 = "Ta'widh (Recovery)"
+    D13 = "IIS P13"
+    D14 = "PIS P13"
 
     Isl_Cost = pd.read_excel(df1, sheet_name=D1, header=5)
     #st.write(Isl_Cost.head(1))
@@ -314,6 +319,38 @@ try:
     NamaCompany = A001[['Company','Customer_Account']].drop_duplicates('Customer_Account', keep='first')
     A003 = A002.merge(NamaCompany,on='Customer_Account',how='left')
 
+    if D14 == "PIS P13":
+        PIS_P13 = pd.read_excel(df1, sheet_name=D14, header=4)
+
+        PIS_P131 = PIS_P13.iloc[np.where(~PIS_P13.Customer.isna())].fillna(0)
+
+        PIS_P131.columns = PIS_P131.columns.str.replace("\n", "_")
+        PIS_P131.columns = PIS_P131.columns.str.replace(" ", "")
+
+        PIS_P131.rename(columns={'Customer': 'Customer_Account',
+                                'SearchTerm':'Company',
+                                'Crcy':'Currency',
+                                'Accumulatedbalance':'Interest'},inplace=True)
+
+        PIS_P131.Customer_Account = PIS_P131.Customer_Account.astype(int)
+        PIS_P131.Interest = PIS_P131.Interest.astype(float)
+
+        PIS_P132 = PIS_P131.fillna(0).groupby(['Customer_Account'])[['Interest']].sum().reset_index()
+
+        #PIS_P132['Financing_Type'] = 'Islamic'
+        
+        #PIS_P132 = PIS_P132[['Customer_Account']].drop_duplicates('Customer_Account', keep='first')
+
+        A003_P13 = A003.merge(PIS_P132,on='Customer_Account',how='left', suffixes=('', '_new'))
+
+        A003_P13['Interest'] = A003_P13['Interest_new'].combine_first(A003_P13['Interest'])
+
+        # Drop the temporary '_new' column
+        A003_P13 = A003_P13.drop(columns='Interest_new')
+
+        A003 = A003_P13
+    else:
+        pass
     #---------------------------------Modification MORA & R&R Apr2024
 
     Mora1 = Mora.fillna(0).rename(columns={'Borrower code': 'Customer_Account',
@@ -518,7 +555,39 @@ try:
     ,'Currency','Financing_Type','Company'])[['Disbursement'\
     ,'Repayment','Principal','Interest_For_the_Month','Interest','Profit_Payment']].sum().reset_index()
 
-    #Other Debtors Apr2024
+    if D13 == "IIS P13":
+        IIS_P13 = pd.read_excel(df1, sheet_name=D13, header=4)
+
+        IIS_P131 = IIS_P13.iloc[np.where(~IIS_P13.Customer.isna())].fillna(0)
+
+        IIS_P131.columns = IIS_P131.columns.str.replace("\n", "_")
+        IIS_P131.columns = IIS_P131.columns.str.replace(" ", "")
+
+        IIS_P131.rename(columns={'Customer': 'Customer_Account',
+                                'SearchTerm':'Company',
+                                'Crcy':'Currency',
+                                'Accumulatedbalance':'Interest'},inplace=True)
+
+        IIS_P131.Customer_Account = IIS_P131.Customer_Account.astype(int)
+        IIS_P131.Interest = IIS_P131.Interest.astype(float)
+
+        IIS_P1312 = IIS_P131.fillna(0).groupby(['Customer_Account'])[['Interest']].sum().reset_index()
+
+        #PIS_P132['Financing_Type'] = 'Islamic'
+        
+        #PIS_P132 = PIS_P132[['Customer_Account']].drop_duplicates('Customer_Account', keep='first')
+
+        C002_P13 = C002.merge(IIS_P1312,on='Customer_Account',how='left', suffixes=('', '_new'))
+
+        C002_P13['Interest'] = C002_P13['Interest_new'].combine_first(C002_P13['Interest'])
+
+        # Drop the temporary '_new' column
+        C002_P13 = C002_P13.drop(columns='Interest_new')
+
+        C002 = C002_P13
+    else:
+        pass
+        #Other Debtors Apr2024
     Others_conv1 = Others_conv.iloc[np.where(~Others_conv.Customer.isna())].fillna(0)
 
     Others_conv1.columns = Others_conv1.columns.str.replace("\n", "_")
@@ -1143,7 +1212,7 @@ try:
                 target.acc_penalty = source.acc_penalty,
                 target.acc_penalty_myr = source.acc_penalty_myr,
                 target.acc_penalty_compensation_fc = source.acc_penalty_compensation_fc,
-                target.acc_penalty_compensation_myr = source.acc_penalty_compensation_myr
+                target.acc_penalty_compensation_myr = source.acc_penalty_compensation_myr,
                 target.position_as_at = source.position_as_at;
     """)
     conn.commit() 
