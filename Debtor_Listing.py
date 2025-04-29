@@ -770,21 +770,38 @@ try:
     Currency['finance_sap_number'] = Currency['finance_sap_number'].astype(str)
     Currency.columns = Currency.columns.str.replace("\n", "")
 
-    aa = pd.read_sql_query("""SELECT param_name,r.exchange_rate,r.valuedate
-    FROM [param_ccy_exchange_rate] r inner join param_system_param p on p.param_reference ='Root>>Currency' and currency_id=p.param_id
-    order by param_name asc;""", conn)
-    
-    MRate = aa.iloc[np.where(aa.valuedate==reportingDate)]
+    sql = f"""SELECT TOP 17 param_name, r.exchange_rate, r.valuedate
+    FROM [param_ccy_exchange_rate] r
+    INNER JOIN param_system_param p 
+        ON p.param_reference = 'Root>>Currency' 
+        AND currency_id = p.param_id
+    WHERE r.valuedate <= '{reportingDate}'
+    ORDER BY r.valuedate DESC;
+    """
+    # Read filtered exchange rates from the database
+    MRate = pd.read_sql_query(sql, conn)
 
-    df_add = pd.DataFrame([['MYR',
-                        '1',
-                        reportingDate]], columns=['param_name','exchange_rate','valuedate'])
+    df_add = pd.DataFrame([['MYR','1',reportingDate]], columns=['param_name','exchange_rate','valuedate'])
 
     MRate1 = pd.concat([MRate, df_add])
+
+    MRate1['exchange_rate'] = MRate1['exchange_rate'].astype(float)   
+
+    #aa = pd.read_sql_query("""SELECT param_name,r.exchange_rate,r.valuedate
+    #FROM [param_ccy_exchange_rate] r inner join param_system_param p on p.param_reference ='Root>>Currency' and currency_id=p.param_id
+    #order by valuedate desc;""", conn)
+    
+    #MRate = aa.iloc[np.where(aa.valuedate==reportingDate)]
+
+    #df_add = pd.DataFrame([['MYR',
+    #                    '1',
+    #                    reportingDate]], columns=['param_name','exchange_rate','valuedate'])
+
+    #MRate1 = pd.concat([MRate, df_add])
     
     appendfinal2 = appendfinal_ldb.merge(Currency, on='finance_sap_number', how='left').\
     merge(MRate1.rename(columns={'param_name':'currency'}), on="currency",how='left') #
-
+    appendfinal2['exchange_rate'].fillna(1,inplace=True)
     appendfinal2['exchange_rate'] = appendfinal2['exchange_rate'].astype(float)
 
     appendfinal2['Cost/Principal Outstanding (Facility Currency)'] = appendfinal2['Cost/Principal Outstanding (MYR)']/appendfinal2['exchange_rate']

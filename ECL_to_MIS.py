@@ -265,15 +265,26 @@ try:
     #view
     #sql ="select * from vw_GetLatestCurrencyRate"
     #MRate = pd.read_sql_query(sql, conn)
-    aa = pd.read_sql_query("""SELECT param_name,r.exchange_rate,r.valuedate
-    FROM [param_ccy_exchange_rate] r inner join param_system_param p on p.param_reference ='Root>>Currency' and currency_id=p.param_id
-    order by param_name asc;""", conn)
-    
-    MRate1 = aa.iloc[np.where(aa.valuedate==reportingDate)]
 
-    df_add = pd.DataFrame([['MYR',
-                        '1',
-                        reportingDate]], columns=['param_name','exchange_rate','valuedate'])
+    # aa = pd.read_sql_query("""SELECT param_name,r.exchange_rate,r.valuedate
+    # FROM [param_ccy_exchange_rate] r inner join param_system_param p on p.param_reference ='Root>>Currency' and currency_id=p.param_id
+    # order by valuedate desc;""", conn)
+    
+    # SQL query with reportingDate filter
+    sql = f"""SELECT TOP 17 param_name, r.exchange_rate, r.valuedate
+    FROM [param_ccy_exchange_rate] r
+    INNER JOIN param_system_param p 
+        ON p.param_reference = 'Root>>Currency' 
+        AND currency_id = p.param_id
+    WHERE r.valuedate <= '{reportingDate}'
+    ORDER BY r.valuedate DESC;
+    """
+    # Read filtered exchange rates from the database
+    MRate1 = pd.read_sql_query(sql, conn)
+    
+    #MRate1 = aa.iloc[np.where(aa.valuedate==reportingDate)]
+
+    df_add = pd.DataFrame([['MYR','1',reportingDate]], columns=['param_name','exchange_rate','valuedate'])
 
     MRate = pd.concat([MRate1, df_add])
 
@@ -302,7 +313,7 @@ try:
     #Rate
     LAF1_1['currency'] = LAF1_1['currency'].astype(str)
     LAF2 = LAF1_1.rename(columns={'currency':'param_name'}).merge(MRate[['param_name','exchange_rate','valuedate']], on='param_name', how='left') #,indicator=True
-
+    LAF2['exchange_rate'].fillna(1,inplace=True)
     LAF2['LAF_ECL_FC'] = LAF2['LAF_ECL_MYR']/LAF2['exchange_rate']
 
     #================================================================================================
@@ -324,6 +335,7 @@ try:
     #  inner join x on x.le = valuedate order by param_name asc
 
     CnC2 = CnC1_1.rename(columns={'currency':'param_name'}).merge(MRate[['param_name','exchange_rate','valuedate']], on='param_name', how='left')
+    CnC2['exchange_rate'].fillna(1,inplace=True)
     CnC2['CnC_ECL_FC'] = CnC2['CnC_ECL_MYR']/CnC2['exchange_rate']
 
     #================================================================================================
