@@ -780,22 +780,23 @@ try:
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_PROFIT_N_OTHER_PAYMENT AS source
     ON target.finance_sap_number = source.Account
     WHEN MATCHED THEN
-        UPDATE SET target.acc_interest_repayment_fc = source.acc_interest_repayment_fc,
-                target.acc_interest_repayment_myr = source.acc_interest_repayment_myr,
-                target.acc_cumulative_interest_repayment_fc = source.acc_cumulative_interest_repayment_fc,
-                target.acc_cumulative_interest_repayment_myr = source.acc_cumulative_interest_repayment_myr,
+        UPDATE SET target.acc_tawidh_payment_repayment_fc = source.acc_tawidh_payment_repayment_fc,
+                target.acc_tawidh_payment_repayment_myr = source.acc_tawidh_payment_repayment_myr,
+                target.acc_cumulative_tawidh_payment_repayment_fc = source.acc_cumulative_tawidh_payment_repayment_fc,
+                target.acc_cumulative_tawidh_payment_repayment_myr = source.acc_cumulative_tawidh_payment_repayment_myr,
                 target.acc_others_charges_payment_fc = source.acc_others_charges_payment_fc,
                 target.acc_others_charges_payment_myr = source.acc_others_charges_payment_myr,
                 target.acc_cumulative_others_charge_payment_fc = source.acc_cumulative_others_charge_payment_fc,
                 target.acc_cumulative_others_charge_payment_myr = source.acc_cumulative_others_charge_payment_myr,
-                target.acc_tawidh_payment_repayment_fc = source.acc_tawidh_payment_repayment_fc,
-                target.acc_tawidh_payment_repayment_myr = source.acc_tawidh_payment_repayment_myr,
-                target.acc_cumulative_tawidh_payment_repayment_fc = source.acc_cumulative_tawidh_payment_repayment_fc,
-                target.acc_cumulative_tawidh_payment_repayment_myr = source.acc_cumulative_tawidh_payment_repayment_myr,
                 target.position_as_at = source.position_as_at;
     """)
     conn.commit() 
 
+    #
+		#target.acc_interest_repayment_fc = source.acc_interest_repayment_fc,
+                #target.acc_interest_repayment_myr = source.acc_interest_repayment_myr,
+                #target.acc_cumulative_interest_repayment_fc = source.acc_cumulative_interest_repayment_fc,
+                #target.acc_cumulative_interest_repayment_myr = source.acc_cumulative_interest_repayment_myr,
 
     #WHEN NOT MATCHED THEN
     #            target.acc_interest_repayment_fc = 0,

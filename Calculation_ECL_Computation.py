@@ -1,7 +1,7 @@
 # python Calculation_ECL_Computation.py 13 "ECL.xlsx" "ECL" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-01-31"
 
 # 
-#reportingDate = '2025-04-30'
+#reportingDate = '2025-05-31'
 
 #try:
 import os
@@ -159,25 +159,39 @@ try:
 
     # Active_before['position_as_at_date'].value_counts()
     # Active_before['position_as_at_date'].dtypes
+    
+    Active_before['position_as_at_date3'] = Active_before['position_as_at_date3'].astype(str)
 
-    Active_before['position_as_at_date'] = Active_before['position_as_at_date'].astype(str)
-
-    Active_test = Active_before.iloc[np.where((Active_before['position_as_at_date']==reportingDate))]#['account_status_id'].value_counts()
+    Active_test = Active_before.iloc[np.where((Active_before['position_as_at_date3']==reportingDate))]#['account_status_id'].value_counts()
 
     # Active_test["watchlist"].value_counts()
     # Active_test['account_status_id'].dtypes
     # Active_test['account_status_id'].value_counts()
     
-    Active_test1 = Active_test.iloc[np.where((Active_test['account_status_id'].isin([30947,30952,30949,30948,30950])))]#['position_as_at_date3'].value_counts()
+    
+    Active_test1 = Active_test.iloc[np.where((Active_test['account_status_id'].isin([30947,30949,30948,30950]))&
+                                             (Active_test["maturity_date3"]!="1900-01-01")&
+                                             ~(Active_test["maturity_date3"].isna())&
+                                             ~(Active_test["pd_segment_value_final"]=="")&
+                                             ~(Active_test["pd_segment_value_final"].isna())&
+                                             ~(Active_test["account_no"]=="")&
+                                             ~(Active_test["account_no"].isna())
+                                             )]#['position_as_at_date3'].value_counts() 30952,
 
+    # Active_test1.shape
+    # Active_test1["pd_segment_value_final"].value_counts()
+
+    #Active_test1.iloc[np.where(Active_test1["pd_segment_value_final"]=="")]
+
+    
     #Active1.to_excel(r"D:\\view_ecl_report_data_20250505_PROD_v1.xlsx",index=False)
 
 
-    Active = Active_test1[["account_no",#"Finance (SAP) Number",
+    Active = Active_test1[["facility_exim_account_num","account_no",#"Finance (SAP) Number",
                      "borrower_name",#"Borrower name",
-                     "first_released_date",#"First Released Date",
-                     "maturity_date",#"Maturity date",
-                     "availability_period_date",#"Availability period",
+                     "first_released_date3",#"First Released Date",
+                     "maturity_date3",#"Maturity date",
+                     "availability_period_date3",#"Availability period",
                      "revolving_type",#"Revolving/Non-revolving", cek code
                      "total_outstanding_base_currency",#"Total outstanding (base currency)",
                      "principal_payment_base_currency",#"Principal payment (base currency)",
@@ -196,9 +210,9 @@ try:
                      "corporate_sovereign_name",#"Corporate/Sovereign",
                      "fx_value"]].rename(columns={'account_no':'Finance (SAP) Number',#"FX"]]
                                                   'borrower_name':'Borrower name',
-                                                  'first_released_date':'First Released Date',
-                                                  'maturity_date':'Maturity date',
-                                                  'availability_period_date':'Availability period',
+                                                  'first_released_date3':'First Released Date',
+                                                  'maturity_date3':'Maturity date',
+                                                  'availability_period_date3':'Availability period',
                                                   'revolving_type':'Revolving/Non-revolving',
                                                   'total_outstanding_base_currency':'Total outstanding (base currency)',
                                                   'principal_payment_base_currency':'Principal payment (base currency)',
@@ -225,21 +239,46 @@ try:
     Active["Availability period"] = pd.to_datetime(Active["Availability period"], errors='coerce')
     Active["Reporting date"] = pd.to_datetime(Active["Reporting date"], errors='coerce')
 
-    
+    Active["Maturity date"].fillna(reportingDate,inplace=True)
+
     # YOB
     Active["YOB"] = ((Active["Maturity date"].dt.year - Active["Reporting date"].dt.year)*12+(Active["Maturity date"].dt.month - Active["Reporting date"].dt.month))#+1
+
+    #Active["YOB"].value_counts()
+
+
     
-    #Active["YOB"].fillna(0,inplace=True)
     #Active["YOB"] = Active["YOB"].astype(int)
 
+    # def extend_row(row):
+    #     # Create a new DataFrame for the row repeated `Value + 1` times
+    #     repeated_rows = pd.DataFrame([row] * (row['YOB'] + 1))
+    #     # Add a new column for the sequence
+    #     repeated_rows['Sequence'] = range(row['YOB'] + 1)
+    #     return repeated_rows
+    
     def extend_row(row):
-        # Create a new DataFrame for the row repeated `Value + 1` times
-        repeated_rows = pd.DataFrame([row] * (row['YOB'] + 1))
-        # Add a new column for the sequence
-        repeated_rows['Sequence'] = range(row['YOB'] + 1)
+        try:
+            count = int(row['YOB']) + 1
+        except (ValueError, TypeError):
+            count = 1  # default to 1 repetition
+        repeated_rows = pd.DataFrame([row] * count)
+        repeated_rows['Sequence'] = range(count)
         return repeated_rows
     # Apply the extend_row function for each row and concatenate the results
     extended_Active = pd.concat([extend_row(row) for index, row in Active.iterrows()], ignore_index=True)
+
+    #Adjustment 20250605
+    extended_Active["Principal payment frequency"].fillna(0,inplace=True)
+    extended_Active["Interest payment frequency"].fillna(0,inplace=True)
+    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi annual"),"Principal payment frequency"] = "Semi Annually"
+    extended_Active.loc[(extended_Active["Interest payment frequency"]=="Semi annual"),"Interest payment frequency"] = "Semi Annually"
+    
+    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annual"),"Principal payment frequency"] = "Semi Annually"
+    extended_Active.loc[(extended_Active["Interest payment frequency"]=="Semi Annual"),"Interest payment frequency"] = "Semi Annually"
+    
+    #terkeluar sbb dah mature
+    #Active.iloc[np.where(Active["Finance (SAP) Number"]=="501035")]
 
     #Principal
         #=IF(D30="",0,
@@ -323,6 +362,7 @@ try:
     extended_Active['Cummulative_Instalment_Amount'] = extended_Active.groupby('Finance (SAP) Number')['Instalment Amount'].cumsum()
     extended_Active['Cummulative_Instalment_Amount_C&C'] = extended_Active.groupby('Finance (SAP) Number')['Instalment Amount (C&C)'].cumsum()
 
+        
 
     #Outstanding balance and Undisbursed @ EAD
     #=IF(D32="","",
@@ -356,9 +396,13 @@ try:
     extended_Active.loc[(extended_Active["Principal payment frequency"]==0)&(extended_Active["Interest payment frequency"]==0),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
     extended_Active.loc[(extended_Active["Principal payment frequency"]==0)&(extended_Active["Interest payment frequency"]==0),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
 
+    extended_Active.loc[(extended_Active["Principal payment frequency"]=="")&(extended_Active["Interest payment frequency"]==""),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    extended_Active.loc[(extended_Active["Principal payment frequency"]=="")&(extended_Active["Interest payment frequency"]==""),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
+
     extended_Active.loc[extended_Active["EAD"]<0,"EAD"] = 0
     extended_Active.loc[extended_Active["EAD (C&C)"]<0,"EAD (C&C)"] = 0
 
+    #extended_Active.iloc[np.where(extended_Active["Finance (SAP) Number"]=="500401")]
 
     #sambungan installment
     extended_Active.loc[extended_Active["Sequence"]>=extended_Active["YOB"],"Instalment Amount"] = extended_Active["EAD"].shift(1)
@@ -403,9 +447,14 @@ try:
     extended_Active.loc[(extended_Active["Principal payment frequency"]==0)&(extended_Active["Interest payment frequency"]==0),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
     extended_Active.loc[(extended_Active["Principal payment frequency"]==0)&(extended_Active["Interest payment frequency"]==0),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
     
+    extended_Active.loc[(extended_Active["Principal payment frequency"]=="")&(extended_Active["Interest payment frequency"]==""),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    extended_Active.loc[(extended_Active["Principal payment frequency"]=="")&(extended_Active["Interest payment frequency"]==""),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
+    
     extended_Active.loc[extended_Active["EAD"]<0,"EAD"] = 0
     extended_Active.loc[extended_Active["EAD (C&C)"]<0,"EAD (C&C)"] = 0
 
+    #extended_Active.iloc[np.where(extended_Active["Finance (SAP) Number"]=="501233")]
+    #extended_Active.iloc[np.where(extended_Active["Principal payment frequency"]=="")]
 
     PD.PD = PD.PD.str.upper()
     Pivoted_PD = PD
@@ -418,12 +467,16 @@ try:
     #st.write(Pivoted_PD)
 
     extended_Active["PD segment"] = extended_Active["PD segment"].astype(str)
+    extended_Active["PD segment"] = extended_Active["PD segment"].str.upper()
     extended_Active["Sequence"] = extended_Active["Sequence"].astype(str)
 
     Pivoted_PD["PD"] = Pivoted_PD["PD"].astype(str)
     Pivoted_PD["Year"] = Pivoted_PD["Year"].astype(str)
 
     extended_Active_PD = extended_Active.merge(Pivoted_PD.rename(columns={"PD":"PD segment","Year":"Sequence"}),on=["PD segment","Sequence"],how="left") #,indicator=True
+
+    #extended_Active.iloc[np.where(extended_Active["Finance (SAP) Number"]=="500401")]
+    #extended_Active_PD.iloc[np.where(extended_Active_PD["Finance (SAP) Number"]=="500401")]
 
     import string
     extended_Active_PD['Number'] = range(1, len(extended_Active_PD) + 1)
@@ -448,20 +501,33 @@ try:
         axis=1
     )
 
-
   
     # Function to adjust month_ends and include the actual end date if it's not a month-end
+    # def adjust_month_ends(row):
+    #     month_ends = row['month_ends']
+
+    #     end_date = pd.to_datetime(row['Maturity date'])
+        
+    #     # Check if the end date is a month-end, if not, append it
+    #     if end_date.is_month_end:
+    #         return list(month_ends)
+    #     else:
+    #         return list(month_ends.union([end_date]))
+
     def adjust_month_ends(row):
         month_ends = row['month_ends']
-
         end_date = pd.to_datetime(row['Maturity date'])
-        
-        # Check if the end date is a month-end, if not, append it
-        if end_date.is_month_end:
-            return list(month_ends)
-        else:
-            return list(month_ends.union([end_date]))
 
+        # Handle missing or invalid month_ends
+        if isinstance(month_ends, pd.DatetimeIndex):
+            if end_date.is_month_end:
+                return list(month_ends)
+            else:
+                # Use union safely
+                return list(month_ends.union([end_date]))
+        else:
+            # Fallback: return just the end_date if valid
+            return [end_date] if pd.notna(end_date) else []
     # Apply the adjustment to each row and convert to a list of Timestamps
     Active_EIR['adjusted_month_ends'] = Active_EIR.apply(adjust_month_ends, axis=1)
 
@@ -478,7 +544,7 @@ try:
     Active_EIR.loc[Active_EIR['Sequence 1']==0,"month_ends_shift"] = Active_EIR['Reporting date']
     Active_EIR["Sequence 2"] = (Active_EIR['adjusted_month_ends'] - Active_EIR['month_ends_shift']).dt.days
     
-    Active_EIR = Active_EIR[["Finance (SAP) Number","YOB","adjusted_month_ends","month_ends_shift","Sequence 2"]]
+    Active_EIR = Active_EIR[["facility_exim_account_num","YOB","adjusted_month_ends","month_ends_shift","Sequence 2"]]
 
     #st.write(Active_EIR)
 
@@ -486,7 +552,7 @@ try:
     Active_EIR['Number'] = range(1, len(Active_EIR) + 1)
     Active_EIR['Key'] = [string.ascii_uppercase[i % len(string.ascii_uppercase)] for i in range(len(Active_EIR))]
 
-    extended_Active_PD_1 = extended_Active_PD.merge(Active_EIR,on=['Finance (SAP) Number','YOB','Number','Key'],how="left")
+    extended_Active_PD_1 = extended_Active_PD.merge(Active_EIR,on=['facility_exim_account_num','YOB','Number','Key'],how="left")
 
     extended_Active_PD_1.rename(columns={"Sequence 2":"NOD"},inplace=True)
 
@@ -499,6 +565,7 @@ try:
 
     extended_Active_PD_1["EIR adj"] =1/((1+extended_Active_PD_1["Profit Rate/ EIR"])**((extended_Active_PD_1["Prev_Cumulative"])/365)) #30.5 number of day in a month
     
+    #extended_Active_PD_1.iloc[np.where(extended_Active_PD_1["Finance (SAP) Number"]=="500400")]
 
     #ECL
     extended_Active_PD_1["EIR adj"]=extended_Active_PD_1["EIR adj"].astype(float)
@@ -534,28 +601,34 @@ try:
     extended_Active_FL_PD["S2 ECL (LAF) MYR"] = extended_Active_FL_PD["S2 ECL (LAF) FC"]*extended_Active_FL_PD["FX"]
 
 
-    extended_Active_FL_PD.loc[extended_Active_FL_PD["Watchlist (Yes/No)"]=="No","Total ECL FC (LAF)"] = extended_Active_FL_PD["S1 ECL (LAF) FC"] 
-    extended_Active_FL_PD.loc[extended_Active_FL_PD["Watchlist (Yes/No)"]=="No","Total ECL FC (C&C)"] = extended_Active_FL_PD["S1 ECL (C&C) FC"]
-    extended_Active_FL_PD.loc[extended_Active_FL_PD["Watchlist (Yes/No)"]=="No","Total ECL FC (Overall)"] = extended_Active_FL_PD["S1 ECL (Overall) FC"]
-    extended_Active_FL_PD.loc[extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes","Total ECL FC (LAF)"] = extended_Active_FL_PD["S2 ECL (LAF) FC"] 
-    extended_Active_FL_PD.loc[extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes","Total ECL FC (C&C)"] = extended_Active_FL_PD["S2 ECL (C&C) FC"]
-    extended_Active_FL_PD.loc[extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes","Total ECL FC (Overall)"] = extended_Active_FL_PD["S2 ECL (Overall) FC"]
+    extended_Active_FL_PD.loc[(extended_Active_FL_PD["Watchlist (Yes/No)"]=="No")&(extended_Active_FL_PD["DPD"]<=30),"Total ECL FC (LAF)"] = extended_Active_FL_PD["S1 ECL (LAF) FC"] 
+    extended_Active_FL_PD.loc[(extended_Active_FL_PD["Watchlist (Yes/No)"]=="No")&(extended_Active_FL_PD["DPD"]<=30),"Total ECL FC (C&C)"] = extended_Active_FL_PD["S1 ECL (C&C) FC"]
+    extended_Active_FL_PD.loc[(extended_Active_FL_PD["Watchlist (Yes/No)"]=="No")&(extended_Active_FL_PD["DPD"]<=30),"Total ECL FC (Overall)"] = extended_Active_FL_PD["S1 ECL (Overall) FC"]
+    extended_Active_FL_PD.loc[(extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes")|(extended_Active_FL_PD["DPD"]>30),"Total ECL FC (LAF)"] = extended_Active_FL_PD["S2 ECL (LAF) FC"] 
+    extended_Active_FL_PD.loc[(extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes")|(extended_Active_FL_PD["DPD"]>30),"Total ECL FC (C&C)"] = extended_Active_FL_PD["S2 ECL (C&C) FC"]
+    extended_Active_FL_PD.loc[(extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes")|(extended_Active_FL_PD["DPD"]>30),"Total ECL FC (Overall)"] = extended_Active_FL_PD["S2 ECL (Overall) FC"]
 
 
-    extended_Active_FL_PD.loc[extended_Active_FL_PD["Watchlist (Yes/No)"]=="No","Total ECL MYR (LAF)"] = extended_Active_FL_PD["S1 ECL (LAF) MYR"] 
-    extended_Active_FL_PD.loc[extended_Active_FL_PD["Watchlist (Yes/No)"]=="No","Total ECL MYR (C&C)"] = extended_Active_FL_PD["S1 ECL (C&C) MYR"]
-    extended_Active_FL_PD.loc[extended_Active_FL_PD["Watchlist (Yes/No)"]=="No","Total ECL MYR (Overall)"] = extended_Active_FL_PD["S1 ECL (Overall) MYR"]
-    extended_Active_FL_PD.loc[extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes","Total ECL MYR (LAF)"] = extended_Active_FL_PD["S2 ECL (LAF) MYR"] 
-    extended_Active_FL_PD.loc[extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes","Total ECL MYR (C&C)"] = extended_Active_FL_PD["S2 ECL (C&C) MYR"]
-    extended_Active_FL_PD.loc[extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes","Total ECL MYR (Overall)"] = extended_Active_FL_PD["S2 ECL (Overall) MYR"]
+    extended_Active_FL_PD.loc[(extended_Active_FL_PD["Watchlist (Yes/No)"]=="No")&(extended_Active_FL_PD["DPD"]<=30),"Total ECL MYR (LAF)"] = extended_Active_FL_PD["S1 ECL (LAF) MYR"] 
+    extended_Active_FL_PD.loc[(extended_Active_FL_PD["Watchlist (Yes/No)"]=="No")&(extended_Active_FL_PD["DPD"]<=30),"Total ECL MYR (C&C)"] = extended_Active_FL_PD["S1 ECL (C&C) MYR"]
+    extended_Active_FL_PD.loc[(extended_Active_FL_PD["Watchlist (Yes/No)"]=="No")&(extended_Active_FL_PD["DPD"]<=30),"Total ECL MYR (Overall)"] = extended_Active_FL_PD["S1 ECL (Overall) MYR"]
+    extended_Active_FL_PD.loc[(extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes")|(extended_Active_FL_PD["DPD"]>30),"Total ECL MYR (LAF)"] = extended_Active_FL_PD["S2 ECL (LAF) MYR"] 
+    extended_Active_FL_PD.loc[(extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes")|(extended_Active_FL_PD["DPD"]>30),"Total ECL MYR (C&C)"] = extended_Active_FL_PD["S2 ECL (C&C) MYR"]
+    extended_Active_FL_PD.loc[(extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes")|(extended_Active_FL_PD["DPD"]>30),"Total ECL MYR (Overall)"] = extended_Active_FL_PD["S2 ECL (Overall) MYR"]
 
 
     # rule for active & watchlist
     extended_Active_FL_PD["Sequence"] = extended_Active_FL_PD["Sequence"].astype(int)
 
-    ECL_Filter = extended_Active_FL_PD.iloc[np.where((extended_Active_FL_PD["Watchlist (Yes/No)"]=="No")&((extended_Active_FL_PD["Sequence"]<=12))|(extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes")|(extended_Active_FL_PD["Watchlist (Yes/No)"]=="Imp"))]
+
+
+    ECL_Filter = extended_Active_FL_PD.iloc[np.where(((extended_Active_FL_PD["Watchlist (Yes/No)"]=="No")&(extended_Active_FL_PD["DPD"]<=30)&(extended_Active_FL_PD["Sequence"]<=12))|
+                                                     (extended_Active_FL_PD["Watchlist (Yes/No)"]=="Yes")|
+                                                     (extended_Active_FL_PD["Watchlist (Yes/No)"]=="Imp")|
+                                                     ((extended_Active_FL_PD["Watchlist (Yes/No)"]=="No")&(extended_Active_FL_PD["DPD"]>30)))]
 
     
+
     ECL_Filter.loc[((ECL_Filter['Watchlist (Yes/No)'].isin(["Imp"]))),"Total ECL FC (LAF)"]=0
     ECL_Filter.loc[((ECL_Filter['Watchlist (Yes/No)'].isin(["Imp"]))),"Total ECL MYR (LAF)"]=0
     ECL_Filter.loc[((ECL_Filter['Watchlist (Yes/No)'].isin(["Imp"]))),"Total ECL FC (C&C)"]=0
@@ -563,21 +636,30 @@ try:
     ECL_Filter.loc[((ECL_Filter['Watchlist (Yes/No)'].isin(["Imp"]))),"Total ECL FC (Overall)"]=0
     ECL_Filter.loc[((ECL_Filter['Watchlist (Yes/No)'].isin(["Imp"]))),"Total ECL MYR (Overall)"]=0
 
-    ECL_Group = ECL_Filter.groupby(["Finance (SAP) Number","Currency","Borrower name","Watchlist (Yes/No)"])[["Total ECL FC (LAF)","Total ECL MYR (LAF)",
+    ECL_Group = ECL_Filter.groupby(["facility_exim_account_num","Finance (SAP) Number",
+                                    "Borrower name",
+                                    "Currency",
+                                    "Watchlist (Yes/No)",
+                                    "First Released Date",
+                                    "Maturity date",
+                                    "Availability period"])[["Total ECL FC (LAF)","Total ECL MYR (LAF)",
                                                                                 "Total ECL FC (C&C)","Total ECL MYR (C&C)",
                                                                                 "Total ECL FC (Overall)","Total ECL MYR (Overall)"]].sum().reset_index()
 
-    ECL_Group = ECL_Group.rename(columns={'Finance (SAP) Number':'Account_No',
-                                          'Borrower name':'Borrower',
-                                          'Total ECL FC (LAF)':'LAF_ECL_FC',
-                                          'Total ECL MYR (LAF)':'LAF_ECL_MYR',
-                                          'Total ECL FC (C&C)':'CnC_ECL_FC',
-                                          'Total ECL MYR (C&C)':'CnC_ECL_MYR',
-                                          'Total ECL FC (Overall)':'ECL_FC',
-                                          'Total ECL MYR (Overall)':'ECL_MYR',
-                                          'Reporting date':'position_as_at',})
+    # ECL_Group.iloc[np.where(ECL_Group["Finance (SAP) Number"]=="501233")]
+    # ECL_Filter.iloc[np.where(ECL_Filter["Finance (SAP) Number"]=="500401")].head(10)
 
+    # ECL_Group = ECL_Group.rename(columns={'Finance (SAP) Number':'Account_No',
+    #                                       'Borrower name':'Borrower',
+    #                                       'Total ECL FC (LAF)':'LAF_ECL_FC',
+    #                                       'Total ECL MYR (LAF)':'LAF_ECL_MYR',
+    #                                       'Total ECL FC (C&C)':'CnC_ECL_FC',
+    #                                       'Total ECL MYR (C&C)':'CnC_ECL_MYR',
+    #                                       'Total ECL FC (Overall)':'ECL_FC',
+    #                                       'Total ECL MYR (Overall)':'ECL_MYR',
+    #                                       'Reporting date':'position_as_at',})
 
+    
     # Extract
     writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Calculation_ECL_Computation_"+str(reportingDate)[:19]+".xlsx"),engine='xlsxwriter')
 
