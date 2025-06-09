@@ -2,12 +2,9 @@
 #account need unique
 
 # python ECL_to_MIS.py 9,"ECL 1024 - MIS v1.xlsx","ECL to MIS","Pending Processing","0","syahidhalid@exim.com.my","2024-03-29"
-
-# python ECL_to_MIS.py 9 "ECL S1 S2 May-2025 working (AIN2).xlsx" "ECL to MIS" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
-
+# python ECL_to_MIS.py 9 "ECL 1024 - MIS v1.xlsx" "ECL to MIS" "Pending Processing" "0" "syahidhalid@exim.com.my" "2024-03-29"
 # position_as_at
-
-#documentId = 9
+#aftd_id = DocumentId
 #tmbh update result table
 
 #try:
@@ -153,23 +150,14 @@ try:
     #    #E:\PythonProjects\misPython\misPython_doc
     #documentName = "a"
     #uploadedByEmail = "a"
-    
-    # documentName = "ECL S1 S2 May-2025 working (AIN2).xlsx"
-    # reportingDate = "2025-05-31"
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
-    
-    
-    D1 = "ECL"
 
-    # D1 = "LAF (2)"
-    # D2 = "C&C (2)"
+    D1 = "LAF (2)"
+    D2 = "C&C (2)"
 
-    LAF = pd.read_excel(df1, sheet_name=D1, header=1, dtype={'facility_exim_account_num': str})
-
-    LAF1 = LAF.iloc[np.where(~LAF.facility_exim_account_num.isna())]
-
-    # LAF1.shape
+    LAF = pd.read_excel(df1, sheet_name=D1, header=2)
+    CnC = pd.read_excel(df1, sheet_name=D2, header=2)
 except Exception as e:
     print(f"Upload Excel Error: {e}")
     sql_query2 = """INSERT INTO [log_apps_error] (
@@ -241,47 +229,33 @@ except Exception as e:
 #------------------------------------------------------------------------------------------------
 
 try:
-    LAF1.columns = LAF1.columns.str.replace("\n", "_")
-    LAF1.columns = LAF1.columns.str.replace(" ", "_")
-    LAF1.columns = LAF1.columns.str.replace(".", "_")
-    
-    # LAF.iloc[np.where(LAF.facility_exim_account_num == 330801137107038976)]
+    LAF.columns = LAF.columns.str.replace("\n", "_")
+    LAF.columns = LAF.columns.str.replace(" ", "_")
+    LAF.columns = LAF.columns.str.replace(".", "_")
 
-    # LAF1['facility_exim_account_num'] = LAF1['facility_exim_account_num'].apply(lambda x: '{:.0f}'.format(x))
+    CnC.columns = CnC.columns.str.replace("\n", "_")
+    CnC.columns = CnC.columns.str.replace(" ", "_")
+    CnC.columns = CnC.columns.str.replace(".", "_")
 
-    #LAF1['facility_exim_account_num'] = LAF1['facility_exim_account_num'].astype(int)
-    #LAF1['facility_exim_account_num'] = LAF1['facility_exim_account_num'].astype(str)
-
-
-    LAF2 = LAF1.fillna(0).groupby(['facility_exim_account_num',
-                                   #'Finance_(SAP)_Number',
-                                   #'Type_of_Financing',
-                                   #'Borrower_name',
-                                   'Currency',
-                                   #'Watchlist_(Yes/No)',
-                                   #'Undrawn/BG',
-                                   #'MFRS_staging_',
-                                   #'MFRS_staging__1',
-                                   #'Staging_movement'
-                                   ])[['Total_ECL_MYR_(LAF)',
-                                         'Total_ECL_MYR_(C&C)']].sum().reset_index()
-    
-    
-    
-
+    LAF1 = LAF.iloc[np.where(~(LAF.Account_No.isna()))]
+    LAF1['LAF_ECL_MYR'] = LAF1['Stage_1_Conventional'] + LAF1['Stage_2_Conventional'] + LAF1['Stage_1_Islamic'] + LAF1['Stage_2_Islamic']
+    LAF1['Account_No'] = LAF1['Account_No'].astype(str)
+    LAF1 = LAF1.fillna(0).groupby(['Account_No','Borrower_name','Category','Unnamed:_5'])[['LAF_ECL_MYR']].sum().reset_index()
+    LAF1['Unnamed:_5'] = LAF1['Unnamed:_5'].astype(str)
+    #LAF1['Unnamed:_5'] = LAF1['Unnamed:_5'].str.strip()
+    LAF1.rename(columns={'Account_No':'Account_No'},inplace=True)
+    LAF1['Account_No'] = LAF1['Account_No'].astype(str)
 
     #================================================================================================
-    
-    # Currency = pd.read_sql_query("""Select facility_exim_account_num
-    # ,b.param_name as currency
-    # from col_facilities_application_master a
-    # left outer join param_system_param b on a.facility_ccy_id = b.param_id;""", conn)
+    Currency = pd.read_sql_query("""Select finance_sap_number
+    ,b.param_name as currency
+    from col_facilities_application_master a
+    left outer join param_system_param b on a.facility_ccy_id = b.param_id;""", conn)
 
-    # # Currency['facility_exim_account_num'].dtypes
-    # # Currency['facility_exim_account_num'] = Currency['facility_exim_account_num'].astype(float)
-    # Currency.columns = Currency.columns.str.replace("\n", "")
+    Currency['finance_sap_number'] = Currency['finance_sap_number'].astype(str)
+    Currency.columns = Currency.columns.str.replace("\n", "")
 
-    # LAF1_1 = LAF2.merge(Currency.drop_duplicates('facility_exim_account_num',keep='first').rename(columns={'facility_exim_account_num':'facility_exim_account_num'}),on=['facility_exim_account_num'],how='left', suffixes=('_x', ''),indicator=True) #
+    LAF1_1 = LAF1.merge(Currency.drop_duplicates('finance_sap_number',keep='first').rename(columns={'finance_sap_number':'Account_No'}),on=['Account_No'],how='left', suffixes=('_x', '')) #,indicator=True
 
     #LAF1_1._merge.value_counts()
     #LAF1_1.iloc[np.where(LAF1_1['_merge']=='left_only')]
@@ -337,28 +311,89 @@ try:
     #====================================================================================================================================
 
     #Rate
+    LAF1_1['currency'] = LAF1_1['currency'].astype(str)
+    LAF2 = LAF1_1.rename(columns={'currency':'param_name'}).merge(MRate[['param_name','exchange_rate','valuedate']], on='param_name', how='left') #,indicator=True
+    LAF2['exchange_rate'].fillna(1,inplace=True)
+    LAF2['LAF_ECL_FC'] = LAF2['LAF_ECL_MYR']/LAF2['exchange_rate']
+
+    #================================================================================================
+
+    CnC['Account_No'] = CnC['Account_No'].astype(str)
+    CnC1 = CnC.iloc[np.where(~(CnC.Account_No.isna()))]
+    CnC1['CnC_ECL_MYR'] = CnC1['Stage_1_Conventional'] + CnC1['Stage_2_Conventional'] + CnC1['Stage_1_Islamic'] + CnC1['Stage_2_Islamic']
+    CnC1 = CnC1.fillna(0).groupby(['Account_No','Borrower_name','Category','Unnamed:_5'])[['CnC_ECL_MYR']].sum().reset_index()
+    #CnC1['Account_No'] = CnC1['Account_No'].str.strip()
+
+    CnC1_1 = CnC1.merge(Currency.drop_duplicates('finance_sap_number',keep='first').rename(columns={'finance_sap_number':'Account_No'}),on=['Account_No'],how='left', suffixes=('_x', '')) #,indicator=True
+
+    #with x as (SELECT max(r.valuedate) as le
+    #  FROM [param_ccy_exchange_rate] r inner join param_system_param p on p.param_reference ='Root>>Currency' and currency_id=p.param_id
+    #  where valuedate=valuedate)
     
-    LAF3 = LAF2.rename(columns={'Currency':'param_name'}).merge(MRate[['param_name','exchange_rate','valuedate']], on='param_name', how='left',indicator=True) #
+    #SELECT param_name,r.exchange_rate,r.valuedate
+    #  FROM [param_ccy_exchange_rate] r inner join param_system_param p on p.param_reference ='Root>>Currency' and currency_id=p.param_id
+    #  inner join x on x.le = valuedate order by param_name asc
+
+    CnC2 = CnC1_1.rename(columns={'currency':'param_name'}).merge(MRate[['param_name','exchange_rate','valuedate']], on='param_name', how='left')
+    CnC2['exchange_rate'].fillna(1,inplace=True)
+    CnC2['CnC_ECL_FC'] = CnC2['CnC_ECL_MYR']/CnC2['exchange_rate']
+
+    #================================================================================================
+
+    merge = pd.concat([LAF2,CnC2])
+    merge.fillna(0, inplace=True)
+
+    #merge.Borrower_name = merge.Borrower_name.str.strip()
+    merge.Borrower_name = merge.Borrower_name.str.upper()
+
+    merge1 = merge.iloc[np.where(merge['Account_No']!="nan")].fillna(0).groupby(['Account_No'])[['LAF_ECL_FC',
+                                                            'LAF_ECL_MYR',
+                                                            'CnC_ECL_FC',
+                                                            'CnC_ECL_MYR']].sum().reset_index()
     
-    # LAF3._merge.value_counts()
+    merge1['ECL_FC'] = merge1['LAF_ECL_FC'].fillna(0) + merge1['CnC_ECL_FC'].fillna(0)
+    merge1['ECL_MYR'] = merge1['LAF_ECL_MYR'].fillna(0) + merge1['CnC_ECL_MYR'].fillna(0)
 
-    LAF3['exchange_rate'].fillna(1,inplace=True)
+    df_add_Humm = pd.DataFrame([['500776A',
+                        0,
+                        0,
+                        0,
+                        0,
+                        0,
+                        0]], columns=['Account_No',
+                                              'LAF_ECL_FC',
+                                              'LAF_ECL_MYR',
+                                              'CnC_ECL_FC',
+                                              'CnC_ECL_MYR',
+                                              'ECL_FC',
+                                              'ECL_MYR'])
 
-    LAF3['Total_ECL_FC_(LAF)'] = LAF3['Total_ECL_MYR_(LAF)'].fillna(0)/LAF3['exchange_rate']
-    LAF3['Total_ECL_FC_(C&C)'] = LAF3['Total_ECL_MYR_(C&C)'].fillna(0)/LAF3['exchange_rate']
+    merge1 = pd.concat([merge1, df_add_Humm])
 
-    LAF3["position_as_at"] = reportingDate
+    a_humm = sum(merge1.fillna(0).iloc[np.where(merge1['Account_No']=='500776')]['LAF_ECL_FC'])
+    b_humm = sum(merge1.fillna(0).iloc[np.where(merge1['Account_No']=='500776')]['LAF_ECL_MYR'])
+    c_humm = sum(merge1.fillna(0).iloc[np.where(merge1['Account_No']=='500776')]['CnC_ECL_FC'])
+    d_humm = sum(merge1.fillna(0).iloc[np.where(merge1['Account_No']=='500776')]['CnC_ECL_MYR'])
+    e_humm = sum(merge1.fillna(0).iloc[np.where(merge1['Account_No']=='500776')]['ECL_FC'])
+    f_humm = sum(merge1.fillna(0).iloc[np.where(merge1['Account_No']=='500776')]['ECL_MYR'])
 
-    LAF3.rename(columns={'Total_ECL_FC_(LAF)':'acc_credit_loss_laf_ecl',
-                         'Total_ECL_MYR_(LAF)':'acc_credit_loss_laf_ecl_myr',
-                         'Total_ECL_FC_(C&C)':'acc_credit_loss_cnc_ecl',
-                         'Total_ECL_MYR_(C&C)':'acc_credit_loss_cnc_ecl_myr',},inplace=True)
+    merge1.loc[(merge1['Account_No']=='500776'),'LAF_ECL_FC'] = 0.79*a_humm
+    merge1.loc[(merge1['Account_No']=='500776'),'LAF_ECL_MYR'] = 0.79*b_humm
+    merge1.loc[(merge1['Account_No']=='500776'),'CnC_ECL_FC'] = 0.79*c_humm
+    merge1.loc[(merge1['Account_No']=='500776'),'CnC_ECL_MYR'] = 0.79*d_humm
+    merge1.loc[(merge1['Account_No']=='500776'),'ECL_FC'] = 0.79*e_humm
+    merge1.loc[(merge1['Account_No']=='500776'),'ECL_MYR'] = 0.79*f_humm
+    
+    merge1.loc[(merge1['Account_No']=='500776A'),'LAF_ECL_FC'] = 0.21*a_humm
+    merge1.loc[(merge1['Account_No']=='500776A'),'LAF_ECL_MYR'] = 0.21*b_humm
+    merge1.loc[(merge1['Account_No']=='500776A'),'CnC_ECL_FC'] = 0.21*c_humm
+    merge1.loc[(merge1['Account_No']=='500776A'),'CnC_ECL_MYR'] = 0.21*d_humm
+    merge1.loc[(merge1['Account_No']=='500776A'),'ECL_FC'] = 0.21*e_humm
+    merge1.loc[(merge1['Account_No']=='500776A'),'ECL_MYR'] = 0.21*f_humm
 
     convert_time = str(current_time).replace(":","-")
-    
-    LAF3 = LAF3[["facility_exim_account_num","acc_credit_loss_laf_ecl","acc_credit_loss_laf_ecl_myr","acc_credit_loss_cnc_ecl","acc_credit_loss_cnc_ecl_myr"]]
-
-    LAF3.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_ECL_to_MIS_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
+    merge1['position_as_at'] = reportingDate
+    merge1.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_ECL_to_MIS_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
 
     #df1 =  config.FOLDER_CONFIG["FTP_directory"]+documentName #"ECL 1024 - MIS v1.xlsx" #documentName
 except Exception as e:
@@ -482,13 +517,13 @@ try:
 
     # Assuming 'combine2' is a DataFrame
     column_types = []
-    for col in LAF3.columns:
+    for col in merge1.columns:
         # You can choose to map column types based on data types in the DataFrame, for example:
-        if LAF3[col].dtype == 'object':  # String data type
+        if merge1[col].dtype == 'object':  # String data type
             column_types.append(f"{col} VARCHAR(255)")
-        elif LAF3[col].dtype == 'int64':  # Integer data type
+        elif merge1[col].dtype == 'int64':  # Integer data type
             column_types.append(f"{col} INT")
-        elif LAF3[col].dtype == 'float64':  # Float data type
+        elif merge1[col].dtype == 'float64':  # Float data type
             column_types.append(f"{col} FLOAT")
         else:
             column_types.append(f"{col} VARCHAR(255)")  # Default type for others
@@ -499,21 +534,21 @@ try:
     # Execute the query
     cursor.execute(create_table_query)
 
-    for row in LAF3.iterrows():
-        sql = "INSERT INTO A_ECL_TO_MIS({}) VALUES ({})".format(','.join(LAF3.columns), ','.join(['?']*len(LAF3.columns)))
+    for row in merge1.iterrows():
+        sql = "INSERT INTO A_ECL_TO_MIS({}) VALUES ({})".format(','.join(merge1.columns), ','.join(['?']*len(merge1.columns)))
         cursor.execute(sql, tuple(row[1]))
     conn.commit()
 
-    # LAF3["facility_exim_account_num"].value_counts()
-    # LAF3.iloc[np.where(LAF3["facility_exim_account_num"]=="330801137110034000")]
-
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_ECL_TO_MIS AS source
-    ON target.facility_exim_account_num = source.facility_exim_account_num
+    ON target.finance_sap_number = source.Account_No
     WHEN MATCHED THEN
-        UPDATE SET target.acc_credit_loss_laf_ecl = source.acc_credit_loss_laf_ecl,
-                target.acc_credit_loss_laf_ecl_myr = source.acc_credit_loss_laf_ecl_myr,
-                target.acc_credit_loss_cnc_ecl = source.acc_credit_loss_cnc_ecl,
-                target.acc_credit_loss_cnc_ecl_myr = source.acc_credit_loss_cnc_ecl_myr;
+        UPDATE SET target.acc_credit_loss_laf_ecl = source.LAF_ECL_FC,
+                target.acc_credit_loss_laf_ecl_myr = source.LAF_ECL_MYR,
+                target.acc_credit_loss_cnc_ecl = source.CnC_ECL_FC,
+                target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR,
+                target.acc_credit_loss_lafcnc_ecl = source.ECL_FC,
+                target.acc_credit_loss_lafcnc_ecl_myr = source.ECL_MYR,
+                target.position_as_at = source.position_as_at;
     """)
     conn.commit() 
     cursor.execute("drop table A_ECL_TO_MIS")
