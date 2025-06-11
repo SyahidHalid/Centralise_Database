@@ -162,7 +162,8 @@ try:
     #df1 = documentName #"Allowance_1024_Adjusted.xlsx"
     
     #import config
-    #documentName = "Allowance_1024_Adjusted.xlsx"
+    #documentName = "Allowance_0525v2adjusted.xlsx.xlsx"
+    #reportingDate = "2025-05-31"
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
     #df1 = r"D:\\mis_doc\\PythonProjects\\misPython\\misPython_doc\\Allowance_1024_Adjusted.xlsx" #"Data Mirror October 2024.xlsx"
@@ -559,11 +560,38 @@ try:
             UPDATE SET target.acc_credit_loss_laf_ecl = source.LAF_ECL_FC,
                     target.acc_credit_loss_laf_ecl_myr = source.LAF_ECL_MYR,
                     target.acc_credit_loss_cnc_ecl = source.CnC_ECL_FC,
-                    target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR,
-                    target.acc_credit_loss_lafcnc_ecl = source.ECL_FC,
-                    target.acc_credit_loss_lafcnc_ecl_myr = source.ECL_MYR;
+                    target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR;
     """)
     conn.commit() 
+
+
+                    # target.acc_credit_loss_lafcnc_ecl = source.ECL_FC,
+                    # target.acc_credit_loss_lafcnc_ecl_myr = source.ECL_MYR
+    
+    # # #incase manual upload
+    # cursor.execute("""WITH CTE AS (
+    #         SELECT Account,
+    #             MAX(LAF_ECL_FC) AS LAF_ECL_FC,
+    #             MAX(LAF_ECL_MYR) AS LAF_ECL_MYR,
+    #             MAX(CnC_ECL_FC) AS CnC_ECL_FC,
+    #             MAX(CnC_ECL_MYR) AS CnC_ECL_MYR,
+    #             MAX(ECL_FC) AS ECL_FC,
+    #             MAX(ECL_MYR) AS ECL_MYR,
+    #             MAX(position_as_at) AS position_as_at
+    #         FROM A_ALLOWANCE
+    #         GROUP BY Account
+    #     )
+    #     MERGE INTO dbase_account_hist AS target
+    #     USING CTE AS source
+    #     ON target.finance_sap_number = source.Account
+    #     WHEN MATCHED AND target.position_as_at = '2025-05-31' THEN
+    #         UPDATE SET target.acc_credit_loss_laf_ecl = source.LAF_ECL_FC,
+    #                 target.acc_credit_loss_laf_ecl_myr = source.LAF_ECL_MYR,
+    #                 target.acc_credit_loss_cnc_ecl = source.CnC_ECL_FC,
+    #                 target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR;
+    # """)
+    # conn.commit() 
+
     cursor.execute("drop table A_ALLOWANCE")
     conn.commit() 
 

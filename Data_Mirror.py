@@ -154,8 +154,9 @@ try:
     #E:mis_doc\\PythonProjects\\misPython\\misPython_doc
     #df1 = documentName #"Data Mirror October 2024.xlsx"
     #import config
-    #documentName = "ECL 1024 - MIS v1.xlsx"
-    
+    #documentName = "DataMirrorMay2025.xlsx.xlsx.xlsx"
+    #reportingDate = "2025-05-31"
+
     df1 = os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
 
     #   Excel Sheet Name
@@ -790,6 +791,21 @@ try:
                 target.acc_cumulative_others_charge_payment_myr = source.acc_cumulative_others_charge_payment_myr;
     """)
     conn.commit() 
+
+    # # incase manual
+    # cursor.execute("""MERGE INTO dbase_account_hist AS target USING A_PROFIT_N_OTHER_PAYMENT AS source
+    # ON target.finance_sap_number = source.Account
+    # WHEN MATCHED AND target.position_as_at = '2025-05-31' THEN
+    #     UPDATE SET target.penalty_repayment = source.acc_tawidh_payment_repayment_fc,
+    #             target.penalty_repayment_myr = source.acc_tawidh_payment_repayment_myr,
+    #             target.cumulative_penalty = source.acc_cumulative_tawidh_payment_repayment_fc,
+    #             target.cumulative_penalty_myr = source.acc_cumulative_tawidh_payment_repayment_myr,
+    #             target.other_charges_payment = source.acc_others_charges_payment_fc,
+    #             target.other_charges_payment_myr = source.acc_others_charges_payment_myr,
+    #             target.cumulative_other_charges_payment = source.acc_cumulative_others_charge_payment_fc,
+    #             target.cumulative_other_charges_payment_myr = source.acc_cumulative_others_charge_payment_myr;
+    # """)
+    # conn.commit() 
 
     #
 		#target.acc_interest_repayment_fc = source.acc_interest_repayment_fc,

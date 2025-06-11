@@ -145,7 +145,8 @@ except Exception as e:
 #process
 try:
     #    #E:\PythonProjects\misPython\misPython_doc
-    #documentName = "Disbursement&RepaymentMay2025.xlsx.xlsx.xlsx" #
+    # documentName = "Disbursement&RepaymentMay2025.xlsx.xlsx.xlsx.xlsx"
+    # reportingDate = "2025-05-31"
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
 
     D1 = "Disbursement Islamic"

@@ -521,7 +521,7 @@ try:
     # cursor.execute("""MERGE INTO dbase_account_hist AS target 
     # USING A_ECL_TO_MIS AS source
     # ON target.facility_exim_account_num = source.facility_exim_account_num
-    # WHEN MATCHED AND position_as_at = '2025-05-31' THEN
+    # WHEN MATCHED AND target.position_as_at = '2025-05-31' THEN
     #     UPDATE SET target.acc_credit_loss_laf_ecl = source.acc_credit_loss_laf_ecl,
     #             target.acc_credit_loss_laf_ecl_myr = source.acc_credit_loss_laf_ecl_myr,
     #             target.acc_credit_loss_cnc_ecl = source.acc_credit_loss_cnc_ecl,

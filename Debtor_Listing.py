@@ -156,7 +156,9 @@ except Exception as e:
 try:
     BalanceOS = "Balance"
 
-    #reportingDate = "2024-03-29"
+    #reportingDate = "2024-05-31"
+    #documentName = "5.DebtorsListingandCustomerBalanceReportasatMay2025.xlsx.xlsx.xlsx.xlsx"
+
     #data_folder = os.path.join(PROJECT_ROOT, "misPython_doc")
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName)
     #df1 = r"D:\\mis_doc\\PythonProjects\\misPython\\misPython_doc\\Debtors Listing and Customer Balance Report as at October 2024_Adjusted.xlsx" 
@@ -1232,6 +1234,27 @@ try:
                 target.acc_penalty_compensation_myr = source.acc_penalty_compensation_myr;
     """)
     conn.commit() 
+
+    # # # incase manual
+    # cursor.execute("""MERGE INTO dbase_account_hist AS target USING A_DEBTOR AS source
+    # ON target.finance_sap_number = source.finance_sap_number
+    # WHEN MATCHED AND target.position_as_at = '2025-05-31' THEN
+    #     UPDATE SET target.acc_accrued_interest_month_fc = source.acc_accrued_interest_month_fc,
+    #             target.acc_accrued_interest_month_myr = source.acc_accrued_interest_month_myr,
+    #             target.modification_of_loss_fc = source.acc_modification_loss,
+    #             target.modification_of_loss_myr = source.acc_modification_loss_myr,
+    #             target.acc_accurate_interest = source.acc_accurate_interest,
+    #             target.acc_accrued_interest_myr = source.acc_accrued_interest_myr,
+    #             target.acc_suspended_interest = source.acc_suspended_interest,
+    #             target.acc_interest_suspense_myr = source.acc_interest_suspense_myr,
+    #             target.acc_other_charges = source.acc_other_charges,
+    #             target.acc_other_charges_myr = source.acc_other_charges_myr,
+    #             target.acc_penalty = source.acc_penalty,
+    #             target.acc_penalty_myr = source.acc_penalty_myr,
+    #             target.acc_penalty_compensation_fc = source.acc_penalty_compensation_fc,
+    #             target.acc_penalty_compensation_myr = source.acc_penalty_compensation_myr;
+    # """)
+    # conn.commit() 
 
     #redundant
     #target.facility_amount_outstanding = source.facility_amount_outstanding,
