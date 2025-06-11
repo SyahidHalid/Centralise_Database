@@ -209,7 +209,7 @@ except Exception as e:
     cursor.execute(sql_query2,(str(e)+" ["+str(documentName)+"]","Debtor Listing",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Upload Excel Debtor Listing'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Upload Excel Debtor Listing'
     WHERE [jobName] = 'Debtor Listing';
                 """
     cursor.execute(sql_error)
@@ -1092,7 +1092,7 @@ except Exception as e:
     cursor.execute(sql_query3,(str(e)+" ["+str(documentName)+"]","Process Excel Debtor Listing",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Process Excel Debtor Listing'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Process Excel Debtor Listing'
     WHERE [jobName] = 'Debtor Listing';
                 """
     cursor.execute(sql_error)
@@ -1229,8 +1229,7 @@ try:
                 target.acc_penalty = source.acc_penalty,
                 target.acc_penalty_myr = source.acc_penalty_myr,
                 target.acc_penalty_compensation_fc = source.acc_penalty_compensation_fc,
-                target.acc_penalty_compensation_myr = source.acc_penalty_compensation_myr,
-                target.position_as_at = source.position_as_at;
+                target.acc_penalty_compensation_myr = source.acc_penalty_compensation_myr;
     """)
     conn.commit() 
 
@@ -1285,7 +1284,7 @@ except Exception as e:
     cursor.execute(sql_query5,(str(e)+" ["+str(documentName)+"]","Update Database Debtor Listing",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Update Database Debtor Listing'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Update Database Debtor Listing'
     WHERE [jobName] = 'Debtor Listing';
                 """
     cursor.execute(sql_error)

@@ -737,15 +737,14 @@ except Exception as e:
     cursor.execute(sql_query2,(str(e)+" ["+str(documentName)+"]","Upload Excel ECL",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Process ECL'
-    WHERE [jobName] = 'ECL';
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Process ECL'
+    WHERE [jobName] = 'Calculation ECL Computation';
                 """
     cursor.execute(sql_error)
     conn.commit()
     print(f"Process ECL Error: {e}")
     sys.exit(f"Process ECL Error: {str(e)}")
     #sys.exit(1)
-
 
 
 #--------------------------------------------------------connect ngan database-----------------------------------------------------------------------------------------------------------------------------------------------------

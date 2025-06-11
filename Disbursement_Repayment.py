@@ -145,7 +145,7 @@ except Exception as e:
 #process
 try:
     #    #E:\PythonProjects\misPython\misPython_doc
-    #df1 = documentName #"Disbursement & Repayment October 2024.xlsx" #
+    #documentName = "Disbursement&RepaymentMay2025.xlsx.xlsx.xlsx" #
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
 
     D1 = "Disbursement Islamic"
@@ -178,7 +178,7 @@ except Exception as e:
     cursor.execute(sql_query2,(str(e)+" ["+str(documentName)+"]","Upload Excel Disbursement & Repayment",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Upload Excel Disbursement & Repayment'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Upload Excel Disbursement & Repayment'
     WHERE [jobName] = 'Disbursement & Repayment';
                 """
     cursor.execute(sql_error)
@@ -426,7 +426,7 @@ except Exception as e:
     cursor.execute(sql_query3,(str(e)+" ["+str(documentName)+"]","Process Excel Disbursement & Repayment",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= '"Process Excel Disbursement & Repayment'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= '"Process Excel Disbursement & Repayment'
     WHERE [jobName] = 'Disbursement & Repayment';
                 """
     cursor.execute(sql_error)
@@ -545,12 +545,12 @@ try:
         cursor.execute(sql, tuple(row[1]))
     conn.commit()
 
-    cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DIS_N_REPAYMENT AS source
-    ON target.finance_sap_number = source.Account
-    WHEN MATCHED THEN
-        UPDATE SET target.position_as_at = source.position_as_at;
-    """)
-    conn.commit() 
+    # cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DIS_N_REPAYMENT AS source
+    # ON target.finance_sap_number = source.Account
+    # WHEN MATCHED THEN
+    #     UPDATE SET target.position_as_at = source.position_as_at;
+    # """)
+    # conn.commit() 
 
     #redundant
     #target.acc_drawdown_fc = source.acc_drawdown_fc,
@@ -595,7 +595,7 @@ except Exception as e:
     cursor.execute(sql_query5,(str(e)+" ["+str(documentName)+"]","Update Database Disbursement & Repayment",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Update Database Disbursement & Repayment'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Update Database Disbursement & Repayment'
     WHERE [jobName] = 'Disbursement & Repayment';
                 """
     cursor.execute(sql_error)

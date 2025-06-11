@@ -204,7 +204,7 @@ except Exception as e:
     cursor.execute(sql_query2,(str(e)+" ["+str(documentName)+"]","Upload Excel Allowance",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Upload Excel Allowance'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Upload Excel Allowance'
     WHERE [jobName] = 'Allowance';
                 """
     cursor.execute(sql_error)
@@ -418,7 +418,7 @@ except Exception as e:
     cursor.execute(sql_query3,(str(e)+" ["+str(documentName)+"]","Process Excel Allowance",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Process Excel Allowance'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Process Excel Allowance'
     WHERE [jobName] = 'Allowance';
                 """
     cursor.execute(sql_error)
@@ -561,8 +561,7 @@ try:
                     target.acc_credit_loss_cnc_ecl = source.CnC_ECL_FC,
                     target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR,
                     target.acc_credit_loss_lafcnc_ecl = source.ECL_FC,
-                    target.acc_credit_loss_lafcnc_ecl_myr = source.ECL_MYR,
-                    target.position_as_at = source.position_as_at;
+                    target.acc_credit_loss_lafcnc_ecl_myr = source.ECL_MYR;
     """)
     conn.commit() 
     cursor.execute("drop table A_ALLOWANCE")
@@ -597,7 +596,7 @@ except Exception as e:
     cursor.execute(sql_query5,(str(e)+" ["+str(documentName)+"]","Update Database Allowance",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Update Database Allowance'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Update Database Allowance'
     WHERE [jobName] = 'Allowance';
                 """
     cursor.execute(sql_error)

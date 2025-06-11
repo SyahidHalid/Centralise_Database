@@ -154,7 +154,7 @@ try:
     #documentName = "a"
     #uploadedByEmail = "a"
     
-    # documentName = "ECL S1 S2 May-2025 working (AIN2).xlsx"
+    # documentName = "ECLS1S2May-2025working10.6.258.07pm.xlsx.xlsx"
     # reportingDate = "2025-05-31"
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
@@ -190,7 +190,7 @@ except Exception as e:
     cursor.execute(sql_query2,(str(e)+" ["+str(documentName)+"]","ECL to MIS",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Upload Excel ECL to MIS'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Upload Excel ECL to MIS'
     WHERE [jobName] = 'ECL to MIS';
                 """
     cursor.execute(sql_error)
@@ -381,7 +381,7 @@ except Exception as e:
     cursor.execute(sql_query3,(str(e)+" ["+str(documentName)+"]","Process Excel ECL to MIS",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Process Excel ECL to MIS'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Process Excel ECL to MIS'
     WHERE [jobName] = 'ECL to MIS';
                 """
     cursor.execute(sql_error)
@@ -516,6 +516,19 @@ try:
                 target.acc_credit_loss_cnc_ecl_myr = source.acc_credit_loss_cnc_ecl_myr;
     """)
     conn.commit() 
+
+    # #incase manual upload
+    # cursor.execute("""MERGE INTO dbase_account_hist AS target 
+    # USING A_ECL_TO_MIS AS source
+    # ON target.facility_exim_account_num = source.facility_exim_account_num
+    # WHEN MATCHED AND position_as_at = '2025-05-31' THEN
+    #     UPDATE SET target.acc_credit_loss_laf_ecl = source.acc_credit_loss_laf_ecl,
+    #             target.acc_credit_loss_laf_ecl_myr = source.acc_credit_loss_laf_ecl_myr,
+    #             target.acc_credit_loss_cnc_ecl = source.acc_credit_loss_cnc_ecl,
+    #             target.acc_credit_loss_cnc_ecl_myr = source.acc_credit_loss_cnc_ecl_myr;
+    # """)
+    # conn.commit() 
+
     cursor.execute("drop table A_ECL_TO_MIS")
     conn.commit() 
 
@@ -548,7 +561,7 @@ except Exception as e:
     cursor.execute(sql_query5,(str(e)+" ["+str(documentName)+"]","Update Database ECL to MIS",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Update Database ECL to MIS'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Update Database ECL to MIS'
     WHERE [jobName] = 'ECL to MIS';
                 """
     cursor.execute(sql_error)

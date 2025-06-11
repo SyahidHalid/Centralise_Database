@@ -198,7 +198,7 @@ except Exception as e:
     cursor.execute(sql_query2,(str(e)+" ["+str(documentName)+"]","Upload Excel Data Mirror",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Upload Excel Data Mirror'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Upload Excel Data Mirror'
     WHERE [jobName] = 'Data Mirror';
                 """
     cursor.execute(sql_error)
@@ -655,7 +655,7 @@ except Exception as e:
     cursor.execute(sql_query3,(str(e)+" ["+str(documentName)+"]","Process Excel Data Mirror",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Process Excel Data Mirror'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Process Excel Data Mirror'
     WHERE [jobName] = 'Data Mirror';
                 """
     cursor.execute(sql_error)
@@ -787,8 +787,7 @@ try:
                 target.acc_others_charges_payment_fc = source.acc_others_charges_payment_fc,
                 target.acc_others_charges_payment_myr = source.acc_others_charges_payment_myr,
                 target.acc_cumulative_others_charge_payment_fc = source.acc_cumulative_others_charge_payment_fc,
-                target.acc_cumulative_others_charge_payment_myr = source.acc_cumulative_others_charge_payment_myr,
-                target.position_as_at = source.position_as_at;
+                target.acc_cumulative_others_charge_payment_myr = source.acc_cumulative_others_charge_payment_myr;
     """)
     conn.commit() 
 
@@ -861,7 +860,7 @@ except Exception as e:
     cursor.execute(sql_query5,(str(e)+" ["+str(documentName)+"]","Update Database Data Mirror",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobErrDetail]= 'Update Database Data Mirror'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Update Database Data Mirror'
     WHERE [jobName] = 'Data Mirror';
                 """
     cursor.execute(sql_error)
