@@ -362,47 +362,51 @@ try:
     extended_Active['Cummulative_Instalment_Amount'] = extended_Active.groupby('Finance (SAP) Number')['Instalment Amount'].cumsum()
     extended_Active['Cummulative_Instalment_Amount_C&C'] = extended_Active.groupby('Finance (SAP) Number')['Instalment Amount (C&C)'].cumsum()
 
-        
+    #extended_Active.iloc[np.where(extended_Active["Finance (SAP) Number"]=="501209")].head(10)    
+
 
     #Outstanding balance and Undisbursed @ EAD
     #=IF(D32="","",
     #   I31-G32+H32)
     #     EAD = "OS + (Undisbursed * CCF)
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Monthly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Monthly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"]) #
+    extended_Active["EAD"] = extended_Active["Total outstanding (base currency)"]-extended_Active["Cummulative_Instalment_Amount"]+extended_Active["Cummulative_Undrawn_balance"]#&(extended_Active["Interest payment frequency"]=="Quarterly")
+    extended_Active["EAD (C&C)"] = 0-extended_Active["Cummulative_Instalment_Amount_C&C"]+extended_Active["Cummulative_Undrawn_balance"]#/(extended_Active["Sequence"])
 
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Monthly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Monthly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"]) #
 
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #
 
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #
 
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Semi Annually"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Semi Annually"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#
 
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Semi Annually"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Semi Annually"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
     
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Bullet"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Bullet"),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Bullet"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Bullet"),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
     
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["EAD (C&C)"]/(extended_Active["Sequence"])
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["EAD (C&C)"]/(extended_Active["Sequence"])
     
-    extended_Active.loc[(extended_Active["Principal payment frequency"]==0)&(extended_Active["Interest payment frequency"]==0),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
-    extended_Active.loc[(extended_Active["Principal payment frequency"]==0)&(extended_Active["Interest payment frequency"]==0),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]==0)&(extended_Active["Interest payment frequency"]==0),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]==0)&(extended_Active["Interest payment frequency"]==0),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
 
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="")&(extended_Active["Interest payment frequency"]==""),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="")&(extended_Active["Interest payment frequency"]==""),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="")&(extended_Active["Interest payment frequency"]==""),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="")&(extended_Active["Interest payment frequency"]==""),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
 
     extended_Active.loc[extended_Active["EAD"]<0,"EAD"] = 0
     extended_Active.loc[extended_Active["EAD (C&C)"]<0,"EAD (C&C)"] = 0
 
-    #extended_Active.iloc[np.where(extended_Active["Finance (SAP) Number"]=="500401")]
+
 
     #sambungan installment
     extended_Active.loc[extended_Active["Sequence"]>=extended_Active["YOB"],"Instalment Amount"] = extended_Active["EAD"].shift(1)
@@ -419,36 +423,40 @@ try:
     #=IF(D32="","",
     #   I31-G32+H32)
     #     EAD = "OS + (Undisbursed * CCF)
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Monthly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Monthly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"]) #
 
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #
+    extended_Active["EAD"] = extended_Active["Total outstanding (base currency)"]-extended_Active["Cummulative_Instalment_Amount"]+extended_Active["Cummulative_Undrawn_balance"]#&(extended_Active["Interest payment frequency"]=="Quarterly")
+    extended_Active["EAD (C&C)"] = 0-extended_Active["Cummulative_Instalment_Amount_C&C"]+extended_Active["Cummulative_Undrawn_balance"]#/(extended_Active["Sequence"])
 
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Monthly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Monthly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"]) #
 
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #
 
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Semi Annually"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Semi Annually"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Quarterly")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #
 
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#
+
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Semi Annually"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Semi Annually"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD"] = extended_Active["Total outstanding (base currency)"]-(extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Semi Annually")&(extended_Active["Interest payment frequency"]=="Quarterly"),"EAD (C&C)"] = extended_Active["Instalment Amount (C&C)"]-(extended_Active["Cummulative_Instalment_Amount_C&C"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
     
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Bullet"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Bullet"),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Bullet"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Bullet"),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
     
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["EAD (C&C)"]/(extended_Active["Sequence"])
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="Bullet")&(extended_Active["Interest payment frequency"]=="Monthly"),"EAD (C&C)"] = extended_Active["EAD (C&C)"]/(extended_Active["Sequence"])
     
-    extended_Active.loc[(extended_Active["Principal payment frequency"]==0)&(extended_Active["Interest payment frequency"]==0),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
-    extended_Active.loc[(extended_Active["Principal payment frequency"]==0)&(extended_Active["Interest payment frequency"]==0),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]==0)&(extended_Active["Interest payment frequency"]==0),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]==0)&(extended_Active["Interest payment frequency"]==0),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
     
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="")&(extended_Active["Interest payment frequency"]==""),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
-    extended_Active.loc[(extended_Active["Principal payment frequency"]=="")&(extended_Active["Interest payment frequency"]==""),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="")&(extended_Active["Interest payment frequency"]==""),"EAD"] = extended_Active["Total outstanding (base currency)"]+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount"]) #&(extended_Active["Interest payment frequency"]=="Quarterly")
+    # extended_Active.loc[(extended_Active["Principal payment frequency"]=="")&(extended_Active["Interest payment frequency"]==""),"EAD (C&C)"] = 0+(extended_Active["Cummulative_Undrawn_balance"]-extended_Active["Cummulative_Instalment_Amount_C&C"])#/(extended_Active["Sequence"])
     
     extended_Active.loc[extended_Active["EAD"]<0,"EAD"] = 0
     extended_Active.loc[extended_Active["EAD (C&C)"]<0,"EAD (C&C)"] = 0
@@ -724,7 +732,7 @@ try:
     ECL_Group = ECL_Filter1.groupby(["facility_exim_account_num","Finance (SAP) Number",
                                     "Borrower name",
                                     "Currency",
-                                    "Principal payment (base currency)",
+                                    "Principal payment frequency",
                                     "Interest payment frequency",
                                     "Watchlist (Yes/No)",
                                     "Reporting date",
