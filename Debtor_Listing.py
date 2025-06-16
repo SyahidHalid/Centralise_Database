@@ -156,7 +156,7 @@ except Exception as e:
 try:
     BalanceOS = "Balance"
 
-    #reportingDate = "2024-05-31"
+    #reportingDate = "2025-05-31"
     #documentName = "5.DebtorsListingandCustomerBalanceReportasatMay2025.xlsx.xlsx.xlsx.xlsx"
 
     #data_folder = os.path.join(PROJECT_ROOT, "misPython_doc")
@@ -1235,6 +1235,8 @@ try:
     """)
     conn.commit() 
 
+    #appendfinal3.iloc[np.where(appendfinal3.finance_sap_number=="500707")]
+    
     # # # incase manual
     # cursor.execute("""MERGE INTO dbase_account_hist AS target USING A_DEBTOR AS source
     # ON target.finance_sap_number = source.finance_sap_number

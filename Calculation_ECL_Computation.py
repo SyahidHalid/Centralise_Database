@@ -636,16 +636,119 @@ try:
     ECL_Filter.loc[((ECL_Filter['Watchlist (Yes/No)'].isin(["Imp"]))),"Total ECL FC (Overall)"]=0
     ECL_Filter.loc[((ECL_Filter['Watchlist (Yes/No)'].isin(["Imp"]))),"Total ECL MYR (Overall)"]=0
 
-    ECL_Group = ECL_Filter.groupby(["facility_exim_account_num","Finance (SAP) Number",
+    ECL_Filter1 = ECL_Filter[["facility_exim_account_num",
+                             "Finance (SAP) Number",
+                             "Borrower name",
+                             "Revolving/Non-revolving",
+                             "Total outstanding (base currency)",
+                             "Principal payment (base currency)",
+                             "Principal payment frequency",
+                             "Interest payment (base currency)",
+                             "Interest payment frequency",
+                             "Undrawn amount (base currency)",
+                             "FL segment",
+                             "Currency",
+                             "DPD",
+                             "Watchlist (Yes/No)",
+                             "Corporate/Sovereign",
+                             "FX",
+                             "Reporting date",
+                             "First Released Date",
+                             "Maturity date",
+                             "Availability period",
+                             "YOB",
+                             "Sequence",
+                             "Cal_Principal_payment",
+                             "Cummulative_Cal_Principal_payment",
+                             "Cal_Interest_payment",
+                             "Cummulative_Cal_Interest_payment",
+                             "Undrawn_balance",
+                             "Cummulative_Undrawn_balance",
+                             "Instalment Amount",
+                             "Instalment Amount (C&C)",
+                             "Cummulative_Instalment_Amount",
+                             "Cummulative_Instalment_Amount_C&C",
+                             "EAD",
+                             "EAD (C&C)",
+                             "PD segment",
+                             "PD_PERCENTAGE",
+                             "LGD rate",
+                            #  "Number",
+                            #  "Key",
+                             "adjusted_month_ends",
+                             "month_ends_shift",
+                             "NOD",
+                             "Prev_Cumulative",
+                             "Profit Rate/ EIR",
+                             "EIR adj",
+                             "S1 ECL (Overall) FC",
+                             "S1 ECL (Overall) MYR",
+                             "S1 ECL (C&C) FC",
+                             "S1 ECL (C&C) MYR",
+                             "S1 ECL (LAF) FC",
+                             "S1 ECL (LAF) MYR",
+                             "FL_PD_PERCENTAGE",
+                             "S2 ECL (Overall) FC",
+                             "S2 ECL (Overall) MYR",
+                             "S2 ECL (C&C) FC",
+                             "S2 ECL (C&C) MYR",
+                             "S2 ECL (LAF) FC",
+                             "S2 ECL (LAF) MYR",
+                             "Total ECL FC (LAF)",
+                             "Total ECL FC (C&C)",
+                             "Total ECL FC (Overall)",
+                             "Total ECL MYR (LAF)",
+                             "Total ECL MYR (C&C)",
+                             "Total ECL MYR (Overall)"]]
+    #buat fixed value for OM
+    #buat group by lebih extednsive
+    #susun balik ecl filter
+
+
+    # import pandas as pd
+
+    # # Sample DataFrame (replace with your actual data)
+    # data = {'column': ['A', 'A', 'B', 'B', 'A'],
+    #         'value1': [10, 20, 15, 25, 30],
+    #         'value2': [1, 2, 3, 4, 5]}
+    # df = pd.DataFrame(data)
+
+    # # Perform groupby with different aggregations
+    # result = df.groupby("column").agg(
+    #     avg_value1=('value1', 'mean'),  # Calculate average of 'value1'
+    #     sum_value2=('value2', 'sum')    # Calculate sum of 'value2'
+    # ).reset_index()
+
+    # print(result)
+
+    ECL_Group = ECL_Filter1.groupby(["facility_exim_account_num","Finance (SAP) Number",
                                     "Borrower name",
                                     "Currency",
+                                    "Principal payment (base currency)",
+                                    "Interest payment frequency",
                                     "Watchlist (Yes/No)",
-                                    "First Released Date",
+                                    "Reporting date",
                                     "Maturity date",
-                                    "Availability period"])[["Total ECL FC (LAF)","Total ECL MYR (LAF)",
-                                                                                "Total ECL FC (C&C)","Total ECL MYR (C&C)",
-                                                                                "Total ECL FC (Overall)","Total ECL MYR (Overall)"]].sum().reset_index()
-
+                                    "PD segment",]).agg(
+                                        AVG_outstanding=("Total outstanding (base currency)",'mean'),
+                                        AVG_Principal=("Principal payment (base currency)",'mean'),
+                                        AVG_Interest=("Interest payment (base currency)",'mean'),
+                                        AVG_Undrawn=("Undrawn amount (base currency)",'mean'),
+                                        AVG_EAD=("EAD",'mean'),
+                                        AVG_PD_PERCENTAGE=("PD_PERCENTAGE",'mean'),
+                                        AVG_LGD=("LGD rate",'mean'),
+                                        AVG_EIR=("Profit Rate/ EIR",'mean'),
+                                        AVG_EIR_ADJ=("EIR adj",'mean'),
+                                        Total_ECL_FC_LAF=("Total ECL FC (LAF)",'sum'),
+                                        Total_ECL_MYR_LAF=("Total ECL MYR (LAF)",'sum'),
+                                        Total_ECL_FC_CNC=("Total ECL FC (C&C)",'sum'),
+                                        Total_ECL_MYR_CNC=("Total ECL MYR (C&C)",'sum'),
+                                        Total_ECL_FC_Overall=("Total ECL FC (Overall)",'sum'),
+                                        Total_ECL_MYR_Overall=("Total ECL MYR (Overall)",'sum')
+                                        ).reset_index().sort_values(by=["Watchlist (Yes/No)","Total_ECL_MYR_Overall"],ascending=[True,False])
+    
+    #ECL_Group.iloc[np.where(ECL_Group["Finance (SAP) Number"]=="501233")]
+    
     # ECL_Group.iloc[np.where(ECL_Group["Finance (SAP) Number"]=="501233")]
     # ECL_Filter.iloc[np.where(ECL_Filter["Finance (SAP) Number"]=="500401")].head(10)
 
@@ -663,7 +766,7 @@ try:
     # Extract
     writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Calculation_ECL_Computation_"+str(reportingDate)[:19]+".xlsx"),engine='xlsxwriter')
 
-    ECL_Filter.to_excel(writer2, sheet_name='ECL_CALCULATOR', index = False)
+    ECL_Filter1.to_excel(writer2, sheet_name='ECL_CALCULATOR', index = False)
 
     ECL_Group.to_excel(writer2, sheet_name='ECL_SUMMARY', index = False)
 
