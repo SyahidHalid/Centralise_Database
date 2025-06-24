@@ -504,6 +504,35 @@ try:
 
     #appendfinal3.to_excel("Disbursement_Repayment_"+str(convert_time)[:19]+".xlsx",index=False)
     #df1 =  config.FOLDER_CONFIG["FTP_directory"]+documentName #"ECL 1024 - MIS v1.xlsx" #documentName
+
+    cursor.execute("DROP TABLE IF EXISTS Exception_Disbursement_Repayment")
+    conn.commit()
+
+    exception_report1._merge = exception_report1._merge.astype(str)
+    exception_report1.fillna(0,inplace=True)
+    
+    # Assuming 'combine2' is a DataFrame
+    column_types1 = []
+    for col in exception_report1.columns:
+        # You can choose to map column types based on data types in the DataFrame, for example:
+        if exception_report1[col].dtype == 'object':  # String data type
+            column_types1.append(f"{col} VARCHAR(255)")
+        elif exception_report1[col].dtype == 'int64':  # Integer data type
+            column_types1.append(f"{col} INT")
+        elif exception_report1[col].dtype == 'float64':  # Float data type
+            column_types1.append(f"{col} FLOAT")
+        else:
+            column_types1.append(f"{col} VARCHAR(255)")  # Default type for others
+
+    #   exception_report1.dtypes
+    create_table_query_result = "CREATE TABLE Exception_Disbursement_Repayment (" + ', '.join(column_types1) + ")"
+    cursor.execute(create_table_query_result)
+
+    for row in exception_report1.iterrows():
+        sql_result = "INSERT INTO Exception_Disbursement_Repayment({}) VALUES ({})".format(','.join(exception_report1.columns), ','.join(['?']*len(exception_report1.columns)))
+        cursor.execute(sql_result, tuple(row[1]))
+    conn.commit()
+
 except Exception as e:
     print(f"Process Excel Error: {e}")
     sql_query3 = """INSERT INTO [log_apps_error] (
