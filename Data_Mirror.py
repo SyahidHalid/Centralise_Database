@@ -628,7 +628,85 @@ try:
 
     convert_time = str(current_time).replace(":","-")
     combine2['position_as_at'] = reportingDate
-    combine2.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Data_Mirror_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
+
+    LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
+   
+    LDB_hist.penalty_repayment = LDB_hist.penalty_repayment.astype(float)
+    LDB_hist.other_charges_payment = LDB_hist.other_charges_payment.astype(float)
+    LDB_hist.acc_interest_repayment_fc = LDB_hist.acc_interest_repayment_fc.astype(float)
+
+    condition1 = ~LDB_hist.finance_sap_number.isna()
+    condition2 = (LDB_hist.penalty_repayment > 0) | (LDB_hist.other_charges_payment > 0) | (LDB_hist.acc_interest_repayment_fc > 0)
+
+    # LDB_hist.head(1)
+    LDB_hist1 = LDB_hist.iloc[np.where(condition1 & condition2)][['finance_sap_number',
+                                                                  'cif_name',
+                                                   'penalty_repayment',
+                                                   'penalty_repayment_myr',
+                                                   'other_charges_payment',
+                                                   'other_charges_payment_myr',
+                                                   'acc_interest_repayment_fc',
+                                                   'acc_interest_repayment_myr']]
+    # combine2.head(1)
+    # combine2.shape
+
+    exception_report = combine2.rename(columns={'Account':'finance_sap_number'}).merge(LDB_hist1, on='finance_sap_number', how='outer', suffixes=('_Sap','_Mis'),indicator=True)
+
+    # exception_report.head(1)
+
+    #Ta`widh Payment/Penalty Repayment  (Facility Currency)
+    exception_report["diff_tawidh_payment_fc"] = exception_report["acc_tawidh_payment_repayment_fc"].fillna(0) - exception_report["penalty_repayment"].fillna(0)
+    
+    #Ta`widh Payment/Penalty Repayment  (MYR)
+    exception_report["diff_tawidh_payment_myr"] = exception_report["acc_tawidh_payment_repayment_myr"].fillna(0) - exception_report["penalty_repayment_myr"].fillna(0)
+    
+    #Other Charges Payment (Facility Currency)
+    exception_report["diff_others_charges_payment_fc"] = exception_report["acc_others_charges_payment_fc"].fillna(0) - exception_report["other_charges_payment"].fillna(0)
+    
+    #Other Charges Payment  (MYR)
+    exception_report["diff_others_charges_payment_myr"] = exception_report["acc_others_charges_payment_myr"].fillna(0) - exception_report["other_charges_payment_myr"].fillna(0)
+
+    #Profit Payment/Interest Repayment (Facility Currency)
+    exception_report["diff_profit_payment_fc"] = exception_report["acc_interest_repayment_fc_Sap"].fillna(0) - exception_report["acc_interest_repayment_fc_Mis"].fillna(0)
+    
+    #Profit Payment/Interest Repayment (MYR)
+    exception_report["diff_profit_payment_myr"] = exception_report["acc_interest_repayment_myr_Sap"].fillna(0) - exception_report["acc_interest_repayment_myr_Mis"].fillna(0)
+
+    exception_report.position_as_at.fillna(reportingDate,inplace=True)
+
+    exception_report1 = exception_report[['finance_sap_number',
+                                          'cif_name',
+                                          'position_as_at',
+                                          '_merge',
+                                          'acc_tawidh_payment_repayment_fc',
+                                          'penalty_repayment',
+                                          'diff_tawidh_payment_fc',
+                                          'acc_tawidh_payment_repayment_myr',
+                                          'penalty_repayment_myr',
+                                          'diff_tawidh_payment_myr',
+                                          'acc_others_charges_payment_fc',
+                                          'other_charges_payment',
+                                          'diff_others_charges_payment_fc',
+                                          'acc_others_charges_payment_myr',
+                                          'other_charges_payment_myr',
+                                          'diff_others_charges_payment_myr',
+                                          'acc_interest_repayment_fc_Sap',
+                                          'acc_interest_repayment_fc_Mis',
+                                          'diff_profit_payment_fc',
+                                          'acc_interest_repayment_myr_Sap',
+                                          'acc_interest_repayment_myr_Mis',
+                                          'diff_profit_payment_myr']]
+
+    # Extract
+    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Data_Mirror_"+str(reportingDate)[:19]+".xlsx"),engine='xlsxwriter')
+
+    combine2.to_excel(writer2, sheet_name='Result', index = False)
+
+    exception_report1.to_excel(writer2, sheet_name='Exception', index = False)
+
+    writer2.close()
+
+    # combine2.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Data_Mirror_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
 
     #combine2.to_excel("Data_Mirror_"+str(convert_time)[:19]+".xlsx",index=False)
     #df1 =  config.FOLDER_CONFIG["FTP_directory"]+documentName #"ECL 1024 - MIS v1.xlsx" #documentName
@@ -780,7 +858,7 @@ try:
 
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_PROFIT_N_OTHER_PAYMENT AS source
     ON target.finance_sap_number = source.Account
-    WHEN MATCHED THEN
+    WHEN target.position_as_at = ? AND MATCHED THEN
         UPDATE SET target.acc_tawidh_payment_repayment_fc = source.acc_tawidh_payment_repayment_fc,
                 target.acc_tawidh_payment_repayment_myr = source.acc_tawidh_payment_repayment_myr,
                 target.acc_cumulative_tawidh_payment_repayment_fc = source.acc_cumulative_tawidh_payment_repayment_fc,
@@ -789,7 +867,7 @@ try:
                 target.acc_others_charges_payment_myr = source.acc_others_charges_payment_myr,
                 target.acc_cumulative_others_charge_payment_fc = source.acc_cumulative_others_charge_payment_fc,
                 target.acc_cumulative_others_charge_payment_myr = source.acc_cumulative_others_charge_payment_myr;
-    """)
+    """, (reportingDate,))
     conn.commit() 
 
     # # incase manual

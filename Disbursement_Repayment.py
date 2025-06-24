@@ -354,6 +354,9 @@ try:
                                                                         'Cumulative_Cost_Payment_Principal_Repayment_Facility_Currency':'acc_cumulative_repayment',
                                                                         'Cumulative_Cost_Payment_Principal_Repayment_MYR':'acc_cumulative_repayment_myr'})
     
+    convert_time = str(current_time).replace(":","-")
+    appendfinal3['position_as_at'] = reportingDate
+
     df_add_Humm = pd.DataFrame([['500776A',
                         0,
                         0,
@@ -401,9 +404,103 @@ try:
     appendfinal3.loc[(appendfinal3['Account']=='500776A'),'acc_cumulative_repayment'] = 0.21*a_humm
     appendfinal3.loc[(appendfinal3['Account']=='500776A'),'acc_cumulative_repayment_myr'] = 0.21*a_humm
 
-    convert_time = str(current_time).replace(":","-")
-    appendfinal3['position_as_at'] = reportingDate
-    appendfinal3.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Disbursement_Repayment_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
+
+
+    #======================================with exception report
+
+    #appendfinal3.head(1)
+    #LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = '{reportingDate}';", conn)
+
+    # LDB_hist.position_as_at.value_counts()
+    # LDB_hist1 = LDB_hist.iloc[np.where((~LDB_hist.finance_sap_number.isna())&((LDB_hist.acc_drawdown_fc>0)|(LDB_hist.acc_repayment_fc>0)))]
+    
+    LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
+   
+    condition1 = ~LDB_hist.finance_sap_number.isna()
+    condition2 = (LDB_hist.acc_drawdown_fc > 0) | (LDB_hist.acc_repayment_fc > 0)
+
+    # LDB_hist.head(1)
+    LDB_hist1 = LDB_hist.iloc[np.where(condition1 & condition2)][['finance_sap_number',
+                                                                  'cif_name',
+                                                   'acc_drawdown_fc',
+                                                   'acc_drawdown_myr',
+                                                   'acc_repayment_fc',
+                                                   'acc_repayment_myr']]
+ 
+    # LDB_hist1 = LDB_hist[['finance_sap_number',
+    #                       'acc_drawdown_fc',
+    #                       'acc_drawdown_myr',
+    #                       'acc_repayment_fc',
+    #                       'acc_repayment_myr']]
+    
+    exception_report = appendfinal3.rename(columns={'Account':'finance_sap_number'}).merge(LDB_hist1, on='finance_sap_number', how='outer', suffixes=('_Sap','_Mis'),indicator=True)
+
+    # exception_report.head(1)
+
+    #Disbursement/Drawdown (Facility Currency)
+    exception_report["diff_drawdown_fc"] = exception_report["acc_drawdown_fc_Sap"].fillna(0) - exception_report["acc_drawdown_fc_Mis"].fillna(0)
+    
+    #Disbursement/Drawdown (MYR)
+    exception_report["diff_drawdown_myr"] = exception_report["acc_drawdown_myr_Sap"].fillna(0) - exception_report["acc_drawdown_myr_Mis"].fillna(0)
+    
+    #Cost Payment/Principal Repayment (Facility Currency)
+    exception_report["diff_cost_payment_fc"] = exception_report["acc_repayment_fc_Sap"].fillna(0) - exception_report["acc_repayment_fc_Mis"].fillna(0)
+    
+    #Cost Payment/Principal Repayment (MYR)
+    exception_report["diff_cost_payment_myr"] = exception_report["acc_repayment_myr_Sap"].fillna(0) - exception_report["acc_repayment_myr_Mis"].fillna(0)
+
+    exception_report1 = exception_report[['finance_sap_number',
+                                          'cif_name',
+                                          'position_as_at',
+                                          '_merge',
+                                          'acc_drawdown_fc_Sap',
+                                          'acc_drawdown_fc_Mis',
+                                          'diff_drawdown_fc',
+                                          'acc_drawdown_myr_Sap',
+                                          'acc_drawdown_myr_Mis',
+                                          'diff_drawdown_myr',
+                                          'acc_repayment_fc_Sap',
+                                          'acc_repayment_fc_Mis',
+                                          'diff_cost_payment_fc',
+                                          'acc_repayment_myr_Sap',
+                                          'acc_repayment_myr_Mis',
+                                          'diff_cost_payment_myr']]
+
+    # exception_report.loc[exception_report._merge=='left_only','_merge'] = 'sap_only'
+    # exception_report.loc[exception_report._merge=='right_only','_merge'] = 'mis_only'
+
+    #exception_report._merge.value_counts()
+
+
+    # cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DIS_N_REPAYMENT AS source
+    # ON target.finance_sap_number = source.Account
+    # WHEN MATCHED THEN
+    #     UPDATE SET target.position_as_at = source.position_as_at;
+    # """)
+    # conn.commit() 
+
+    #redundant
+    #target.acc_drawdown_fc = source.acc_drawdown_fc,
+    #            target.acc_drawdown_myr = source.acc_drawdown_myr,
+    #            target.acc_cumulative_drawdown = source.acc_cumulative_drawdown,
+    #            target.acc_cumulative_drawdown_myr = source.acc_cumulative_drawdown_myr,
+    #target.acc_repayment_fc = source.acc_repayment_fc,
+    #            target.acc_repayment_myr = source.acc_repayment_myr,
+    #            target.acc_cumulative_repayment = source.acc_cumulative_repayment,
+    #            target.acc_cumulative_repayment_myr = source.acc_cumulative_repayment_myr,
+
+    # Extract
+    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Disbursement_Repayment_"+str(reportingDate)[:19]+".xlsx"),engine='xlsxwriter')
+
+    appendfinal3.to_excel(writer2, sheet_name='Result', index = False)
+
+    exception_report1.to_excel(writer2, sheet_name='Exception', index = False)
+
+    writer2.close()
+
+
+
+    #appendfinal3.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Disbursement_Repayment_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
 
     #appendfinal3.to_excel("Disbursement_Repayment_"+str(convert_time)[:19]+".xlsx",index=False)
     #df1 =  config.FOLDER_CONFIG["FTP_directory"]+documentName #"ECL 1024 - MIS v1.xlsx" #documentName

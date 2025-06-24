@@ -347,7 +347,7 @@ try:
     LAF3['Total_ECL_FC_(LAF)'] = LAF3['Total_ECL_MYR_(LAF)'].fillna(0)/LAF3['exchange_rate']
     LAF3['Total_ECL_FC_(C&C)'] = LAF3['Total_ECL_MYR_(C&C)'].fillna(0)/LAF3['exchange_rate']
 
-    LAF3["position_as_at"] = reportingDate
+    
 
     LAF3.rename(columns={'Total_ECL_FC_(LAF)':'acc_credit_loss_laf_ecl',
                          'Total_ECL_MYR_(LAF)':'acc_credit_loss_laf_ecl_myr',
@@ -355,10 +355,35 @@ try:
                          'Total_ECL_MYR_(C&C)':'acc_credit_loss_cnc_ecl_myr',},inplace=True)
 
     convert_time = str(current_time).replace(":","-")
-    
-    LAF3 = LAF3[["facility_exim_account_num","acc_credit_loss_laf_ecl","acc_credit_loss_laf_ecl_myr","acc_credit_loss_cnc_ecl","acc_credit_loss_cnc_ecl_myr"]]
+    LAF3["position_as_at"] = reportingDate
+    # LAF3 = LAF3[["facility_exim_account_num","acc_credit_loss_laf_ecl","acc_credit_loss_laf_ecl_myr","acc_credit_loss_cnc_ecl","acc_credit_loss_cnc_ecl_myr"]]
 
-    LAF3.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_ECL_to_MIS_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
+    # 30952 is Impaired
+    LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ? and acc_status in (30947,30948,30949,30950);", conn, params=(reportingDate,))
+   
+    LDB_hist.acc_credit_loss_laf_ecl = LDB_hist.acc_credit_loss_laf_ecl.astype(float)
+    LDB_hist.acc_credit_loss_laf_ecl_myr = LDB_hist.acc_credit_loss_laf_ecl_myr.astype(float)
+    LDB_hist.acc_credit_loss_cnc_ecl = LDB_hist.acc_credit_loss_cnc_ecl.astype(float)
+    LDB_hist.acc_credit_loss_cnc_ecl_myr = LDB_hist.acc_credit_loss_cnc_ecl_myr.astype(float)
+
+    condition1 = ~LDB_hist.finance_sap_number.isna()
+    condition2 = (LDB_hist.acc_credit_loss_laf_ecl > 0) | (LDB_hist.acc_credit_loss_laf_ecl_myr > 0) | (LDB_hist.acc_credit_loss_cnc_ecl > 0) | (LDB_hist.acc_credit_loss_cnc_ecl_myr > 0)
+
+    # LDB_hist.head(1)
+    LDB_hist1 = LDB_hist.iloc[np.where(condition1 & condition2)][['finance_sap_number',
+                                                                  'cif_name',
+                                                   'acc_credit_loss_laf_ecl',
+                                                   'acc_credit_loss_laf_ecl_myr',
+                                                   'acc_credit_loss_cnc_ecl',
+                                                   'acc_credit_loss_cnc_ecl_myr']]
+    # appendfinal.head(1)
+    # appendfinal.shape
+
+    exception_report = LAF3.rename(columns={'Account':'finance_sap_number'}).merge(LDB_hist1, on='finance_sap_number', how='outer', suffixes=('_Sap','_Mis'),indicator=True)
+
+
+
+    # LAF3.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_ECL_to_MIS_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
 
     #df1 =  config.FOLDER_CONFIG["FTP_directory"]+documentName #"ECL 1024 - MIS v1.xlsx" #documentName
 except Exception as e:
@@ -509,12 +534,12 @@ try:
 
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_ECL_TO_MIS AS source
     ON target.facility_exim_account_num = source.facility_exim_account_num
-    WHEN MATCHED THEN
+    WHEN target.position_as_at = ? AND MATCHED THEN
         UPDATE SET target.acc_credit_loss_laf_ecl = source.acc_credit_loss_laf_ecl,
                 target.acc_credit_loss_laf_ecl_myr = source.acc_credit_loss_laf_ecl_myr,
                 target.acc_credit_loss_cnc_ecl = source.acc_credit_loss_cnc_ecl,
                 target.acc_credit_loss_cnc_ecl_myr = source.acc_credit_loss_cnc_ecl_myr;
-    """)
+    """, (reportingDate,))
     conn.commit() 
 
     # #incase manual upload

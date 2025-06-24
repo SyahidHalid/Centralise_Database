@@ -398,7 +398,72 @@ try:
     
     convert_time = str(current_time).replace(":","-")
     appendfinal['position_as_at'] = reportingDate
-    appendfinal.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Allowance_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
+
+    # 30952 is Impaired
+    LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ? and acc_status = 30952;", conn, params=(reportingDate,))
+   
+    LDB_hist.acc_credit_loss_laf_ecl = LDB_hist.acc_credit_loss_laf_ecl.astype(float)
+    LDB_hist.acc_credit_loss_laf_ecl_myr = LDB_hist.acc_credit_loss_laf_ecl_myr.astype(float)
+    LDB_hist.acc_credit_loss_cnc_ecl = LDB_hist.acc_credit_loss_cnc_ecl.astype(float)
+    LDB_hist.acc_credit_loss_cnc_ecl_myr = LDB_hist.acc_credit_loss_cnc_ecl_myr.astype(float)
+
+    condition1 = ~LDB_hist.finance_sap_number.isna()
+    condition2 = (LDB_hist.acc_credit_loss_laf_ecl > 0) | (LDB_hist.acc_credit_loss_laf_ecl_myr > 0) | (LDB_hist.acc_credit_loss_cnc_ecl > 0) | (LDB_hist.acc_credit_loss_cnc_ecl_myr > 0)
+
+    # LDB_hist.head(1)
+    LDB_hist1 = LDB_hist.iloc[np.where(condition1 & condition2)][['finance_sap_number',
+                                                                  'cif_name',
+                                                   'acc_credit_loss_laf_ecl',
+                                                   'acc_credit_loss_laf_ecl_myr',
+                                                   'acc_credit_loss_cnc_ecl',
+                                                   'acc_credit_loss_cnc_ecl_myr']]
+    # appendfinal.head(1)
+    # appendfinal.shape
+
+    exception_report = appendfinal.rename(columns={'Account':'finance_sap_number'}).merge(LDB_hist1, on='finance_sap_number', how='outer', suffixes=('_Sap','_Mis'),indicator=True)
+
+    # exception_report.head(1)
+
+    exception_report["diff_LAF_ECL_FC"] = exception_report["LAF_ECL_FC"].fillna(0) - exception_report["acc_credit_loss_laf_ecl"].fillna(0)
+
+    exception_report["diff_LAF_ECL_MYR"] = exception_report["LAF_ECL_MYR"].fillna(0) - exception_report["acc_credit_loss_laf_ecl_myr"].fillna(0)
+    
+    exception_report["diff_CnC_ECL_FC"] = exception_report["CnC_ECL_FC"].fillna(0) - exception_report["acc_credit_loss_cnc_ecl"].fillna(0)
+    
+    exception_report["diff_CnC_ECL_MYR"] = exception_report["CnC_ECL_MYR"].fillna(0) - exception_report["acc_credit_loss_cnc_ecl_myr"].fillna(0)
+
+    exception_report.position_as_at.fillna(reportingDate,inplace=True)
+    
+    exception_report1 = exception_report[['finance_sap_number',
+                                          'cif_name',
+                                          'Borrower',
+                                          'Ccy',
+                                          'Type_of_Financing',
+                                          'position_as_at',
+                                          '_merge',
+                                          'LAF_ECL_FC',
+                                          'acc_credit_loss_laf_ecl',
+                                          'diff_LAF_ECL_FC',
+                                          'LAF_ECL_MYR',
+                                          'acc_credit_loss_laf_ecl_myr',
+                                          'diff_LAF_ECL_MYR',
+                                          'CnC_ECL_FC',
+                                          'acc_credit_loss_cnc_ecl',
+                                          'diff_CnC_ECL_FC',
+                                          'CnC_ECL_MYR',
+                                          'acc_credit_loss_cnc_ecl_myr',
+                                          'diff_CnC_ECL_MYR']]
+
+    # Extract
+    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Allowance_"+str(reportingDate)[:19]+".xlsx"),engine='xlsxwriter')
+
+    appendfinal.to_excel(writer2, sheet_name='Result', index = False)
+
+    exception_report1.to_excel(writer2, sheet_name='Exception', index = False)
+
+    writer2.close()
+
+    # appendfinal.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Allowance_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
 except Exception as e:
     print(f"Process Excel Error: {e}")
     sql_query3 = """INSERT INTO [log_apps_error] (
@@ -556,12 +621,12 @@ try:
         MERGE INTO col_facilities_application_master AS target
         USING CTE AS source
         ON target.finance_sap_number = source.Account
-        WHEN MATCHED THEN
+        WHEN target.position_as_at = ? AND MATCHED THEN
             UPDATE SET target.acc_credit_loss_laf_ecl = source.LAF_ECL_FC,
                     target.acc_credit_loss_laf_ecl_myr = source.LAF_ECL_MYR,
                     target.acc_credit_loss_cnc_ecl = source.CnC_ECL_FC,
                     target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR;
-    """)
+    """, (reportingDate,))
     conn.commit() 
 
 

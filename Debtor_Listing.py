@@ -154,12 +154,14 @@ except Exception as e:
 
 #process
 try:
-    BalanceOS = "Balance"
 
-    #reportingDate = "2025-05-31"
-    #documentName = "5.DebtorsListingandCustomerBalanceReportasatMay2025.xlsx.xlsx.xlsx.xlsx"
+    #   reportingDate = "2025-05-31"
+    #   documentName = "5.DebtorsListingandCustomerBalanceReportasatMay2025.xlsx.xlsx.xlsx.xlsx"
 
     #data_folder = os.path.join(PROJECT_ROOT, "misPython_doc")
+
+    BalanceOS = "Balance"
+
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName)
     #df1 = r"D:\\mis_doc\\PythonProjects\\misPython\\misPython_doc\\Debtors Listing and Customer Balance Report as at October 2024_Adjusted.xlsx" 
 
@@ -1071,7 +1073,166 @@ try:
     convert_time = str(current_time).replace(":","-")
     appendfinal3['position_as_at'] = reportingDate
     #os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName)
-    appendfinal3.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Debtor_Listing_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
+
+    # appendfinal3.head(1)
+    # appendfinal3.shape
+    LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
+   
+    LDB_hist.facility_amount_outstanding = LDB_hist.facility_amount_outstanding.astype(float)
+    LDB_hist.acc_principal_amount_outstanding = LDB_hist.acc_principal_amount_outstanding.astype(float)
+
+    LDB_hist.acc_accrued_interest_month_fc = LDB_hist.acc_accrued_interest_month_fc.astype(float)
+    LDB_hist.acc_accrued_interest_month_myr = LDB_hist.acc_accrued_interest_month_myr.astype(float)
+
+    LDB_hist.modification_of_loss_fc = LDB_hist.modification_of_loss_fc.astype(float)
+    LDB_hist.modification_of_loss_myr = LDB_hist.modification_of_loss_myr.astype(float)
+
+    LDB_hist.acc_accurate_interest = LDB_hist.acc_accurate_interest.astype(float)
+    LDB_hist.acc_accrued_interest_myr = LDB_hist.acc_accrued_interest_myr.astype(float)
+
+    LDB_hist.acc_suspended_interest = LDB_hist.acc_suspended_interest.astype(float)
+    LDB_hist.acc_interest_suspense_myr = LDB_hist.acc_interest_suspense_myr.astype(float)
+
+    LDB_hist.acc_other_charges = LDB_hist.acc_other_charges.astype(float)
+    LDB_hist.acc_other_charges_myr = LDB_hist.acc_other_charges_myr.astype(float)
+
+    LDB_hist.acc_penalty = LDB_hist.acc_penalty.astype(float)
+    LDB_hist.acc_penalty_myr = LDB_hist.acc_penalty_myr.astype(float)
+
+    LDB_hist.acc_penalty_compensation_fc = LDB_hist.acc_penalty_compensation_fc.astype(float)
+    LDB_hist.acc_penalty_compensation_myr = LDB_hist.acc_penalty_compensation_myr.astype(float)
+
+    LDB_hist.acc_balance_outstanding_audited_fc = LDB_hist.acc_balance_outstanding_audited_fc.astype(float)
+    LDB_hist.acc_balance_outstanding_audited_myr = LDB_hist.acc_balance_outstanding_audited_myr.astype(float)
+
+    condition1 = ~LDB_hist.finance_sap_number.isna()
+    condition2 = (LDB_hist.facility_amount_outstanding > 0)|(LDB_hist.acc_accrued_interest_month_fc > 0)|(LDB_hist.modification_of_loss_fc > 0)|(LDB_hist.acc_accurate_interest > 0)|(LDB_hist.acc_suspended_interest > 0)|(LDB_hist.acc_other_charges > 0)|(LDB_hist.acc_penalty > 0)|(LDB_hist.acc_penalty_compensation_fc > 0)|(LDB_hist.acc_balance_outstanding_audited_myr > 0)
+    
+    # LDB_hist.head(1)
+    LDB_hist1 = LDB_hist.iloc[np.where(condition1 & condition2)][['finance_sap_number',
+                                                                  'cif_name',
+                                                   'facility_amount_outstanding',
+                                                   'acc_principal_amount_outstanding',
+                                                   'acc_accrued_interest_month_fc',
+                                                   'acc_accrued_interest_month_myr',
+                                                   'modification_of_loss_fc',
+                                                   'modification_of_loss_myr',
+                                                   'acc_accurate_interest',
+                                                   'acc_accrued_interest_myr',
+                                                   'acc_suspended_interest',
+                                                   'acc_interest_suspense_myr',
+                                                   'acc_other_charges',
+                                                   'acc_other_charges_myr',
+                                                   'acc_penalty',
+                                                   'acc_penalty_myr',
+                                                   'acc_penalty_compensation_fc',
+                                                   'acc_penalty_compensation_myr',
+                                                   'acc_balance_outstanding_audited_fc',
+                                                   'acc_balance_outstanding_audited_myr']]
+    # combine2.head(1)
+    # combine2.shape
+
+    exception_report = appendfinal3.rename(columns={'Account':'finance_sap_number'}).merge(LDB_hist1, on='finance_sap_number', how='outer', suffixes=('_Sap','_Mis'),indicator=True)
+
+    # exception_report.head(1)
+
+    exception_report["diff_principal_fc"] = exception_report["facility_amount_outstanding_Sap"].fillna(0) - exception_report["facility_amount_outstanding_Mis"].fillna(0)
+    exception_report["diff_principal_myr"] = exception_report["acc_principal_amount_outstanding_Sap"].fillna(0) - exception_report["acc_principal_amount_outstanding_Mis"].fillna(0)
+    
+    exception_report["diff_interest_month_fc"] = exception_report["acc_accrued_interest_month_fc_Sap"].fillna(0) - exception_report["acc_accrued_interest_month_fc_Mis"].fillna(0)
+    exception_report["diff_interest_month_myr"] = exception_report["acc_accrued_interest_month_myr_Sap"].fillna(0) - exception_report["acc_accrued_interest_month_myr_Mis"].fillna(0)
+    
+    exception_report["diff_modi_fc"] = exception_report["acc_modification_loss"].fillna(0) - exception_report["modification_of_loss_fc"].fillna(0)
+    exception_report["diff_modi_myr"] = exception_report["acc_modification_loss_myr"].fillna(0) - exception_report["modification_of_loss_myr"].fillna(0)
+    
+    exception_report["diff_cum_interest_fc"] = exception_report["acc_accurate_interest_Sap"].fillna(0) - exception_report["acc_accurate_interest_Mis"].fillna(0)
+    exception_report["diff_cum_interest_myr"] = exception_report["acc_accrued_interest_myr_Sap"].fillna(0) - exception_report["acc_accrued_interest_myr_Mis"].fillna(0)
+
+    exception_report["diff_iis_fc"] = exception_report["acc_suspended_interest_Sap"].fillna(0) - exception_report["acc_suspended_interest_Mis"].fillna(0)
+    exception_report["diff_iis_myr"] = exception_report["acc_interest_suspense_myr_Sap"].fillna(0) - exception_report["acc_interest_suspense_myr_Mis"].fillna(0)
+
+    exception_report["diff_other_charges_fc"] = exception_report["acc_other_charges_Sap"].fillna(0) - exception_report["acc_other_charges_Mis"].fillna(0)
+    exception_report["diff_other_charges_myr"] = exception_report["acc_other_charges_myr_Sap"].fillna(0) - exception_report["acc_other_charges_myr_Mis"].fillna(0)
+             
+    exception_report["diff_penalty_fc"] = exception_report["acc_penalty_Sap"].fillna(0) - exception_report["acc_penalty_Mis"].fillna(0)
+    exception_report["diff_penalty_myr"] = exception_report["acc_penalty_myr_Sap"].fillna(0) - exception_report["acc_penalty_myr_Mis"].fillna(0)
+             
+    exception_report["diff_penalty_compensation_fc"] = exception_report["acc_penalty_compensation_fc_Sap"].fillna(0) - exception_report["acc_penalty_compensation_fc_Mis"].fillna(0)
+    exception_report["diff_penalty_compensation_myr"] = exception_report["acc_penalty_compensation_myr_Sap"].fillna(0) - exception_report["acc_penalty_compensation_myr_Mis"].fillna(0)
+
+    exception_report["diff_os_fc"] = exception_report["acc_balance_outstanding_audited_fc_Sap"].fillna(0) - exception_report["acc_balance_outstanding_audited_fc_Mis"].fillna(0)
+    exception_report["diff_os_myr"] = exception_report["acc_balance_outstanding_audited_myr_Sap"].fillna(0) - exception_report["acc_balance_outstanding_audited_myr_Mis"].fillna(0)
+               
+
+    exception_report1 = exception_report[['finance_sap_number',
+                                          'cif_name',
+                                          'position_as_at',
+                                          '_merge',
+                                          'facility_amount_outstanding_Sap',
+                                          'facility_amount_outstanding_Mis',
+                                          'diff_principal_fc',
+                                          'acc_principal_amount_outstanding_Sap',
+                                          'acc_principal_amount_outstanding_Mis',
+                                          'diff_principal_myr',
+                                          'acc_accrued_interest_month_fc_Sap',
+                                          'acc_accrued_interest_month_fc_Mis',
+                                          'diff_interest_month_fc',
+                                          'acc_accrued_interest_month_myr_Sap',
+                                          'acc_accrued_interest_month_myr_Mis',
+                                          'diff_interest_month_myr',
+                                          'acc_modification_loss',
+                                          'modification_of_loss_fc',
+                                          'diff_modi_fc',
+                                          'acc_modification_loss_myr',
+                                          'modification_of_loss_myr',
+                                          'diff_modi_myr',
+                                          'acc_accurate_interest_Sap',
+                                          'acc_accurate_interest_Mis',
+                                          'diff_cum_interest_fc',
+                                          'acc_accrued_interest_myr_Sap',
+                                          'acc_accrued_interest_myr_Mis',
+                                          'diff_cum_interest_myr',
+                                          'acc_suspended_interest_Sap',
+                                          'acc_suspended_interest_Mis',
+                                          'diff_iis_fc',
+                                          'acc_interest_suspense_myr_Sap',
+                                          'acc_interest_suspense_myr_Mis',
+                                          'diff_iis_myr',
+                                          'acc_other_charges_Sap',
+                                          'acc_other_charges_Mis',
+                                          'diff_other_charges_fc',
+                                          'acc_other_charges_myr_Sap',
+                                          'acc_other_charges_myr_Mis',
+                                          'diff_other_charges_myr',
+                                          'acc_penalty_Sap',
+                                          'acc_penalty_Mis',
+                                          'diff_penalty_fc',
+                                          'acc_penalty_myr_Sap',
+                                          'acc_penalty_myr_Mis',
+                                          'diff_penalty_myr',
+                                          'acc_penalty_compensation_fc_Sap',
+                                          'acc_penalty_compensation_fc_Mis',
+                                          'diff_penalty_compensation_fc',
+                                          'acc_penalty_compensation_myr_Sap',
+                                          'acc_penalty_compensation_myr_Mis',
+                                          'diff_penalty_compensation_myr',
+                                          'acc_balance_outstanding_audited_fc_Sap',
+                                          'acc_balance_outstanding_audited_fc_Mis',
+                                          'diff_os_fc',
+                                          'acc_balance_outstanding_audited_myr_Sap',
+                                          'acc_balance_outstanding_audited_myr_Mis',
+                                          'diff_os_myr']]
+
+    # Extract
+    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Debtor_Listing_"+str(reportingDate)[:19]+".xlsx"),engine='xlsxwriter')
+
+    appendfinal3.to_excel(writer2, sheet_name='Result', index = False)
+
+    exception_report1.to_excel(writer2, sheet_name='Exception', index = False)
+
+    writer2.close()
+
+    # appendfinal3.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Debtor_Listing_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
 
     #df1 =  config.FOLDER_CONFIG["FTP_directory"]+documentName #"ECL 1024 - MIS v1.xlsx" #documentName
 except Exception as e:
@@ -1217,7 +1378,7 @@ try:
 
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DEBTOR AS source
     ON target.finance_sap_number = source.finance_sap_number
-    WHEN MATCHED THEN
+    WHEN target.position_as_at = ? AND MATCHED THEN
         UPDATE SET target.acc_accrued_interest_month_fc = source.acc_accrued_interest_month_fc,
                 target.acc_accrued_interest_month_myr = source.acc_accrued_interest_month_myr,
                 target.acc_modification_loss = source.acc_modification_loss,
@@ -1232,7 +1393,7 @@ try:
                 target.acc_penalty_myr = source.acc_penalty_myr,
                 target.acc_penalty_compensation_fc = source.acc_penalty_compensation_fc,
                 target.acc_penalty_compensation_myr = source.acc_penalty_compensation_myr;
-    """)
+    """, (reportingDate,))
     conn.commit() 
 
     #appendfinal3.iloc[np.where(appendfinal3.finance_sap_number=="500707")]
