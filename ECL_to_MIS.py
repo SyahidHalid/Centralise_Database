@@ -354,9 +354,10 @@ try:
                          'Total_ECL_FC_(C&C)':'acc_credit_loss_cnc_ecl',
                          'Total_ECL_MYR_(C&C)':'acc_credit_loss_cnc_ecl_myr',},inplace=True)
 
+    LAF3 = LAF3[["facility_exim_account_num","acc_credit_loss_laf_ecl","acc_credit_loss_laf_ecl_myr","acc_credit_loss_cnc_ecl","acc_credit_loss_cnc_ecl_myr"]]
+
     convert_time = str(current_time).replace(":","-")
     LAF3["position_as_at"] = reportingDate
-    # LAF3 = LAF3[["facility_exim_account_num","acc_credit_loss_laf_ecl","acc_credit_loss_laf_ecl_myr","acc_credit_loss_cnc_ecl","acc_credit_loss_cnc_ecl_myr"]]
 
     # 30952 is Impaired
     LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ? and acc_status in (30947,30948,30949,30950);", conn, params=(reportingDate,))
@@ -370,7 +371,7 @@ try:
     condition2 = (LDB_hist.acc_credit_loss_laf_ecl > 0) | (LDB_hist.acc_credit_loss_laf_ecl_myr > 0) | (LDB_hist.acc_credit_loss_cnc_ecl > 0) | (LDB_hist.acc_credit_loss_cnc_ecl_myr > 0)
 
     # LDB_hist.head(1)
-    LDB_hist1 = LDB_hist.iloc[np.where(condition1 & condition2)][['finance_sap_number',
+    LDB_hist1 = LDB_hist.iloc[np.where(condition1 & condition2)][['facility_exim_account_num',
                                                                   'cif_name',
                                                    'acc_credit_loss_laf_ecl',
                                                    'acc_credit_loss_laf_ecl_myr',
@@ -378,10 +379,48 @@ try:
                                                    'acc_credit_loss_cnc_ecl_myr']]
     # appendfinal.head(1)
     # appendfinal.shape
+    # LDB_hist1.facility_exim_account_num.dtypes
+    # LAF3.facility_exim_account_num.dtypes
 
-    exception_report = LAF3.rename(columns={'Account':'finance_sap_number'}).merge(LDB_hist1, on='finance_sap_number', how='outer', suffixes=('_Sap','_Mis'),indicator=True)
+    exception_report = LAF3.merge(LDB_hist1, on='facility_exim_account_num', how='outer', suffixes=('_Sap','_Mis'),indicator=True)
 
+    # exception_report.head(1)
 
+    exception_report["diff_LAF_ECL_FC"] = exception_report["acc_credit_loss_laf_ecl_Sap"].fillna(0) - exception_report["acc_credit_loss_laf_ecl_Mis"].fillna(0)
+
+    exception_report["diff_LAF_ECL_MYR"] = exception_report["acc_credit_loss_laf_ecl_myr_Sap"].fillna(0) - exception_report["acc_credit_loss_laf_ecl_myr_Mis"].fillna(0)
+    
+    exception_report["diff_CnC_ECL_FC"] = exception_report["acc_credit_loss_cnc_ecl_Sap"].fillna(0) - exception_report["acc_credit_loss_cnc_ecl_Mis"].fillna(0)
+    
+    exception_report["diff_CnC_ECL_MYR"] = exception_report["acc_credit_loss_cnc_ecl_myr_Sap"].fillna(0) - exception_report["acc_credit_loss_cnc_ecl_myr_Mis"].fillna(0)
+
+    exception_report.position_as_at.fillna(reportingDate,inplace=True)
+    
+    exception_report1 = exception_report[['facility_exim_account_num',
+                                          'cif_name',
+                                          'position_as_at',
+                                          '_merge',
+                                          'acc_credit_loss_laf_ecl_Sap',
+                                          'acc_credit_loss_laf_ecl_Mis',
+                                          'diff_LAF_ECL_FC',
+                                          'acc_credit_loss_laf_ecl_myr_Sap',
+                                          'acc_credit_loss_laf_ecl_myr_Mis',
+                                          'diff_LAF_ECL_MYR',
+                                          'acc_credit_loss_cnc_ecl_Sap',
+                                          'acc_credit_loss_cnc_ecl_Mis',
+                                          'diff_CnC_ECL_FC',
+                                          'acc_credit_loss_cnc_ecl_myr_Sap',
+                                          'acc_credit_loss_cnc_ecl_myr_Mis',
+                                          'diff_CnC_ECL_MYR']]
+
+    # Extract
+    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_ECL_to_MIS_"+str(reportingDate)[:19]+".xlsx"),engine='xlsxwriter')
+
+    LAF3.to_excel(writer2, sheet_name='Result', index = False)
+
+    exception_report1.to_excel(writer2, sheet_name='Exception', index = False)
+
+    writer2.close()
 
     # LAF3.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_ECL_to_MIS_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
 
