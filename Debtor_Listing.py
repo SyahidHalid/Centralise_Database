@@ -1163,6 +1163,7 @@ try:
     exception_report["diff_os_fc"] = exception_report["acc_balance_outstanding_audited_fc_Sap"].fillna(0) - exception_report["acc_balance_outstanding_audited_fc_Mis"].fillna(0)
     exception_report["diff_os_myr"] = exception_report["acc_balance_outstanding_audited_myr_Sap"].fillna(0) - exception_report["acc_balance_outstanding_audited_myr_Mis"].fillna(0)
                
+    exception_report.position_as_at.fillna(reportingDate,inplace=True)
 
     exception_report1 = exception_report[['finance_sap_number',
                                           'cif_name',

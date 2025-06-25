@@ -448,7 +448,9 @@ try:
     
     #Cost Payment/Principal Repayment (MYR)
     exception_report["diff_cost_payment_myr"] = exception_report["acc_repayment_myr_Sap"].fillna(0) - exception_report["acc_repayment_myr_Mis"].fillna(0)
-
+    
+    exception_report.position_as_at.fillna(reportingDate,inplace=True)
+    
     exception_report1 = exception_report[['finance_sap_number',
                                           'cif_name',
                                           'position_as_at',
