@@ -649,7 +649,7 @@ try:
         MERGE INTO col_facilities_application_master AS target
         USING CTE AS source
         ON target.finance_sap_number = source.Account
-        WHEN target.position_as_at = ? AND MATCHED THEN
+        WHEN MATCHED AND target.position_as_at = ? THEN
             UPDATE SET target.acc_credit_loss_laf_ecl = source.LAF_ECL_FC,
                     target.acc_credit_loss_laf_ecl_myr = source.LAF_ECL_MYR,
                     target.acc_credit_loss_cnc_ecl = source.CnC_ECL_FC,

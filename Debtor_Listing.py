@@ -1408,7 +1408,7 @@ try:
 
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DEBTOR AS source
     ON target.finance_sap_number = source.finance_sap_number
-    WHEN target.position_as_at = ? AND MATCHED THEN
+    WHEN MATCHED AND target.position_as_at = ? THEN
         UPDATE SET target.acc_accrued_interest_month_fc = source.acc_accrued_interest_month_fc,
                 target.acc_accrued_interest_month_myr = source.acc_accrued_interest_month_myr,
                 target.acc_modification_loss = source.acc_modification_loss,

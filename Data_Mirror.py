@@ -887,7 +887,7 @@ try:
 
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_PROFIT_N_OTHER_PAYMENT AS source
     ON target.finance_sap_number = source.Account
-    WHEN target.position_as_at = ? AND MATCHED THEN
+    WHEN MATCHED AND target.position_as_at = ? THEN
         UPDATE SET target.acc_tawidh_payment_repayment_fc = source.acc_tawidh_payment_repayment_fc,
                 target.acc_tawidh_payment_repayment_myr = source.acc_tawidh_payment_repayment_myr,
                 target.acc_cumulative_tawidh_payment_repayment_fc = source.acc_cumulative_tawidh_payment_repayment_fc,
