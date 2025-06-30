@@ -267,7 +267,7 @@ try:
                 target.acc_others_charges_payment_myr = source.acc_others_charges_payment_myr,
                 target.acc_cumulative_others_charge_payment_fc = source.acc_cumulative_others_charge_payment_fc,
                 target.acc_cumulative_others_charge_payment_myr = source.acc_cumulative_others_charge_payment_myr;
-    """, (reportingDate,))
+    """) #, (reportingDate,)
     conn.commit()
     #target.position_as_at = ? AND
 

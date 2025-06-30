@@ -254,7 +254,7 @@ try:
                 target.acc_credit_loss_laf_ecl_myr = source.acc_credit_loss_laf_ecl_myr,
                 target.acc_credit_loss_cnc_ecl = source.acc_credit_loss_cnc_ecl,
                 target.acc_credit_loss_cnc_ecl_myr = source.acc_credit_loss_cnc_ecl_myr;
-    """, (reportingDate,))
+    """) #, (reportingDate,)
     conn.commit()
     #target.position_as_at = ? AND
 

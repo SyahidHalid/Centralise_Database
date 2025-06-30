@@ -284,7 +284,7 @@ try:
                 target.acc_penalty_myr = source.acc_penalty_myr,
                 target.acc_penalty_compensation_fc = source.acc_penalty_compensation_fc,
                 target.acc_penalty_compensation_myr = source.acc_penalty_compensation_myr;
-    """, (reportingDate,))
+    """) #, (reportingDate,)
     conn.commit()
     #target.position_as_at = ? AND
 
