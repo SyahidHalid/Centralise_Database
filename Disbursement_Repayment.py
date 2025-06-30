@@ -492,7 +492,7 @@ try:
     #            target.acc_cumulative_repayment_myr = source.acc_cumulative_repayment_myr,
 
     # Extract
-    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Disbursement_Repayment_"+str(reportingDate)[:19]+".xlsx"),engine='xlsxwriter')
+    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Disbursement_Repayment_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
 
     appendfinal3.to_excel(writer2, sheet_name='Result', index = False)
 

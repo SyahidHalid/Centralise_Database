@@ -454,7 +454,7 @@ try:
                                           'diff_CnC_ECL_MYR']]
 
     # Extract
-    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Allowance_"+str(reportingDate)[:19]+".xlsx"),engine='xlsxwriter')
+    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Allowance_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
 
     appendfinal.to_excel(writer2, sheet_name='Result', index = False)
 

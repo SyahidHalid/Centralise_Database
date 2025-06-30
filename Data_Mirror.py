@@ -698,7 +698,7 @@ try:
                                           'diff_profit_payment_myr']]
 
     # Extract
-    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Data_Mirror_"+str(reportingDate)[:19]+".xlsx"),engine='xlsxwriter')
+    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Data_Mirror_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
 
     combine2.to_excel(writer2, sheet_name='Result', index = False)
 
