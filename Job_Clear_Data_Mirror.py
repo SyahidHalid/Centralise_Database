@@ -1,4 +1,4 @@
-# python ECL_to_MIS.py 9 "ECL S1 S2 May-2025 working (AIN2).xlsx" "ECL to MIS" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
+# python Job_Clear_Data_Mirror.py 9 "DataMirrorMay2025.xlsx.xlsx.xlsx" "Job Clear Data Mirror" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
 
 
 # Library & DB

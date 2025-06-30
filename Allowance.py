@@ -1,6 +1,6 @@
 # python Allowance.py 13,"Allowance_1024_Adjusted.xlsx","Allowance","Pending Processing","0","syahidhalid@exim.com.my","2024-03-29"
 # python Allowance.py 13 "Allowance_1024_Adjusted.xlsx" "Allowance" "Pending Processing" "0" "syahidhalid@exim.com.my" "2024-03-29"
-# python Allowance.py 13 "Allowance_0225_Adjusted.xlsx" "Allowance" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-02-28"
+# python Allowance.py 13 "Allowance_0525v2adjusted.xlsx.xlsx" "Allowance" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
 
 # position_as_at
 # aftd_id = DocumentId

@@ -1,5 +1,5 @@
-# python ECL_to_MIS.py 9 "ECL S1 S2 May-2025 working (AIN2).xlsx" "ECL to MIS" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
-
+# python Job_Clear_ECL_to_MIS.py 9 "ECLS1S2May-2025working10.6.258.07pm.xlsx.xlsx" "Job Clear ECL to MIS" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
+# documentId = 1
 
 # Library & DB
 import os

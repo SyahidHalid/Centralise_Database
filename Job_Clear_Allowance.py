@@ -1,4 +1,4 @@
-# python ECL_to_MIS.py 9 "ECL S1 S2 May-2025 working (AIN2).xlsx" "Allowance" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
+# python Job_Clear_Allowance.py 9 "Allowance_0525v2adjusted.xlsx.xlsx" "Job Clear Allowance" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
 
 
 # Library & DB

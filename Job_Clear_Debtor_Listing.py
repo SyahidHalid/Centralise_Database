@@ -1,4 +1,4 @@
-# python ECL_to_MIS.py 9 "ECL S1 S2 May-2025 working (AIN2).xlsx" "ECL to MIS" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
+# python Job_Clear_Debtor_Listing.py 9 "5.DebtorsListingandCustomerBalanceReportasatMay2025.xlsx.xlsx.xlsx.xlsx" "Job CLear Debtor Listing" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
 
 
 # Library & DB

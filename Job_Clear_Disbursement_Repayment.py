@@ -1,5 +1,12 @@
-# python ECL_to_MIS.py 9 "ECL S1 S2 May-2025 working (AIN2).xlsx" "ECL to MIS" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
+# python Job_Clear_Disbursement_Repayment.py 9 "Disbursement&RepaymentMay2025.xlsx.xlsx.xlsx.xlsx" "Job Clear Disbursement Repayment" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
 
+# documentId = 100
+# documentName = "Disbursement&RepaymentMay2025.xlsx.xlsx.xlsx.xlsx"
+# jobName = "Job Clear Disbursement Repayment"
+# statusName = "Pending Processing"
+# uploadedById = "0"
+# uploadedByEmail = "syahidhalid@exim.com.my"
+# reportingDate = "2025-05-31"
 
 # Library & DB
 import os
@@ -103,18 +110,18 @@ try:
                           'acc_repayment_fc',
                           'acc_repayment_myr',
                           'acc_cumulative_repayment',
-                          'acc_cumulative_repayment_myr']]
+                          'acc_cumulative_repayment_myr']]#.fillna(0)
 
 
-    LDB_prev1['acc_cumulative_drawdown'] = LDB_prev1['acc_cumulative_drawdown'] - LDB_prev1['acc_drawdown_fc']
-    LDB_prev1['acc_cumulative_drawdown_myr'] = LDB_prev1['acc_cumulative_drawdown_myr'] - LDB_prev1['acc_drawdown_myr']
-    LDB_prev1['acc_cumulative_repayment'] = LDB_prev1['acc_cumulative_repayment'] - LDB_prev1['acc_repayment_fc']
-    LDB_prev1['acc_cumulative_repayment_myr'] = LDB_prev1['acc_cumulative_repayment_myr'] - LDB_prev1['acc_repayment_myr']
+    LDB_prev1['acc_cumulative_drawdown'] = LDB_prev1['acc_cumulative_drawdown'].fillna(0) - LDB_prev1['acc_drawdown_fc'].fillna(0)
+    LDB_prev1['acc_cumulative_drawdown_myr'] = LDB_prev1['acc_cumulative_drawdown_myr'].fillna(0) - LDB_prev1['acc_drawdown_myr'].fillna(0)
+    LDB_prev1['acc_cumulative_repayment'] = LDB_prev1['acc_cumulative_repayment'].fillna(0) - LDB_prev1['acc_repayment_fc'].fillna(0)
+    LDB_prev1['acc_cumulative_repayment_myr'] = LDB_prev1['acc_cumulative_repayment_myr'].fillna(0) - LDB_prev1['acc_repayment_myr'].fillna(0)
 
-    LDB_prev1['acc_drawdown_fc'] = 0
-    LDB_prev1['acc_drawdown_myr'] = 0
-    LDB_prev1['acc_repayment_fc'] = 0
-    LDB_prev1['acc_repayment_myr'] = 0
+    LDB_prev1['acc_drawdown_fc'] = 0.00
+    LDB_prev1['acc_drawdown_myr'] = 0.00
+    LDB_prev1['acc_repayment_fc'] = 0.00
+    LDB_prev1['acc_repayment_myr'] = 0.00
 
 except Exception as e:
     print(f"Upload Excel Error: {e}")
@@ -230,6 +237,15 @@ try:
     #processed_status_id PY005
 
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # LDB_prev1.facility_exim_account_num = LDB_prev1.facility_exim_account_num.str.replace("",0)
+    # LDB_prev1.acc_drawdown_fc = LDB_prev1.acc_drawdown_fc.str.replace("",0)
+    # LDB_prev1.acc_drawdown_myr = LDB_prev1.acc_drawdown_myr.str.replace("",0)
+    # LDB_prev1.acc_cumulative_drawdown = LDB_prev1.acc_cumulative_drawdown.str.replace("",0)
+    # LDB_prev1.acc_cumulative_drawdown_myr = LDB_prev1.acc_cumulative_drawdown_myr.str.replace("",0)
+    # LDB_prev1.acc_repayment_fc = LDB_prev1.acc_repayment_fc.str.replace("",0)
+    # LDB_prev1.acc_repayment_myr = LDB_prev1.acc_repayment_myr.str.replace("",0)
+    # LDB_prev1.acc_cumulative_repayment = LDB_prev1.acc_cumulative_repayment.str.replace("",0)
+    # LDB_prev1.acc_cumulative_repayment_myr = LDB_prev1.acc_cumulative_repayment_myr.str.replace("",0)
 
     column_types = []
     for col in LDB_prev1.columns:
@@ -248,6 +264,7 @@ try:
     create_table_query = "CREATE TABLE A_DISBURSEMENT_REPAYMENT (" + ', '.join(column_types) + ")"
     # Execute the query
     cursor.execute(create_table_query)
+
 
     for row in LDB_prev1.iterrows():
         sql = "INSERT INTO A_DISBURSEMENT_REPAYMENT({}) VALUES ({})".format(','.join(LDB_prev1.columns), ','.join(['?']*len(LDB_prev1.columns)))
