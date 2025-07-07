@@ -145,8 +145,8 @@ except Exception as e:
 #process
 try:
     #    #E:\PythonProjects\misPython\misPython_doc
-    # documentName = "Disbursement&RepaymentMay2025.xlsx.xlsx.xlsx.xlsx"
-    # reportingDate = "2025-05-31"
+    # documentName = "DisbursementRepaymentJune2025.xlsx.xlsx"
+    # reportingDate = "2025-06-30"
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
 
     D1 = "Disbursement Islamic"
@@ -649,7 +649,8 @@ try:
     conn.commit() 
 
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+    appendfinal3.position_as_at.fillna(reportingDate,inplace=True)
+    
     # Assuming 'combine2' is a DataFrame
     column_types = []
     for col in appendfinal3.columns:
@@ -673,7 +674,16 @@ try:
         sql = "INSERT INTO A_DIS_N_REPAYMENT({}) VALUES ({})".format(','.join(appendfinal3.columns), ','.join(['?']*len(appendfinal3.columns)))
         cursor.execute(sql, tuple(row[1]))
     conn.commit()
-
+   
+    cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DIS_N_REPAYMENT AS source
+    ON target.finance_sap_number = source.Account
+    WHEN MATCHED AND target.position_as_at = ? THEN
+        UPDATE SET target.acc_drawdown_myr = source.acc_drawdown_myr,
+                target.acc_cumulative_drawdown_myr = source.acc_cumulative_drawdown_myr,
+                target.acc_repayment_myr = source.acc_repayment_myr,
+                target.acc_cumulative_repayment_myr = source.acc_cumulative_repayment_myr;
+    """, (reportingDate,))
+    conn.commit() 
     # cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DIS_N_REPAYMENT AS source
     # ON target.finance_sap_number = source.Account
     # WHEN MATCHED THEN

@@ -289,6 +289,16 @@ try:
     # """, (reportingDate,))
     # conn.commit()
     #target.position_as_at = ? AND
+    
+    cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DIS_N_REPAYMENT AS source
+    ON target.finance_sap_number = source.Account
+    WHEN MATCHED AND target.position_as_at = ? THEN
+        UPDATE SET target.acc_drawdown_myr = source.acc_drawdown_myr,
+                target.acc_cumulative_drawdown_myr = source.acc_cumulative_drawdown_myr,
+                target.acc_repayment_myr = source.acc_repayment_myr,
+                target.acc_cumulative_repayment_myr = source.acc_cumulative_repayment_myr;
+    """, (reportingDate,))
+    conn.commit() 
 
     cursor.execute("drop table A_DISBURSEMENT_REPAYMENT")
     conn.commit() 
