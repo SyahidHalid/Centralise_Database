@@ -7,7 +7,7 @@
 
 # position_as_at
 
-#documentId = 9
+# documentId = 9
 #tmbh update result table
 
 #try:
@@ -154,8 +154,9 @@ try:
     #documentName = "a"
     #uploadedByEmail = "a"
     
-    # documentName = "ECLS1S2May-2025working10.6.258.07pm.xlsx.xlsx"
-    # reportingDate = "2025-05-31"
+    # documentName = "ECLS1S2Jun-2025workingv2.xlsx (new) .xlsx"
+    # documentName = "ECLS1S2Jun-2025workingv2.xlsx (old)  .xlsx"
+    # reportingDate = "2025-06-30"
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
     
@@ -169,6 +170,9 @@ try:
 
     LAF1 = LAF.iloc[np.where(~LAF.facility_exim_account_num.isna())]
 
+    LAF1.facility_exim_account_num = LAF1.facility_exim_account_num.astype(str)    
+    LAF1.facility_exim_account_num = LAF1.facility_exim_account_num.str.strip()
+    LAF1.facility_exim_account_num = LAF1.facility_exim_account_num.str.replace('-','')
     # LAF1.shape
 except Exception as e:
     print(f"Upload Excel Error: {e}")
@@ -370,17 +374,29 @@ try:
     condition1 = ~LDB_hist.finance_sap_number.isna()
     condition2 = (LDB_hist.acc_credit_loss_laf_ecl > 0) | (LDB_hist.acc_credit_loss_laf_ecl_myr > 0) | (LDB_hist.acc_credit_loss_cnc_ecl > 0) | (LDB_hist.acc_credit_loss_cnc_ecl_myr > 0)
 
+    LDB_hist.facility_exim_account_num = LDB_hist.facility_exim_account_num.astype(str)    
+    LDB_hist.facility_exim_account_num = LDB_hist.facility_exim_account_num.str.strip()
+    LDB_hist.facility_exim_account_num = LDB_hist.facility_exim_account_num.str.replace('-','')
+
     # LDB_hist.head(1)
-    LDB_hist1 = LDB_hist.iloc[np.where(condition1 & condition2)][['facility_exim_account_num',
+    LDB_hist1 = LDB_hist[['facility_exim_account_num',
                                                                   'cif_name',
                                                    'acc_credit_loss_laf_ecl',
                                                    'acc_credit_loss_laf_ecl_myr',
                                                    'acc_credit_loss_cnc_ecl',
-                                                   'acc_credit_loss_cnc_ecl_myr']]
+                                                   'acc_credit_loss_cnc_ecl_myr']] #.iloc[np.where(condition1 & condition2)]
     # appendfinal.head(1)
     # appendfinal.shape
     # LDB_hist1.facility_exim_account_num.dtypes
     # LAF3.facility_exim_account_num.dtypes
+    # LDB_hist1.iloc[np.where(LDB_hist1.facility_exim_account_num=='')]
+
+    # LAF1 #330801137107039000	AEMULUS
+
+    # LDB_hist1.iloc[np.where(LDB_hist1.facility_exim_account_num=="330801137107020901")]
+    # LAF1.iloc[np.where(LAF1.facility_exim_account_num=='330801137107020901')]
+    # exception_report.iloc[np.where(exception_report.facility_exim_account_num=='330801137107020901')]
+    # exception_report._merge.value_counts()
 
     exception_report = LAF3.merge(LDB_hist1, on='facility_exim_account_num', how='outer', suffixes=('_Sap','_Mis'),indicator=True)
 
@@ -421,6 +437,7 @@ try:
     exception_report1.to_excel(writer2, sheet_name='Exception', index = False)
 
     writer2.close()
+
 
     # LAF3.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_ECL_to_MIS_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
 

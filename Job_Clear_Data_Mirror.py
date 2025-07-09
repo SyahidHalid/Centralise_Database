@@ -93,7 +93,7 @@ except Exception as e:
 #   process
 try:
     # documentName = "ECLS1S2May-2025working10.6.258.07pm.xlsx.xlsx"
-    # reportingDate = "2025-05-31"
+    # reportingDate = "2025-06-30"
 
     LDB_prev1 = LDB_prev[['facility_exim_account_num',
                           'acc_tawidh_payment_repayment_fc',

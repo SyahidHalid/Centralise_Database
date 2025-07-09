@@ -100,7 +100,7 @@ except Exception as e:
 #   process
 try:
     # documentName = "ECLS1S2May-2025working10.6.258.07pm.xlsx.xlsx"
-    # reportingDate = "2025-05-31"
+    # reportingDate = "2025-06-30"
 
     LDB_prev1 = LDB_prev[['facility_exim_account_num',
                           'acc_drawdown_fc',
@@ -290,8 +290,8 @@ try:
     # conn.commit()
     #target.position_as_at = ? AND
     
-    cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DIS_N_REPAYMENT AS source
-    ON target.finance_sap_number = source.Account
+    cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DISBURSEMENT_REPAYMENT AS source
+    ON target.facility_exim_account_num = source.facility_exim_account_num
     WHEN MATCHED AND target.position_as_at = ? THEN
         UPDATE SET target.acc_drawdown_myr = source.acc_drawdown_myr,
                 target.acc_cumulative_drawdown_myr = source.acc_cumulative_drawdown_myr,

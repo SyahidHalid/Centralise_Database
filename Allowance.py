@@ -159,11 +159,11 @@ try:
     #   Excel File Name
 
     #E:mis_doc\\PythonProjects\\misPython\\misPython_doc
-    #df1 = documentName #"Allowance_1024_Adjusted.xlsx"
+    #df1 = documentName #"Allowance_0625(MIS).xlsx"
     
     #import config
-    #documentName = "Allowance_0525v2adjusted.xlsx.xlsx"
-    #reportingDate = "2025-05-31"
+    #documentName = "Allowance_0625(MIS).xlsx.xlsx"
+    #reportingDate = "2025-06-30"
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
     #df1 = r"D:\\mis_doc\\PythonProjects\\misPython\\misPython_doc\\Allowance_1024_Adjusted.xlsx" #"Data Mirror October 2024.xlsx"
@@ -411,12 +411,12 @@ try:
     condition2 = (LDB_hist.acc_credit_loss_laf_ecl > 0) | (LDB_hist.acc_credit_loss_laf_ecl_myr > 0) | (LDB_hist.acc_credit_loss_cnc_ecl > 0) | (LDB_hist.acc_credit_loss_cnc_ecl_myr > 0)
 
     # LDB_hist.head(1)
-    LDB_hist1 = LDB_hist.iloc[np.where(condition1 & condition2)][['finance_sap_number',
+    LDB_hist1 = LDB_hist[['finance_sap_number',
                                                                   'cif_name',
                                                    'acc_credit_loss_laf_ecl',
                                                    'acc_credit_loss_laf_ecl_myr',
                                                    'acc_credit_loss_cnc_ecl',
-                                                   'acc_credit_loss_cnc_ecl_myr']]
+                                                   'acc_credit_loss_cnc_ecl_myr']] #.iloc[np.where(condition1 & condition2)]
     # appendfinal.head(1)
     # appendfinal.shape
 
