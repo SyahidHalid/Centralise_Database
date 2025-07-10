@@ -400,7 +400,7 @@ try:
     appendfinal['position_as_at'] = reportingDate
 
     # 30952 is Impaired
-    LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ? and acc_status = 30952;", conn, params=(reportingDate,))
+    LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ? and acc_status in (30952,30953);", conn, params=(reportingDate,))
    
     LDB_hist.acc_credit_loss_laf_ecl = LDB_hist.acc_credit_loss_laf_ecl.astype(float)
     LDB_hist.acc_credit_loss_laf_ecl_myr = LDB_hist.acc_credit_loss_laf_ecl_myr.astype(float)

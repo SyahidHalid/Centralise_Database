@@ -639,14 +639,14 @@ try:
     condition2 = (LDB_hist.penalty_repayment > 0) | (LDB_hist.other_charges_payment > 0) | (LDB_hist.acc_interest_repayment_fc > 0)
 
     # LDB_hist.head(1)
-    LDB_hist1 = LDB_hist.iloc[np.where(condition1 & condition2)][['finance_sap_number',
+    LDB_hist1 = LDB_hist[['finance_sap_number',
                                                                   'cif_name',
                                                    'penalty_repayment',
                                                    'penalty_repayment_myr',
                                                    'other_charges_payment',
                                                    'other_charges_payment_myr',
                                                    'acc_interest_repayment_fc',
-                                                   'acc_interest_repayment_myr']]
+                                                   'acc_interest_repayment_myr']] #.iloc[np.where(condition1 & condition2)]
     # combine2.head(1)
     # combine2.shape
 

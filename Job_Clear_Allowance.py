@@ -95,7 +95,7 @@ try:
     # documentName = "ECLS1S2May-2025working10.6.258.07pm.xlsx.xlsx"
     # reportingDate = "2025-06-30"
 
-    LDB_prev1 = LDB_prev.iloc[np.where((LDB_prev.acc_status.isin(['30952'])))][['facility_exim_account_num',
+    LDB_prev1 = LDB_prev.iloc[np.where(~(LDB_prev.acc_status.isin(['30947','30948','30949','30950'])))][['facility_exim_account_num',
                           'acc_credit_loss_laf_ecl',
                           'acc_credit_loss_laf_ecl_myr',
                           'acc_credit_loss_cnc_ecl',

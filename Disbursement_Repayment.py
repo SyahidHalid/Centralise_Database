@@ -420,12 +420,12 @@ try:
     condition2 = (LDB_hist.acc_drawdown_fc > 0) | (LDB_hist.acc_repayment_fc > 0)
 
     # LDB_hist.head(1)
-    LDB_hist1 = LDB_hist.iloc[np.where(condition1 & condition2)][['finance_sap_number',
+    LDB_hist1 = LDB_hist[['finance_sap_number',
                                                                   'cif_name',
                                                    'acc_drawdown_fc',
                                                    'acc_drawdown_myr',
                                                    'acc_repayment_fc',
-                                                   'acc_repayment_myr']]
+                                                   'acc_repayment_myr']] #.iloc[np.where(condition1 & condition2)]
  
     # LDB_hist1 = LDB_hist[['finance_sap_number',
     #                       'acc_drawdown_fc',

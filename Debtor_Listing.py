@@ -1109,7 +1109,7 @@ try:
     condition2 = (LDB_hist.facility_amount_outstanding > 0)|(LDB_hist.acc_accrued_interest_month_fc > 0)|(LDB_hist.modification_of_loss_fc > 0)|(LDB_hist.acc_accurate_interest > 0)|(LDB_hist.acc_suspended_interest > 0)|(LDB_hist.acc_other_charges > 0)|(LDB_hist.acc_penalty > 0)|(LDB_hist.acc_penalty_compensation_fc > 0)|(LDB_hist.acc_balance_outstanding_audited_myr > 0)
     
     # LDB_hist.head(1)
-    LDB_hist1 = LDB_hist.iloc[np.where(condition1 & condition2)][['finance_sap_number',
+    LDB_hist1 = LDB_hist[['finance_sap_number',
                                                                   'cif_name',
                                                    'facility_amount_outstanding',
                                                    'acc_principal_amount_outstanding',
@@ -1128,7 +1128,7 @@ try:
                                                    'acc_penalty_compensation_fc',
                                                    'acc_penalty_compensation_myr',
                                                    'acc_balance_outstanding_audited_fc',
-                                                   'acc_balance_outstanding_audited_myr']]
+                                                   'acc_balance_outstanding_audited_myr']]#.iloc[np.where(condition1 & condition2)]
     # combine2.head(1)
     # combine2.shape
 
