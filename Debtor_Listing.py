@@ -1076,16 +1076,21 @@ try:
 
     # appendfinal3.head(1)
     # appendfinal3.shape
-    LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
+ 
+    LDB_name = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
    
+    LDB_hist_before = pd.read_sql_query("SELECT * FROM col_facilities_application_master where position_as_at = ?;", conn, params=(reportingDate,))
+   
+    LDB_hist = LDB_hist_before.merge(LDB_name[['finance_sap_number','cif_name']], on='finance_sap_number', how='left')
+      
     LDB_hist.facility_amount_outstanding = LDB_hist.facility_amount_outstanding.astype(float)
     LDB_hist.acc_principal_amount_outstanding = LDB_hist.acc_principal_amount_outstanding.astype(float)
 
     LDB_hist.acc_accrued_interest_month_fc = LDB_hist.acc_accrued_interest_month_fc.astype(float)
     LDB_hist.acc_accrued_interest_month_myr = LDB_hist.acc_accrued_interest_month_myr.astype(float)
 
-    LDB_hist.modification_of_loss_fc = LDB_hist.modification_of_loss_fc.astype(float)
-    LDB_hist.modification_of_loss_myr = LDB_hist.modification_of_loss_myr.astype(float)
+    LDB_hist.acc_modification_loss = LDB_hist.acc_modification_loss.astype(float)
+    LDB_hist.acc_modification_loss_myr = LDB_hist.acc_modification_loss_myr.astype(float)
 
     LDB_hist.acc_accurate_interest = LDB_hist.acc_accurate_interest.astype(float)
     LDB_hist.acc_accrued_interest_myr = LDB_hist.acc_accrued_interest_myr.astype(float)
@@ -1106,7 +1111,7 @@ try:
     LDB_hist.acc_balance_outstanding_audited_myr = LDB_hist.acc_balance_outstanding_audited_myr.astype(float)
 
     condition1 = ~LDB_hist.finance_sap_number.isna()
-    condition2 = (LDB_hist.facility_amount_outstanding > 0)|(LDB_hist.acc_accrued_interest_month_fc > 0)|(LDB_hist.modification_of_loss_fc > 0)|(LDB_hist.acc_accurate_interest > 0)|(LDB_hist.acc_suspended_interest > 0)|(LDB_hist.acc_other_charges > 0)|(LDB_hist.acc_penalty > 0)|(LDB_hist.acc_penalty_compensation_fc > 0)|(LDB_hist.acc_balance_outstanding_audited_myr > 0)
+    #condition2 = (LDB_hist.facility_amount_outstanding > 0)|(LDB_hist.acc_accrued_interest_month_fc > 0)|(LDB_hist.modification_of_loss_fc > 0)|(LDB_hist.acc_accurate_interest > 0)|(LDB_hist.acc_suspended_interest > 0)|(LDB_hist.acc_other_charges > 0)|(LDB_hist.acc_penalty > 0)|(LDB_hist.acc_penalty_compensation_fc > 0)|(LDB_hist.acc_balance_outstanding_audited_myr > 0)
     
     # LDB_hist.head(1)
     LDB_hist1 = LDB_hist[['finance_sap_number',
@@ -1115,8 +1120,8 @@ try:
                                                    'acc_principal_amount_outstanding',
                                                    'acc_accrued_interest_month_fc',
                                                    'acc_accrued_interest_month_myr',
-                                                   'modification_of_loss_fc',
-                                                   'modification_of_loss_myr',
+                                                   'acc_modification_loss',
+                                                   'acc_modification_loss_myr',
                                                    'acc_accurate_interest',
                                                    'acc_accrued_interest_myr',
                                                    'acc_suspended_interest',
@@ -1142,8 +1147,8 @@ try:
     exception_report["diff_interest_month_fc"] = exception_report["acc_accrued_interest_month_fc_Sap"].fillna(0) - exception_report["acc_accrued_interest_month_fc_Mis"].fillna(0)
     exception_report["diff_interest_month_myr"] = exception_report["acc_accrued_interest_month_myr_Sap"].fillna(0) - exception_report["acc_accrued_interest_month_myr_Mis"].fillna(0)
     
-    exception_report["diff_modi_fc"] = exception_report["acc_modification_loss"].fillna(0) - exception_report["modification_of_loss_fc"].fillna(0)
-    exception_report["diff_modi_myr"] = exception_report["acc_modification_loss_myr"].fillna(0) - exception_report["modification_of_loss_myr"].fillna(0)
+    exception_report["diff_modi_fc"] = exception_report["acc_modification_loss_Sap"].fillna(0) - exception_report["acc_modification_loss_Mis"].fillna(0)
+    exception_report["diff_modi_myr"] = exception_report["acc_modification_loss_myr_Sap"].fillna(0) - exception_report["acc_modification_loss_myr_Mis"].fillna(0)
     
     exception_report["diff_cum_interest_fc"] = exception_report["acc_accurate_interest_Sap"].fillna(0) - exception_report["acc_accurate_interest_Mis"].fillna(0)
     exception_report["diff_cum_interest_myr"] = exception_report["acc_accrued_interest_myr_Sap"].fillna(0) - exception_report["acc_accrued_interest_myr_Mis"].fillna(0)
@@ -1181,11 +1186,11 @@ try:
                                           'acc_accrued_interest_month_myr_Sap',
                                           'acc_accrued_interest_month_myr_Mis',
                                           'diff_interest_month_myr',
-                                          'acc_modification_loss',
-                                          'modification_of_loss_fc',
+                                          'acc_modification_loss_Sap',
+                                          'acc_modification_loss_Mis',
                                           'diff_modi_fc',
-                                          'acc_modification_loss_myr',
-                                          'modification_of_loss_myr',
+                                          'acc_modification_loss_myr_Sap',
+                                          'acc_modification_loss_myr_Mis',
                                           'diff_modi_myr',
                                           'acc_accurate_interest_Sap',
                                           'acc_accurate_interest_Mis',

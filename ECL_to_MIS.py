@@ -155,7 +155,7 @@ try:
     #uploadedByEmail = "a"
     
     # documentName = "ECLS1S2Jun-2025workingv2.xlsx (new) .xlsx"
-    # documentName = "ECLS1S2Jun-2025workingv2.xlsx (old)  .xlsx"
+    # documentName = "ECL S1 S2 Jun-2025 working v5 (2).xlsx"
     # reportingDate = "2025-06-30"
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
@@ -364,7 +364,12 @@ try:
     LAF3["position_as_at"] = reportingDate
 
     # 30952 is Impaired
-    LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ? and acc_status in (30947,30948,30949,30950);", conn, params=(reportingDate,))
+    #LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ? and acc_status in (30947,30948,30949,30950);", conn, params=(reportingDate,))
+    LDB_name = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
+   
+    LDB_hist_before = pd.read_sql_query("SELECT * FROM col_facilities_application_master where position_as_at = ? and acc_status in (30947,30948,30949,30950);", conn, params=(reportingDate,))
+   
+    LDB_hist = LDB_hist_before.merge(LDB_name[['finance_sap_number','cif_name']], on='finance_sap_number', how='left')
    
     LDB_hist.acc_credit_loss_laf_ecl = LDB_hist.acc_credit_loss_laf_ecl.astype(float)
     LDB_hist.acc_credit_loss_laf_ecl_myr = LDB_hist.acc_credit_loss_laf_ecl_myr.astype(float)
@@ -375,8 +380,9 @@ try:
     condition2 = (LDB_hist.acc_credit_loss_laf_ecl > 0) | (LDB_hist.acc_credit_loss_laf_ecl_myr > 0) | (LDB_hist.acc_credit_loss_cnc_ecl > 0) | (LDB_hist.acc_credit_loss_cnc_ecl_myr > 0)
 
     LDB_hist.facility_exim_account_num = LDB_hist.facility_exim_account_num.astype(str)    
-    LDB_hist.facility_exim_account_num = LDB_hist.facility_exim_account_num.str.strip()
+    #LDB_hist.facility_exim_account_num = LDB_hist.facility_exim_account_num.str.strip()
     LDB_hist.facility_exim_account_num = LDB_hist.facility_exim_account_num.str.replace('-','')
+    LDB_hist.facility_exim_account_num = LDB_hist.facility_exim_account_num.str.replace(' ','')
 
     # LDB_hist.head(1)
     LDB_hist1 = LDB_hist[['facility_exim_account_num',

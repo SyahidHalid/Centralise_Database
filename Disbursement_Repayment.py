@@ -404,6 +404,67 @@ try:
     appendfinal3.loc[(appendfinal3['Account']=='500776A'),'acc_cumulative_repayment'] = 0.21*a_humm
     appendfinal3.loc[(appendfinal3['Account']=='500776A'),'acc_cumulative_repayment_myr'] = 0.21*a_humm
 
+    LDB_cum = pd.read_sql_query("SELECT * FROM dbase_account_hist;", conn)
+    
+    reportingYear = int(reportingDate[:4])
+
+    # Convert to datetime
+    LDB_cum['position_as_at'] = pd.to_datetime(LDB_cum['position_as_at'], errors='coerce')
+
+    # Filter by year
+    LDB_cum_filtered = LDB_cum.loc[(LDB_cum['position_as_at'].dt.year == reportingYear)&(LDB_cum['position_as_at']<reportingDate)]
+
+    LDB_cum_filtered['acc_drawdown_fc'] = LDB_cum_filtered['acc_drawdown_fc'].astype(float)
+    LDB_cum_filtered['acc_drawdown_myr'] = LDB_cum_filtered['acc_drawdown_myr'].astype(float)
+    LDB_cum_filtered['acc_repayment_fc'] = LDB_cum_filtered['acc_repayment_fc'].astype(float)
+    LDB_cum_filtered['acc_repayment_myr'] = LDB_cum_filtered['acc_repayment_myr'].astype(float)
+
+    LDB_cum_group = LDB_cum_filtered.iloc[np.where(~(LDB_cum_filtered.finance_sap_number.isna())&
+                                                   (LDB_cum_filtered.finance_sap_number!='')&
+                                                   (LDB_cum_filtered.finance_sap_number!='NEW ACCOUNT'))].groupby(['finance_sap_number',
+                                                                                                                   'cif_name'])[['acc_drawdown_fc',
+                                                                      'acc_drawdown_myr',
+                                                                      'acc_repayment_fc',
+                                                                      'acc_repayment_myr']].sum().reset_index()
+
+    LDB_cum_group.rename(columns={'acc_drawdown_fc':'acc_cumulative_drawdown',
+                                  'acc_drawdown_myr':'acc_cumulative_drawdown_myr',
+                                  'acc_repayment_fc':'acc_cumulative_repayment',
+                                  'acc_repayment_myr':'acc_cumulative_repayment_myr'},inplace=True)
+    
+    appendfinal4 = LDB_cum_group.merge(appendfinal3[['Account',
+                                             'acc_drawdown_fc',
+                                             'acc_drawdown_myr',
+                                             'acc_repayment_fc',
+                                             'acc_repayment_myr',
+                                             'position_as_at']].rename(columns={'Account':'finance_sap_number'}),
+                                             on='finance_sap_number',
+                                             how='outer',
+                                             indicator=True)
+    
+    appendfinal4['acc_cumulative_drawdown'] = appendfinal4['acc_drawdown_fc'].fillna(0) + appendfinal4['acc_cumulative_drawdown'].fillna(0)
+    appendfinal4['acc_cumulative_drawdown_myr'] = appendfinal4['acc_drawdown_myr'].fillna(0) + appendfinal4['acc_cumulative_drawdown_myr'].fillna(0)
+    appendfinal4['acc_cumulative_repayment'] = appendfinal4['acc_repayment_fc'].fillna(0) + appendfinal4['acc_cumulative_repayment'].fillna(0)
+    appendfinal4['acc_cumulative_repayment_myr'] = appendfinal4['acc_repayment_myr'].fillna(0) + appendfinal4['acc_cumulative_repayment_myr'].fillna(0)
+
+    appendfinal4 = appendfinal4[['finance_sap_number','cif_name','_merge',
+                         'acc_drawdown_fc','acc_drawdown_myr','acc_cumulative_drawdown','acc_cumulative_drawdown_myr',
+                         'acc_repayment_fc','acc_repayment_myr','acc_cumulative_repayment','acc_cumulative_repayment_myr',
+                       'position_as_at']]#.fillna(0)#.sort_values(by='_merge',ascending=True)
+
+    appendfinal4['position_as_at'] = reportingDate
+    appendfinal4['cif_name'].fillna('Only Exist in FAD',inplace=True)
+    appendfinal4['acc_drawdown_fc'].fillna(0,inplace=True)
+    appendfinal4['acc_drawdown_myr'].fillna(0,inplace=True)
+    appendfinal4['acc_cumulative_drawdown'].fillna(0,inplace=True)
+    appendfinal4['acc_cumulative_drawdown_myr'].fillna(0,inplace=True)
+    appendfinal4['acc_repayment_fc'].fillna(0,inplace=True)
+    appendfinal4['acc_repayment_myr'].fillna(0,inplace=True)
+    appendfinal4['acc_cumulative_repayment'].fillna(0,inplace=True)
+    appendfinal4['acc_cumulative_repayment_myr'].fillna(0,inplace=True)
+
+
+    #appendfinal4.head(1)
 
 
     #======================================with exception report
@@ -414,8 +475,12 @@ try:
     # LDB_hist.position_as_at.value_counts()
     # LDB_hist1 = LDB_hist.iloc[np.where((~LDB_hist.finance_sap_number.isna())&((LDB_hist.acc_drawdown_fc>0)|(LDB_hist.acc_repayment_fc>0)))]
     
-    LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
+    LDB_name = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
    
+    LDB_hist_before = pd.read_sql_query("SELECT * FROM col_facilities_application_master where position_as_at = ?;", conn, params=(reportingDate,))
+   
+    LDB_hist = LDB_hist_before.merge(LDB_name[['finance_sap_number','cif_name']], on='finance_sap_number', how='left')
+    
     condition1 = ~LDB_hist.finance_sap_number.isna()
     condition2 = (LDB_hist.acc_drawdown_fc > 0) | (LDB_hist.acc_repayment_fc > 0)
 
@@ -494,7 +559,7 @@ try:
     # Extract
     writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Disbursement_Repayment_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
 
-    appendfinal3.to_excel(writer2, sheet_name='Result', index = False)
+    appendfinal4.to_excel(writer2, sheet_name='Result', index = False)
 
     exception_report1.to_excel(writer2, sheet_name='Exception', index = False)
 
@@ -649,17 +714,20 @@ try:
     conn.commit() 
 
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    appendfinal3.position_as_at.fillna(reportingDate,inplace=True)
+    #appendfinal3.position_as_at.fillna(reportingDate,inplace=True)
     
-    # Assuming 'combine2' is a DataFrame
+    # appendfinal4.head(1)
+    # appendfinal4.iloc[np.where(appendfinal4.position_as_at=='')]
+    
+    # Assuming 'appendfinal4' is a DataFrame
     column_types = []
-    for col in appendfinal3.columns:
+    for col in appendfinal4.columns:
         # You can choose to map column types based on data types in the DataFrame, for example:
-        if appendfinal3[col].dtype == 'object':  # String data type
+        if appendfinal4[col].dtype == 'object':  # String data type
             column_types.append(f"{col} VARCHAR(255)")
-        elif appendfinal3[col].dtype == 'int64':  # Integer data type
+        elif appendfinal4[col].dtype == 'int64':  # Integer data type
             column_types.append(f"{col} INT")
-        elif appendfinal3[col].dtype == 'float64':  # Float data type
+        elif appendfinal4[col].dtype == 'float64':  # Float data type
             column_types.append(f"{col} FLOAT")
         else:
             column_types.append(f"{col} VARCHAR(255)")  # Default type for others
@@ -670,13 +738,13 @@ try:
     # Execute the query
     cursor.execute(create_table_query)
 
-    for row in appendfinal3.iterrows():
-        sql = "INSERT INTO A_DIS_N_REPAYMENT({}) VALUES ({})".format(','.join(appendfinal3.columns), ','.join(['?']*len(appendfinal3.columns)))
+    for row in appendfinal4.iterrows():
+        sql = "INSERT INTO A_DIS_N_REPAYMENT({}) VALUES ({})".format(','.join(appendfinal4.columns), ','.join(['?']*len(appendfinal4.columns)))
         cursor.execute(sql, tuple(row[1]))
     conn.commit()
    
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DIS_N_REPAYMENT AS source
-    ON target.finance_sap_number = source.Account
+    ON target.finance_sap_number = source.finance_sap_number
     WHEN MATCHED AND target.position_as_at = ? THEN
         UPDATE SET target.acc_drawdown_myr = source.acc_drawdown_myr,
                 target.acc_cumulative_drawdown_myr = source.acc_cumulative_drawdown_myr,

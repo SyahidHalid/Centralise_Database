@@ -1,6 +1,6 @@
 # python Allowance.py 13,"Allowance_1024_Adjusted.xlsx","Allowance","Pending Processing","0","syahidhalid@exim.com.my","2024-03-29"
 # python Allowance.py 13 "Allowance_1024_Adjusted.xlsx" "Allowance" "Pending Processing" "0" "syahidhalid@exim.com.my" "2024-03-29"
-# python Allowance.py 13 "Allowance_0525v2adjusted.xlsx.xlsx" "Allowance" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
+# python Allowance.py 13 CR_Allowance_0625.xlsx" "Allowance" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-06-30"
 
 # position_as_at
 # aftd_id = DocumentId
@@ -162,8 +162,8 @@ try:
     #df1 = documentName #"Allowance_0625(MIS).xlsx"
     
     #import config
-    #documentName = "Allowance_0625(MIS).xlsx.xlsx"
-    #reportingDate = "2025-06-30"
+    # documentName = "CR_Allowance_0625.xlsx"
+    # reportingDate = "2025-06-30"
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
     #df1 = r"D:\\mis_doc\\PythonProjects\\misPython\\misPython_doc\\Allowance_1024_Adjusted.xlsx" #"Data Mirror October 2024.xlsx"
@@ -173,6 +173,9 @@ try:
     D3 = "IA-IIS"
     D4 = "IA C&C CONV"
     D5 = "IA C&C ISL"
+    D6 = "IAIMPCONV"
+    D7 = "IAIMPISL"
+    D8 = "IA OTHREC CONV"
 
     #May_RM = form.text_input("1st (IA) MYR Column Sequence Aug24 is 71, Add 1 for next: Sep24 72")
     #May_FC = form.text_input("1st (IA) FC Column Sequence Aug24 is 142, Add 2 for next: Sep24 is 144")
@@ -185,6 +188,10 @@ try:
     IA_IIS = pd.read_excel(df1, sheet_name=D3, header=6)
     CnC_Conv = pd.read_excel(df1, sheet_name=D4, header=6)
     CnC_Isl = pd.read_excel(df1, sheet_name=D5, header=6)
+    Imp_Conv = pd.read_excel(df1, sheet_name=D6, header=6)
+    Imp_Isl = pd.read_excel(df1, sheet_name=D7, header=6)
+    CnC_Acc_Receiv = pd.read_excel(df1, sheet_name=D8, header=6)
+
 except Exception as e:
     print(f"Upload Excel Error: {e}")
     sql_query2 = """INSERT INTO [log_apps_error] (
@@ -277,14 +284,26 @@ try:
     CnC_Isl.columns = CnC_Isl.columns.str.replace(" ", "_")
     CnC_Isl.columns = CnC_Isl.columns.str.replace(".", "_")
 
+    Imp_Conv.columns = Imp_Conv.columns.str.replace("\n", "_")
+    Imp_Conv.columns = Imp_Conv.columns.str.replace(" ", "_")
+    Imp_Conv.columns = Imp_Conv.columns.str.replace(".", "_")
+    
+    Imp_Isl.columns = Imp_Isl.columns.str.replace("\n", "_")
+    Imp_Isl.columns = Imp_Isl.columns.str.replace(" ", "_")
+    Imp_Isl.columns = Imp_Isl.columns.str.replace(".", "_")
+    
+    CnC_Acc_Receiv.columns = CnC_Acc_Receiv.columns.str.replace("\n", "_")
+    CnC_Acc_Receiv.columns = CnC_Acc_Receiv.columns.str.replace(" ", "_")
+    CnC_Acc_Receiv.columns = CnC_Acc_Receiv.columns.str.replace(".", "_")
+
+
+
     IA_Conv_1 = IA_Conv.iloc[np.where(~(IA_Conv.Loan_Acc_.isna())&~(IA_Conv.Ccy.isna()))].fillna(0).groupby(['Loan_Acc_','Ccy','Borrower'])[['Closing_IA','Closing']].sum().reset_index()
 
     IA_Isl_1 = IA_Isl.iloc[np.where((~(IA_Isl.Loan_Acc_.isna()))&~(IA_Isl.Ccy.isna()))].fillna(0).groupby(['Loan_Acc_','Ccy','Borrower'])[['Closing_IA','Closing']].sum().reset_index()
 
     IA_IIS.loc[IA_IIS.Borrower=="PT Mahakarya Inti Buana",'Loan_Acc_']='500039'
-    
     IA_IIS['Loan_Acc_'].fillna(0, inplace=True)
-
     IA_IIS_1 = IA_IIS.iloc[np.where((~(IA_IIS.Loan_Acc_==0))&~(IA_IIS.Ccy.isna()))].fillna(0).groupby(['Loan_Acc_','Ccy','Borrower'])[['IIS_(RM)','IIS_(FC)']].sum().reset_index()
 
     #IA_IIS_1['Loan_Acc_'] = IA_IIS_1['Loan_Acc_'].astype(int)
@@ -292,8 +311,15 @@ try:
     CnC_Conv_1 = CnC_Conv.iloc[np.where((~(CnC_Conv.Loan_Acc_.isna()))&~(CnC_Conv.Ccy.isna()))].fillna(0).groupby(['Loan_Acc_','Ccy','Borrower'])[['Closing_IA','Closing']].sum().reset_index()
 
     CnC_Isl_1 = CnC_Isl.iloc[np.where((~(CnC_Isl.Loan_Acc_.isna()))&~(CnC_Isl.Ccy.isna()))].fillna(0).groupby(['Loan_Acc_','Ccy','Borrower'])[['Closing_IA','Closing']].sum().reset_index()
-    
     CnC_Isl_1['Loan_Acc_'] = CnC_Isl_1['Loan_Acc_'].astype(int)
+
+    Imp_Conv_1 = Imp_Conv.iloc[np.where(~(Imp_Conv.Loan_Acc_.isna())&~(Imp_Conv.Ccy.isna()))].fillna(0).groupby(['Loan_Acc_','Ccy','Borrower'])[['Closing_IA','Closing']].sum().reset_index()
+
+    Imp_Isl_1 = Imp_Isl.iloc[np.where((~(Imp_Isl.Loan_Acc_.isna()))&~(Imp_Isl.Ccy.isna()))].fillna(0).groupby(['Loan_Acc_','Ccy','Borrower'])[['Closing_IA','Closing']].sum().reset_index()
+
+    CnC_Acc_Receiv_1 = CnC_Acc_Receiv.iloc[np.where((~(CnC_Acc_Receiv.Loan_Acc_.isna()))&~(CnC_Acc_Receiv.Ccy.isna()))].fillna(0).groupby(['Loan_Acc_','Ccy','Borrower'])[['Closing_IA','Closing']].sum().reset_index()
+
+
 
     IA_Conv_1.rename(columns={'Closing_IA':'LAF_ECL_MYR',
                             'Closing':'LAF_ECL_FC'},inplace=True)
@@ -310,19 +336,35 @@ try:
     CnC_Isl_1.rename(columns={'Closing_IA':'CnC_ECL_MYR',
                             'Closing':'CnC_ECL_FC'},inplace=True)
 
+    Imp_Conv_1.rename(columns={'Closing_IA':'LAF_ECL_MYR',
+                            'Closing':'LAF_ECL_FC'},inplace=True)
+
+    Imp_Isl_1.rename(columns={'Closing_IA':'LAF_ECL_MYR',
+                            'Closing':'LAF_ECL_FC'},inplace=True)
+
+    CnC_Acc_Receiv_1.rename(columns={'Closing_IA':'AR_ECL_MYR',
+                            'Closing':'AR_ECL_FC'},inplace=True)
+
+
+
     IA_Conv_1['Type_of_Financing'] = 'Conventional'
     IA_Isl_1['Type_of_Financing'] = 'Islamic'
     IA_IIS_1['Type_of_Financing'] = 'Conventional'
     CnC_Conv_1['Type_of_Financing'] = 'Conventional'
     CnC_Isl_1['Type_of_Financing'] = 'Islamic'
+    Imp_Conv_1['Type_of_Financing'] = 'Conventional'
+    Imp_Isl_1['Type_of_Financing'] = 'Islamic'
+    CnC_Acc_Receiv_1['Type_of_Financing'] = 'Conventional'
 
     IA_IIS_1.loc[IA_IIS_1.Borrower!="PT Mahakarya Inti Buana",'LAF_ECL_MYR']=0
     IA_IIS_1.loc[IA_IIS_1.Borrower!="PT Mahakarya Inti Buana",'LAF_ECL_FC']=0
 
-    merge = pd.concat([IA_Conv_1,IA_Isl_1,IA_IIS_1,CnC_Conv_1,CnC_Isl_1])
+    merge = pd.concat([IA_Conv_1,IA_Isl_1,IA_IIS_1,CnC_Conv_1,CnC_Isl_1,Imp_Conv_1,Imp_Isl_1,CnC_Acc_Receiv_1])
 
     merge.fillna(0, inplace=True)
 
+    #merge.iloc[np.where(merge.Loan_Acc_==500204)]
+    
     merge['Loan_Acc_'] = merge['Loan_Acc_'].astype(str)
     #mergee['Ccy'] = merge['Ccy'].astype(float)
     #mergee['Borrower'] = merge['Borrower'].astype(float)
@@ -334,18 +376,22 @@ try:
 
     appendfinal = merge.fillna(0).groupby(['Loan_Acc_'\
     ,'Borrower','Ccy','Type_of_Financing'])[['LAF_ECL_FC'\
-    ,'LAF_ECL_MYR','CnC_ECL_FC','CnC_ECL_MYR']].sum().reset_index().drop_duplicates('Loan_Acc_', keep='first')
+    ,'LAF_ECL_MYR','CnC_ECL_FC','CnC_ECL_MYR',
+                                              'AR_ECL_FC',
+                                              'AR_ECL_MYR']].sum().reset_index().drop_duplicates('Loan_Acc_', keep='first')
 
     appendfinal.rename(columns={'Loan_Acc_':'Account'},inplace=True)
     appendfinal['Account'] = appendfinal['Account'].astype(str)
 
-    appendfinal['ECL_FC'] = appendfinal['LAF_ECL_FC'].fillna(0) + appendfinal['CnC_ECL_FC'].fillna(0)
-    appendfinal['ECL_MYR'] = appendfinal['LAF_ECL_MYR'].fillna(0) + appendfinal['CnC_ECL_MYR'].fillna(0)
+    appendfinal['ECL_FC'] = appendfinal['LAF_ECL_FC'].fillna(0) + appendfinal['CnC_ECL_FC'].fillna(0) + appendfinal['AR_ECL_FC'].fillna(0)
+    appendfinal['ECL_MYR'] = appendfinal['LAF_ECL_MYR'].fillna(0) + appendfinal['CnC_ECL_MYR'].fillna(0) + appendfinal['AR_ECL_MYR'].fillna(0)
 
     df_add_Humm = pd.DataFrame([['500776A',
                         'Hummingbird Energy (L) Inc',
                         'USD',
                         'Conventional',
+                        0,
+                        0,
                         0,
                         0,
                         0,
@@ -360,7 +406,9 @@ try:
                                               'CnC_ECL_FC',
                                               'CnC_ECL_MYR',
                                               'ECL_FC',
-                                              'ECL_MYR'])
+                                              'ECL_MYR',
+                                              'AR_ECL_FC',
+                                              'AR_ECL_MYR'])
 
     appendfinal = pd.concat([appendfinal, df_add_Humm])
     
@@ -374,6 +422,8 @@ try:
     appendfinal['CnC_ECL_MYR'] = appendfinal['CnC_ECL_MYR'].astype(float)
     appendfinal['ECL_FC'] = appendfinal['ECL_FC'].astype(float)
     appendfinal['ECL_MYR'] = appendfinal['ECL_MYR'].astype(float)
+    appendfinal['AR_ECL_FC'] = appendfinal['CnC_ECL_FC'].astype(float)
+    appendfinal['AR_ECL_MYR'] = appendfinal['CnC_ECL_MYR'].astype(float)
 
     a_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['LAF_ECL_FC'])
     b_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['LAF_ECL_MYR'])
@@ -381,6 +431,8 @@ try:
     d_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['CnC_ECL_MYR'])
     e_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['ECL_FC'])
     f_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['ECL_MYR'])
+    c_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['AR_ECL_FC'])
+    d_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['AR_ECL_MYR'])
 
     appendfinal.loc[(appendfinal['Account']=='500776'),'LAF_ECL_FC'] = 0.79*a_humm
     appendfinal.loc[(appendfinal['Account']=='500776'),'LAF_ECL_MYR'] = 0.79*b_humm
@@ -388,6 +440,8 @@ try:
     appendfinal.loc[(appendfinal['Account']=='500776'),'CnC_ECL_MYR'] = 0.79*d_humm
     appendfinal.loc[(appendfinal['Account']=='500776'),'ECL_FC'] = 0.79*e_humm
     appendfinal.loc[(appendfinal['Account']=='500776'),'ECL_MYR'] = 0.79*f_humm
+    appendfinal.loc[(appendfinal['Account']=='500776'),'AR_ECL_FC'] = 0.79*c_humm
+    appendfinal.loc[(appendfinal['Account']=='500776'),'AR_ECL_MYR'] = 0.79*d_humm
     
     appendfinal.loc[(appendfinal['Account']=='500776A'),'LAF_ECL_FC'] = 0.21*a_humm
     appendfinal.loc[(appendfinal['Account']=='500776A'),'LAF_ECL_MYR'] = 0.21*b_humm
@@ -395,20 +449,31 @@ try:
     appendfinal.loc[(appendfinal['Account']=='500776A'),'CnC_ECL_MYR'] = 0.21*d_humm
     appendfinal.loc[(appendfinal['Account']=='500776A'),'ECL_FC'] = 0.21*e_humm
     appendfinal.loc[(appendfinal['Account']=='500776A'),'ECL_MYR'] = 0.21*f_humm
+    appendfinal.loc[(appendfinal['Account']=='500776A'),'AR_ECL_FC'] = 0.21*c_humm
+    appendfinal.loc[(appendfinal['Account']=='500776A'),'AR_ECL_MYR'] = 0.21*d_humm
     
     convert_time = str(current_time).replace(":","-")
     appendfinal['position_as_at'] = reportingDate
 
+   
+
     # 30952 is Impaired
-    LDB_hist = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ? and acc_status in (30952,30953);", conn, params=(reportingDate,))
+    LDB_name = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
+   
+    LDB_hist_before = pd.read_sql_query("SELECT * FROM col_facilities_application_master where position_as_at = ? and acc_status in (30952,30953);", conn, params=(reportingDate,))
+   
+    LDB_hist = LDB_hist_before.merge(LDB_name[['finance_sap_number','cif_name']], on='finance_sap_number', how='left')
    
     LDB_hist.acc_credit_loss_laf_ecl = LDB_hist.acc_credit_loss_laf_ecl.astype(float)
     LDB_hist.acc_credit_loss_laf_ecl_myr = LDB_hist.acc_credit_loss_laf_ecl_myr.astype(float)
     LDB_hist.acc_credit_loss_cnc_ecl = LDB_hist.acc_credit_loss_cnc_ecl.astype(float)
     LDB_hist.acc_credit_loss_cnc_ecl_myr = LDB_hist.acc_credit_loss_cnc_ecl_myr.astype(float)
+    LDB_hist.acc_credit_loss_acc_receiv_ecl = LDB_hist.acc_credit_loss_acc_receiv_ecl.astype(float)
+    LDB_hist.acc_credit_loss_acc_receiv_ecl_myr = LDB_hist.acc_credit_loss_acc_receiv_ecl_myr.astype(float)
+
 
     condition1 = ~LDB_hist.finance_sap_number.isna()
-    condition2 = (LDB_hist.acc_credit_loss_laf_ecl > 0) | (LDB_hist.acc_credit_loss_laf_ecl_myr > 0) | (LDB_hist.acc_credit_loss_cnc_ecl > 0) | (LDB_hist.acc_credit_loss_cnc_ecl_myr > 0)
+    #condition2 = (LDB_hist.acc_credit_loss_laf_ecl > 0) | (LDB_hist.acc_credit_loss_laf_ecl_myr > 0) | (LDB_hist.acc_credit_loss_cnc_ecl > 0) | (LDB_hist.acc_credit_loss_cnc_ecl_myr > 0)
 
     # LDB_hist.head(1)
     LDB_hist1 = LDB_hist[['finance_sap_number',
@@ -416,7 +481,9 @@ try:
                                                    'acc_credit_loss_laf_ecl',
                                                    'acc_credit_loss_laf_ecl_myr',
                                                    'acc_credit_loss_cnc_ecl',
-                                                   'acc_credit_loss_cnc_ecl_myr']] #.iloc[np.where(condition1 & condition2)]
+                                                   'acc_credit_loss_cnc_ecl_myr',
+                                                   'acc_credit_loss_acc_receiv_ecl',
+                                                   'acc_credit_loss_acc_receiv_ecl_myr']] #.iloc[np.where(condition1 & condition2)]
     # appendfinal.head(1)
     # appendfinal.shape
 
@@ -431,6 +498,10 @@ try:
     exception_report["diff_CnC_ECL_FC"] = exception_report["CnC_ECL_FC"].fillna(0) - exception_report["acc_credit_loss_cnc_ecl"].fillna(0)
     
     exception_report["diff_CnC_ECL_MYR"] = exception_report["CnC_ECL_MYR"].fillna(0) - exception_report["acc_credit_loss_cnc_ecl_myr"].fillna(0)
+
+    exception_report["diff_AR_ECL_FC"] = exception_report["AR_ECL_FC"].fillna(0) - exception_report["acc_credit_loss_acc_receiv_ecl"].fillna(0)
+    
+    exception_report["diff_AR_ECL_MYR"] = exception_report["AR_ECL_MYR"].fillna(0) - exception_report["acc_credit_loss_acc_receiv_ecl_myr"].fillna(0)
 
     exception_report.position_as_at.fillna(reportingDate,inplace=True)
     
@@ -451,7 +522,19 @@ try:
                                           'diff_CnC_ECL_FC',
                                           'CnC_ECL_MYR',
                                           'acc_credit_loss_cnc_ecl_myr',
-                                          'diff_CnC_ECL_MYR']]
+                                          'diff_CnC_ECL_MYR',
+                                          'AR_ECL_FC',
+                                          'acc_credit_loss_acc_receiv_ecl',
+                                          'diff_AR_ECL_FC',
+                                          'AR_ECL_MYR',
+                                          'acc_credit_loss_acc_receiv_ecl_myr',
+                                          'diff_AR_ECL_MYR']].rename(columns={'_merge':'Mapping',
+                                                                               'acc_credit_loss_laf_ecl':'LAF_ECL_FC_MIS',
+                                                                               'acc_credit_loss_laf_ecl_myr':'LAF_ECL_MYR_MIS',
+                                                                               'acc_credit_loss_cnc_ecl':'CnC_ECL_FC_MIS',
+                                                                               'acc_credit_loss_cnc_ecl_myr':'CnC_ECL_MYR_MIS',
+                                                                               'acc_credit_loss_acc_receiv_ecl':'AR_ECL_FC_MIS',
+                                                                               'acc_credit_loss_acc_receiv_ecl_myr':'AR_ECL_MYR_MIS'})
 
     # Extract
     writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Allowance_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
@@ -642,6 +725,8 @@ try:
                 MAX(CnC_ECL_MYR) AS CnC_ECL_MYR,
                 MAX(ECL_FC) AS ECL_FC,
                 MAX(ECL_MYR) AS ECL_MYR,
+                MAX(AR_ECL_FC) AS AR_ECL_FC,
+                MAX(AR_ECL_MYR) AS AR_ECL_MYR,
                 MAX(position_as_at) AS position_as_at
             FROM A_ALLOWANCE
             GROUP BY Account
@@ -653,7 +738,9 @@ try:
             UPDATE SET target.acc_credit_loss_laf_ecl = source.LAF_ECL_FC,
                     target.acc_credit_loss_laf_ecl_myr = source.LAF_ECL_MYR,
                     target.acc_credit_loss_cnc_ecl = source.CnC_ECL_FC,
-                    target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR;
+                    target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR,
+                    target.acc_credit_loss_acc_receiv_ecl = source.AR_ECL_FC,
+                    target.acc_credit_loss_acc_receiv_ecl_myr = source.AR_ECL_MYR;
     """, (reportingDate,))
     conn.commit() 
 
