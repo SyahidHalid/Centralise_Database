@@ -194,7 +194,7 @@ except Exception as e:
     cursor.execute(sql_query2,(str(e)+" ["+str(documentName)+"]","ECL to MIS",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Upload Excel ECL to MIS'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY004', [jobErrDetail]= 'Upload Excel ECL to MIS'
     WHERE [jobName] = 'ECL to MIS';
                 """
     cursor.execute(sql_error)
@@ -206,7 +206,7 @@ except Exception as e:
     #==============================================================================================
 
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
-    data = [(documentId,"Not Applicable",'PY003','PY003')] #,36961,36961
+    data = [(documentId,"Not Applicable",'PY004','PY004')] #,36961,36961
     download_error = pd.DataFrame(data,columns=columns)
     
     # Assuming 'combine2' is a DataFrame
@@ -497,7 +497,7 @@ except Exception as e:
     cursor.execute(sql_query3,(str(e)+" ["+str(documentName)+"]","Process Excel ECL to MIS",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Process Excel ECL to MIS'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY004', [jobErrDetail]= 'Process Excel ECL to MIS'
     WHERE [jobName] = 'ECL to MIS';
                 """
     cursor.execute(sql_error)
@@ -508,7 +508,7 @@ except Exception as e:
     #==============================================================================================
 
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
-    data = [(documentId,"Not Applicable",'PY003','PY003')] #,36961,36961
+    data = [(documentId,"Not Applicable",'PY004','PY004')] #,36961,36961
     download_error = pd.DataFrame(data,columns=columns)
     
     # Assuming 'combine2' is a DataFrame
@@ -677,7 +677,7 @@ except Exception as e:
     cursor.execute(sql_query5,(str(e)+" ["+str(documentName)+"]","Update Database ECL to MIS",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Update Database ECL to MIS'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY004', [jobErrDetail]= 'Update Database ECL to MIS'
     WHERE [jobName] = 'ECL to MIS';
                 """
     cursor.execute(sql_error)
@@ -688,7 +688,7 @@ except Exception as e:
     #==============================================================================================
 
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
-    data = [(documentId,"Not Applicable",'PY003','PY003')] #,36961,36961
+    data = [(documentId,"Not Applicable",'PY004','PY004')] #,36961,36961
     download_error = pd.DataFrame(data,columns=columns)
     
     # Assuming 'combine2' is a DataFrame

@@ -213,7 +213,7 @@ except Exception as e:
     cursor.execute(sql_query2,(str(e)+" ["+str(documentName)+"]","Debtor Listing",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Upload Excel Debtor Listing'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY004', [jobErrDetail]= 'Upload Excel Debtor Listing'
     WHERE [jobName] = 'Debtor Listing';
                 """
     cursor.execute(sql_error)
@@ -225,7 +225,7 @@ except Exception as e:
     #==============================================================================================
 
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
-    data = [(documentId,"Not Applicable",'PY003','PY003')] #,36961,36961
+    data = [(documentId,"Not Applicable",'PY004','PY004')] #,36961,36961
     download_error = pd.DataFrame(data,columns=columns)
     
     # Assuming 'combine2' is a DataFrame
@@ -1290,7 +1290,7 @@ except Exception as e:
     cursor.execute(sql_query3,(str(e)+" ["+str(documentName)+"]","Process Excel Debtor Listing",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Process Excel Debtor Listing'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY004', [jobErrDetail]= 'Process Excel Debtor Listing'
     WHERE [jobName] = 'Debtor Listing';
                 """
     cursor.execute(sql_error)
@@ -1302,7 +1302,7 @@ except Exception as e:
     #==============================================================================================
 
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
-    data = [(documentId,"Not Applicable",'PY003','PY003')] #,36961,36961
+    data = [(documentId,"Not Applicable",'PY004','PY004')] #,36961,36961
     download_error = pd.DataFrame(data,columns=columns)
     
     # Assuming 'combine2' is a DataFrame
@@ -1505,7 +1505,7 @@ except Exception as e:
     cursor.execute(sql_query5,(str(e)+" ["+str(documentName)+"]","Update Database Debtor Listing",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Update Database Debtor Listing'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY004', [jobErrDetail]= 'Update Database Debtor Listing'
     WHERE [jobName] = 'Debtor Listing';
                 """
     cursor.execute(sql_error)
@@ -1516,7 +1516,7 @@ except Exception as e:
     #==============================================================================================
 
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
-    data = [(documentId,"Not Applicable",'PY003','PY003')] #,36961,36961
+    data = [(documentId,"Not Applicable",'PY004','PY004')] #,36961,36961
     download_error = pd.DataFrame(data,columns=columns)
     
     # Assuming 'combine2' is a DataFrame

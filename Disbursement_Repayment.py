@@ -242,10 +242,10 @@ try:
     Rep_Conv.columns = Rep_Conv.columns.str.replace("\n", "_")
     Rep_Conv.columns = Rep_Conv.columns.str.replace(" ", "")
 
-    Dis_isl['St'] =   Dis_isl['St'].str[8:]
-    Rep_Isl['St'] =   Rep_Isl['St'].str[8:]
-    Dis_Conv['St'] =   Dis_Conv['St'].str[8:]
-    Rep_Conv['St'] =   Rep_Conv['St'].str[8:]
+    Dis_isl['St'] =   Dis_isl['St'].apply(lambda x: str(x)[8:] if pd.notnull(x) else x)
+    Rep_Isl['St'] =   Rep_Isl['St'].apply(lambda x: str(x)[8:] if pd.notnull(x) else x)
+    Dis_Conv['St'] = Dis_Conv['St'].apply(lambda x: str(x)[8:] if pd.notnull(x) else x)
+    Rep_Conv['St'] =   Rep_Conv['St'].apply(lambda x: str(x)[8:] if pd.notnull(x) else x)
 
     Dis_isl.rename(columns={'St':'Account'},inplace=True)
     Rep_Isl.rename(columns={'St':'Account'},inplace=True)
