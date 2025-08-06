@@ -547,7 +547,7 @@ try:
 
     # appendfinal.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Allowance_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
 
-    exception_report1._merge = exception_report1._merge.astype(str)
+    exception_report1.Mapping = exception_report1.Mapping.astype(str)
     exception_report1.fillna(0,inplace=True)
     
     cursor.execute("DROP TABLE IF EXISTS Exception_Allowance")
@@ -643,6 +643,7 @@ except Exception as e:
     cursor.execute("drop table A_download_error")
     conn.commit() 
 
+# uploadedByEmail = 'syahidhalid@exim.com.my'
 #---------------------------------------------Download-------------------------------------------------------------
 
 # cntrl + K + C untuk comment kn sume 
@@ -856,3 +857,5 @@ except Exception as e:
 #    print(f"Python Error: {e}")
 #    sys.exit(f"Python Error: {str(e)}")
 #    sys.exit(1)
+
+# documentId = 1

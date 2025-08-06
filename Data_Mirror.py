@@ -154,8 +154,8 @@ try:
     #E:mis_doc\\PythonProjects\\misPython\\misPython_doc
     #df1 = documentName #"Data Mirror October 2024.xlsx"
     #import config
-    #   documentName = "DataMirrorJune2025.xlsx.xlsx"
-    #   reportingDate = "2025-06-30"
+    #   documentName = "DataMirrorJuly2025.xlsx.xlsx"
+    #   reportingDate = "2025-07-31"
 
     df1 = os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
 
@@ -972,17 +972,34 @@ try:
         cursor.execute(sql, tuple(row[1]))
     conn.commit()
 
-    cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_PROFIT_N_OTHER_PAYMENT AS source
+    cursor.execute("""
+    WITH DistinctSource AS (
+        SELECT 
+            finance_sap_number,
+            acc_tawidh_payment_repayment_fc,
+            acc_tawidh_payment_repayment_myr,
+            acc_cumulative_tawidh_payment_repayment_fc,
+            acc_cumulative_tawidh_payment_repayment_myr,
+            acc_others_charges_payment_fc,
+            acc_others_charges_payment_myr,
+            acc_cumulative_others_charge_payment_fc,
+            acc_cumulative_others_charge_payment_myr,
+            ROW_NUMBER() OVER (PARTITION BY finance_sap_number ORDER BY finance_sap_number) AS rn
+        FROM A_PROFIT_N_OTHER_PAYMENT
+    )
+    MERGE INTO col_facilities_application_master AS target
+    USING (SELECT * FROM DistinctSource WHERE rn = 1) AS source
     ON target.finance_sap_number = source.finance_sap_number
     WHEN MATCHED AND target.position_as_at = ? THEN
-        UPDATE SET target.acc_tawidh_payment_repayment_fc = source.acc_tawidh_payment_repayment_fc,
-                target.acc_tawidh_payment_repayment_myr = source.acc_tawidh_payment_repayment_myr,
-                target.acc_cumulative_tawidh_payment_repayment_fc = source.acc_cumulative_tawidh_payment_repayment_fc,
-                target.acc_cumulative_tawidh_payment_repayment_myr = source.acc_cumulative_tawidh_payment_repayment_myr,
-                target.acc_others_charges_payment_fc = source.acc_others_charges_payment_fc,
-                target.acc_others_charges_payment_myr = source.acc_others_charges_payment_myr,
-                target.acc_cumulative_others_charge_payment_fc = source.acc_cumulative_others_charge_payment_fc,
-                target.acc_cumulative_others_charge_payment_myr = source.acc_cumulative_others_charge_payment_myr;
+        UPDATE SET 
+            target.acc_tawidh_payment_repayment_fc = source.acc_tawidh_payment_repayment_fc,
+            target.acc_tawidh_payment_repayment_myr = source.acc_tawidh_payment_repayment_myr,
+            target.acc_cumulative_tawidh_payment_repayment_fc = source.acc_cumulative_tawidh_payment_repayment_fc,
+            target.acc_cumulative_tawidh_payment_repayment_myr = source.acc_cumulative_tawidh_payment_repayment_myr,
+            target.acc_others_charges_payment_fc = source.acc_others_charges_payment_fc,
+            target.acc_others_charges_payment_myr = source.acc_others_charges_payment_myr,
+            target.acc_cumulative_others_charge_payment_fc = source.acc_cumulative_others_charge_payment_fc,
+            target.acc_cumulative_others_charge_payment_myr = source.acc_cumulative_others_charge_payment_myr;
     """, (reportingDate,))
     conn.commit() 
 

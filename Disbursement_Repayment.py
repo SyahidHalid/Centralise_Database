@@ -145,8 +145,8 @@ except Exception as e:
 #process
 try:
     #    #E:\PythonProjects\misPython\misPython_doc
-    # documentName = "DisbursementRepaymentJune2025.xlsx.xlsx"
-    # reportingDate = "2025-06-30"
+    # documentName = "DisbursementRepaymentJuly2025.xlsx.xlsx"
+    # reportingDate = "2025-07-31"
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
 
     D1 = "Disbursement Islamic"
@@ -179,7 +179,7 @@ except Exception as e:
     cursor.execute(sql_query2,(str(e)+" ["+str(documentName)+"]","Upload Excel Disbursement & Repayment",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Upload Excel Disbursement & Repayment'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY004', [jobErrDetail]= 'Upload Excel Disbursement & Repayment'
     WHERE [jobName] = 'Disbursement & Repayment';
                 """
     cursor.execute(sql_error)
@@ -191,7 +191,7 @@ except Exception as e:
     #==============================================================================================
 
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
-    data = [(documentId,"Not Applicable",'PY003','PY003')] #,36961,36961
+    data = [(documentId,"Not Applicable",'PY004','PY004')] #,36961,36961 36820
     download_error = pd.DataFrame(data,columns=columns)
     
     # Assuming 'combine2' is a DataFrame
@@ -620,7 +620,7 @@ except Exception as e:
     cursor.execute(sql_query3,(str(e)+" ["+str(documentName)+"]","Process Excel Disbursement & Repayment",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= '"Process Excel Disbursement & Repayment'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY004', [jobErrDetail]= '"Process Excel Disbursement & Repayment'
     WHERE [jobName] = 'Disbursement & Repayment';
                 """
     cursor.execute(sql_error)
@@ -632,7 +632,7 @@ except Exception as e:
     #==============================================================================================
 
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
-    data = [(documentId,"Not Applicable",'PY003','PY003')] #,36961,36961
+    data = [(documentId,"Not Applicable",'PY004','PY004')] #,36961,36961
     download_error = pd.DataFrame(data,columns=columns)
     
     # Assuming 'combine2' is a DataFrame
@@ -802,7 +802,7 @@ except Exception as e:
     cursor.execute(sql_query5,(str(e)+" ["+str(documentName)+"]","Update Database Disbursement & Repayment",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobStatus]= 'PY003', [jobErrDetail]= 'Update Database Disbursement & Repayment'
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY004', [jobErrDetail]= 'Update Database Disbursement & Repayment'
     WHERE [jobName] = 'Disbursement & Repayment';
                 """
     cursor.execute(sql_error)
@@ -813,7 +813,7 @@ except Exception as e:
     #==============================================================================================
 
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
-    data = [(documentId,"Not Applicable",'PY003','PY003')] #,36961,36961
+    data = [(documentId,"Not Applicable",'PY004','PY004')] #,36961,36961
     download_error = pd.DataFrame(data,columns=columns)
     
     # Assuming 'combine2' is a DataFrame
