@@ -674,46 +674,6 @@ except Exception as e:
 # cntrl + K + U untuk comment kn sume 
 
 try:
-    #table        
-    columns = ['aftd_id','result_file_name','processed_status_id','status_id']
-    data = [(documentId,"Result_Disbursement_Repayment_"+str(convert_time)[:19]+".xlsx",'PY005','PY002')]
-    download_result = pd.DataFrame(data,columns=columns)
-    
-    # Assuming 'combine2' is a DataFrame
-    column_types1 = []
-    for col in download_result.columns:
-        # You can choose to map column types based on data types in the DataFrame, for example:
-        if download_result[col].dtype == 'object':  # String data type
-            column_types1.append(f"{col} VARCHAR(255)")
-        elif download_result[col].dtype == 'int64':  # Integer data type
-            column_types1.append(f"{col} INT")
-        elif download_result[col].dtype == 'float64':  # Float data type
-            column_types1.append(f"{col} FLOAT")
-        else:
-            column_types1.append(f"{col} VARCHAR(255)")  # Default type for others
-
-    create_table_query_result = "CREATE TABLE A_download_result_C (" + ', '.join(column_types1) + ")"
-    cursor.execute(create_table_query_result)
-
-    for row in download_result.iterrows():
-        sql_result = "INSERT INTO A_download_result_C({}) VALUES ({})".format(','.join(download_result.columns), ','.join(['?']*len(download_result.columns)))
-        cursor.execute(sql_result, tuple(row[1]))
-    conn.commit()
-
-
-    cursor.execute("""MERGE INTO account_finance_transaction_documents AS target 
-                    USING A_download_result_C AS source
-                    ON target.aftd_id = source.aftd_id
-                    WHEN MATCHED THEN 
-                        UPDATE SET target.result_file_name = source.result_file_name,
-                        target.processed_status_id = (select param_id from param_system_param where param_code=source.processed_status_id),
-                        target.status_id = (select param_id from param_system_param where param_code=source.status_id);   
-    """)
-    conn.commit() 
-    cursor.execute("drop table A_download_result_C")
-    conn.commit() 
-
-    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     #appendfinal3.position_as_at.fillna(reportingDate,inplace=True)
     
     # appendfinal4.head(1)
@@ -782,6 +742,48 @@ try:
 
     print("Data updated successfully at "+str(current_time))
     conn.close()
+
+    #table        
+    columns = ['aftd_id','result_file_name','processed_status_id','status_id']
+    data = [(documentId,"Result_Disbursement_Repayment_"+str(convert_time)[:19]+".xlsx",'PY005','PY002')]
+    download_result = pd.DataFrame(data,columns=columns)
+    
+    # Assuming 'combine2' is a DataFrame
+    column_types1 = []
+    for col in download_result.columns:
+        # You can choose to map column types based on data types in the DataFrame, for example:
+        if download_result[col].dtype == 'object':  # String data type
+            column_types1.append(f"{col} VARCHAR(255)")
+        elif download_result[col].dtype == 'int64':  # Integer data type
+            column_types1.append(f"{col} INT")
+        elif download_result[col].dtype == 'float64':  # Float data type
+            column_types1.append(f"{col} FLOAT")
+        else:
+            column_types1.append(f"{col} VARCHAR(255)")  # Default type for others
+
+    create_table_query_result = "CREATE TABLE A_download_result_C (" + ', '.join(column_types1) + ")"
+    cursor.execute(create_table_query_result)
+
+    for row in download_result.iterrows():
+        sql_result = "INSERT INTO A_download_result_C({}) VALUES ({})".format(','.join(download_result.columns), ','.join(['?']*len(download_result.columns)))
+        cursor.execute(sql_result, tuple(row[1]))
+    conn.commit()
+
+
+    cursor.execute("""MERGE INTO account_finance_transaction_documents AS target 
+                    USING A_download_result_C AS source
+                    ON target.aftd_id = source.aftd_id
+                    WHEN MATCHED THEN 
+                        UPDATE SET target.result_file_name = source.result_file_name,
+                        target.processed_status_id = (select param_id from param_system_param where param_code=source.processed_status_id),
+                        target.status_id = (select param_id from param_system_param where param_code=source.status_id);   
+    """)
+    conn.commit() 
+    cursor.execute("drop table A_download_result_C")
+    conn.commit() 
+
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  
 except Exception as e:
     print(f"Update Database Error: {e}")
     sql_query5 = """INSERT INTO [log_apps_error] (
