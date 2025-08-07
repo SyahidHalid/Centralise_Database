@@ -741,8 +741,7 @@ try:
     cursor.execute(sql_query4)
     conn.commit() 
 
-    print("Data updated successfully at "+str(current_time))
-    conn.close()
+
 
     #table        
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
@@ -786,7 +785,8 @@ try:
     #target.processed_status_id = source.processed_status_id
 
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+    print("Data updated successfully at "+str(current_time))
+    conn.close()
 except Exception as e:
     print(f"Update Database Error: {e}")
     sql_query5 = """INSERT INTO [log_apps_error] (

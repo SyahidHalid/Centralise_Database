@@ -1,5 +1,5 @@
 # python Disbursement_Repayment.py 10,"Disbursement & Repayment October 2024.xlsx","Disbursement & Repayment","Pending Processing","0","syahidhalid@exim.com.my","2024-03-29"
-# python Disbursement_Repayment.py 10 "Disbursement&RepaymentMay2025.xlsx.xlsx.xlsx.xlsx" "Disbursement & Repayment" "Pending Processing" "0" "syahidhalid@exim.com.my" "2024-05-31"
+# python Disbursement_Repayment.py 10 "DisbursementRepaymentJuly2025.xlsx.xlsx" "Disbursement & Repayment" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-07-31"
 # position_as_at
 #aftd_id = DocumentId
 #tmbh update result table
@@ -747,8 +747,7 @@ try:
     cursor.execute(sql_query4)
     conn.commit() 
 
-    print("Data updated successfully at "+str(current_time))
-    conn.close()
+
 
     #table        
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
@@ -789,6 +788,8 @@ try:
     cursor.execute("drop table A_download_result_C")
     conn.commit() 
 
+    print("Data updated successfully at "+str(current_time))
+    conn.close()
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   
 except Exception as e:

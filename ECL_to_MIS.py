@@ -612,8 +612,7 @@ try:
     cursor.execute(sql_query4)
     conn.commit() 
 
-    print("Data updated successfully at "+str(current_time))
-    conn.close()
+
 
         #table        
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
@@ -654,6 +653,9 @@ try:
     cursor.execute("drop table A_download_result_D")
     conn.commit() 
 
+    print("Data updated successfully at "+str(current_time))
+    conn.close()
+    
     #status id PY002
     #processed_status_id PY005
 
