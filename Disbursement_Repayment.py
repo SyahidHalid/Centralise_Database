@@ -703,7 +703,14 @@ try:
         cursor.execute(sql, tuple(row[1]))
     conn.commit()
    
-    cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DIS_N_REPAYMENT AS source
+    cursor.execute("""
+    WITH RankedSource AS (
+        SELECT *,
+            ROW_NUMBER() OVER (PARTITION BY finance_sap_number ORDER BY position_as_at DESC) AS rn
+        FROM A_DIS_N_REPAYMENT
+    )
+    MERGE INTO col_facilities_application_master AS target
+    USING (SELECT * FROM RankedSource WHERE rn = 1) AS source
     ON target.finance_sap_number = source.finance_sap_number
     WHEN MATCHED AND target.position_as_at = ? THEN
         UPDATE SET target.acc_drawdown_myr = source.acc_drawdown_myr,
