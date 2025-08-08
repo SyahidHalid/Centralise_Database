@@ -460,8 +460,9 @@ try:
     # 30952 is Impaired
     LDB_name = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
    
-    LDB_hist_before = pd.read_sql_query("SELECT * FROM col_facilities_application_master where position_as_at = ? and acc_status in (30952,30953);", conn, params=(reportingDate,))
-   
+    LDB_hist_before = pd.read_sql_query("SELECT * FROM col_facilities_application_master where position_as_at = ? and acc_status NOT IN (30947,30948,30949,30950);", conn, params=(reportingDate,))
+    #(30947,30948,30949,30950) active overdue watchlist overdue
+    #(30952,30953) impaired partial write off
     LDB_hist = LDB_hist_before.merge(LDB_name[['finance_sap_number','cif_name']], on='finance_sap_number', how='left')
    
     LDB_hist.acc_credit_loss_laf_ecl = LDB_hist.acc_credit_loss_laf_ecl.astype(float)
