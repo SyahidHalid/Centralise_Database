@@ -336,7 +336,7 @@ try:
     PIS.loc[(~(PIS.Account.isna())&((PIS.Text.str.contains("Penalty"))|(PIS.Text.str.contains("Ta'widh")))),"___Amt_in_loc_cur_"] = 0
 
     #PIS blom ad nme kat text untuk penalty
-
+    
     #---------------------------------------------Process-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     Other_payment_conv1 = Other_payment_conv.iloc[np.where(~(Other_payment_conv.Account.isna()))].fillna(0).groupby(['Account','Type_of_Financing'])[['___Amt_in_loc_cur_','______Amount_in_DC']].sum().reset_index()
@@ -369,7 +369,7 @@ try:
     IIS1['Ta`widh Payment/Penalty Repayment (MYR)'] = -1*IIS1['Ta`widh Payment/Penalty Repayment (MYR)']
     IIS1['Ta`widh Payment/Penalty Repayment (Facility Currency)'] = -1*IIS1['Ta`widh Payment/Penalty Repayment (Facility Currency)']
     IIS1['Account'] = IIS1['Account'].astype(int)
-
+    
     PIS1 = PIS.iloc[np.where(~(PIS.Account.isna()))].fillna(0).groupby(['Account','Type_of_Financing'])[['___Amt_in_loc_cur_','______Amount_in_DC',
     "Ta`widh Payment/Penalty Repayment (Facility Currency)",
     "Ta`widh Payment/Penalty Repayment (MYR)"]].sum().reset_index()
@@ -489,7 +489,7 @@ try:
 
     #combine
     combine = merge_ldb.merge(merge1_ldb,on="Account", how="outer").fillna(0) #,indicator=True
-
+    # combine.iloc[np.where(combine.Account=='500538')]
     #---------------------------------------------Ta'widh--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     Penalty.columns = Penalty.columns.str.replace("\n", "_")
@@ -551,13 +551,26 @@ try:
                     'Cumulative_Tawidh_Payment_Penalty_Repayment_FC':'acc_cumulative_tawidh_payment_repayment_fc',
                     'Cumulative_Tawidh_Payment_Penalty_Repayment_MYR':'acc_cumulative_tawidh_payment_repayment_myr'})
 
+    # .drop(['acc_tawidh_payment_repayment_fc',
+    #                             'acc_tawidh_payment_repayment_myr',
+    #                             'acc_cumulative_tawidh_payment_repayment_fc',
+    #                             'acc_cumulative_tawidh_payment_repayment_myr'],axis=1)
 
     #combine2
-    combine2 = combine.drop(['acc_tawidh_payment_repayment_fc',
-                            'acc_tawidh_payment_repayment_myr',
-                            'acc_cumulative_tawidh_payment_repayment_fc',
-                            'acc_cumulative_tawidh_payment_repayment_myr'],axis=1).merge(Tawidh_Comb1,on="Account", how="outer").fillna(0) #,indicator=True
+    combine2 = combine.merge(Tawidh_Comb1,on="Account", how="outer", suffixes=('_Sap','_Mis')).fillna(0) #,indicator=True
+    # combine2.iloc[np.where(combine2.Account=='500538')]
+    
+    combine2["acc_tawidh_payment_repayment_fc"] = combine2["acc_tawidh_payment_repayment_fc_Sap"].fillna(0) + combine2["acc_tawidh_payment_repayment_fc_Mis"].fillna(0)
+    combine2["acc_tawidh_payment_repayment_myr"] = combine2["acc_tawidh_payment_repayment_myr_Sap"].fillna(0) + combine2["acc_tawidh_payment_repayment_myr_Mis"].fillna(0)
+    combine2["acc_cumulative_tawidh_payment_repayment_fc"] = combine2["acc_cumulative_tawidh_payment_repayment_fc_Sap"].fillna(0) + combine2["acc_cumulative_tawidh_payment_repayment_fc_Mis"].fillna(0)
+    combine2["acc_cumulative_tawidh_payment_repayment_myr"] = combine2["acc_cumulative_tawidh_payment_repayment_myr_Sap"].fillna(0) + combine2["acc_cumulative_tawidh_payment_repayment_myr_Mis"].fillna(0)
 
+    combine2.drop(['acc_tawidh_payment_repayment_fc_Sap','acc_tawidh_payment_repayment_fc_Mis',
+                                'acc_tawidh_payment_repayment_myr_Sap','acc_tawidh_payment_repayment_myr_Mis',
+                                'acc_cumulative_tawidh_payment_repayment_fc_Sap','acc_cumulative_tawidh_payment_repayment_fc_Mis',
+                                'acc_cumulative_tawidh_payment_repayment_myr_Sap','acc_cumulative_tawidh_payment_repayment_myr_Mis'],axis=1,inplace=True)
+      
+    
     df_add_Humm = pd.DataFrame([['500776A',
                         0,
                         0,
