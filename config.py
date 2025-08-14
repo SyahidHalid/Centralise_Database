@@ -1,10 +1,10 @@
 # Database credentials
 
-# UAT
+# # UAT
 # CONNECTION_STRING = (
 #     'DRIVER={ODBC Driver 17 for SQL Server};'
 #     'SERVER=10.32.1.51,1455;'
-#     'DATABASE=mis_db_prod11072025;'
+#     'DATABASE=mis_db_prod13082025;'
 #     'UID=mis_admin;'
 #     'PWD=Exim1234;'
 #     'Encrypt=yes;TrustServerCertificate=yes;'
@@ -13,8 +13,8 @@
 # FOLDER_CONFIG = {
 #     'FTP_directory': r'misPython_doc\\'
 # }
-# mis_db_prod18062025
-# mis_db_prod_backup_2024_04_02
+# # mis_db_prod18062025
+# # mis_db_prod_backup_2024_04_02
 
 # #PROD
 CONNECTION_STRING = (

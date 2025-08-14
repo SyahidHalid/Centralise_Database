@@ -154,9 +154,9 @@ try:
     #documentName = "a"
     #uploadedByEmail = "a"
     
-    # documentName = "ECLS1S2Jun-2025workingv2.xlsx (new) .xlsx"
-    # documentName = "ECL S1 S2 Jun-2025 working v5 (2).xlsx"
-    # reportingDate = "2025-06-30"
+    # documentName = "ECLS1S2July-2025working.xlsxv213.8.2025.xlsx.xlsx"
+
+    # reportingDate = "2025-07-31"
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
     
@@ -435,6 +435,11 @@ try:
                                           'acc_credit_loss_cnc_ecl_myr_Mis',
                                           'diff_CnC_ECL_MYR']]
 
+    # sum(LAF3.acc_credit_loss_laf_ecl_myr)
+    # sum(LAF3.acc_credit_loss_cnc_ecl_myr)
+    # LAF3.facility_exim_account_num.value_counts()
+    # exception_report1.iloc[np.where(exception_report1._merge=='left_only')]
+    
     # Extract
     writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_ECL_to_MIS_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
 
@@ -552,7 +557,7 @@ except Exception as e:
 # cntrl + K + U untuk comment kn sume 
 
 try:
-
+    #LAF3.facility_exim_account_num.value_counts()
     # Assuming 'combine2' is a DataFrame
     column_types = []
     for col in LAF3.columns:

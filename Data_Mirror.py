@@ -386,9 +386,15 @@ try:
     Profit1['Ta`widh Payment/Penalty Repayment (Facility Currency)'] = 0
 
     merge = pd.concat([Other_payment_conv1,Other_payment_isl1]).fillna(0).rename(columns={'___Amt_in_loc_cur_':'Other_Charges_Payment_MYR','______Amount_in_DC':'Other_Charges_Payment_FC'})
+    
+    # merge.head(1)
+    # sum(merge.Other_Charges_Payment_MYR)
 
     merge1 = pd.concat([Interest1,IIS1,Profit1,PIS1]).fillna(0).rename(columns={'___Amt_in_loc_cur_':'Profit_Payment_Interest_Repayment_MYR','______Amount_in_DC':'Profit_Payment_Interest_Repayment_FC'})
 
+    #   sum(merge1['Ta`widh Payment/Penalty Repayment (Facility Currency)'])
+    #   sum(merge1['Ta`widh Payment/Penalty Repayment (MYR)'])
+    
     merge['Account'] = merge['Account'].astype(str)
     merge1['Account'] = merge1['Account'].astype(str)
 
@@ -419,6 +425,9 @@ try:
     merge_ldb = merge.merge(LDB_prev.iloc[np.where(LDB_prev['finance_sap_number']!="nan")][['finance_sap_number',
                                     'acc_others_charges_payment_fc','acc_others_charges_payment_myr',
                                     'acc_cumulative_others_charge_payment_fc','acc_cumulative_others_charge_payment_myr',]].drop_duplicates('finance_sap_number',keep='first').rename(columns={'finance_sap_number':'Account'}),on=['Account'],how='left',suffixes=('_x', ''),indicator=True)
+
+    # merge_ldb.head(1)
+    # sum(merge_ldb.acc_others_charges_payment_myr)
 
     merge1_ldb = merge1.merge(LDB_prev.iloc[np.where(LDB_prev['finance_sap_number']!="nan")][['finance_sap_number',
                                     'acc_interest_repayment_fc','acc_interest_repayment_myr',
@@ -471,6 +480,7 @@ try:
                                                                                                                         'Other_Charges_Payment_MYR':'acc_others_charges_payment_myr',
                                                                                                                         'Cumulative_Other_Charges_Payment_FC':'acc_cumulative_others_charge_payment_fc',
                                                                                                                         'Cumulative_Other_Charges_Payment_MYR':'acc_cumulative_others_charge_payment_myr'})
+    # sum(merge_ldb.acc_others_charges_payment_myr)
 
     #to update acc_interest_repayment_fc, acc_interest_repayment_myr, acc_cumulative_interest_repayment_fc, acc_cumulative_interest_repayment_myr,
     #to update acc_tawidh_payment_repayment_fc, acc_tawidh_payment_repayment_myr, acc_cumulative_tawidh_payment_repayment_fc, acc_cumulative_tawidh_payment_repayment_myr
@@ -490,6 +500,10 @@ try:
     #combine
     combine = merge_ldb.merge(merge1_ldb,on="Account", how="outer").fillna(0) #,indicator=True
     # combine.iloc[np.where(combine.Account=='500538')]
+    # sum(combine.acc_others_charges_payment_myr)
+    # sum(combine.acc_tawidh_payment_repayment_fc)
+    # sum(combine.acc_tawidh_payment_repayment_myr)
+
     #---------------------------------------------Ta'widh--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     Penalty.columns = Penalty.columns.str.replace("\n", "_")
@@ -559,6 +573,7 @@ try:
     #combine2
     combine2 = combine.merge(Tawidh_Comb1,on="Account", how="outer", suffixes=('_Sap','_Mis')).fillna(0) #,indicator=True
     # combine2.iloc[np.where(combine2.Account=='500538')]
+    # sum(combine2.acc_others_charges_payment_myr)
     
     combine2["acc_tawidh_payment_repayment_fc"] = combine2["acc_tawidh_payment_repayment_fc_Sap"].fillna(0) + combine2["acc_tawidh_payment_repayment_fc_Mis"].fillna(0)
     combine2["acc_tawidh_payment_repayment_myr"] = combine2["acc_tawidh_payment_repayment_myr_Sap"].fillna(0) + combine2["acc_tawidh_payment_repayment_myr_Mis"].fillna(0)
@@ -642,7 +657,8 @@ try:
     combine2['position_as_at'] = reportingDate
 
 
-
+    # sum(combine2.acc_others_charges_payment_myr)
+    #---------------------------------------------------------cumulative---------------------------------------------------------------------
     LDB_cum = pd.read_sql_query("SELECT * FROM dbase_account_hist;", conn)
     
     reportingYear = int(reportingDate[:4])
@@ -662,8 +678,7 @@ try:
     
     LDB_cum_group = LDB_cum_filtered.iloc[np.where(~(LDB_cum_filtered.finance_sap_number.isna())&
                                                    (LDB_cum_filtered.finance_sap_number!='')&
-                                                   (LDB_cum_filtered.finance_sap_number!='NEW ACCOUNT'))].groupby(['finance_sap_number',
-                                                                                                                   'cif_name'])[['other_charges_payment_myr',
+                                                   (LDB_cum_filtered.finance_sap_number!='NEW ACCOUNT'))].groupby(['finance_sap_number'])[['other_charges_payment_myr',
                                                                       'other_charges_payment',
                                                                       'acc_interest_repayment_myr',
                                                                       'acc_interest_repayment_fc',
@@ -677,33 +692,19 @@ try:
                                   'penalty_repayment_myr':'acc_cumulative_tawidh_payment_repayment_myr',
                                   'penalty_repayment':'acc_cumulative_tawidh_payment_repayment_fc'},inplace=True)
 
-    combine3 = LDB_cum_group.merge(combine2[['Account',
+    combine3 = combine2[['Account',
                                              'acc_others_charges_payment_fc',
                                              'acc_others_charges_payment_myr',
                                              'acc_interest_repayment_fc',
                                              'acc_interest_repayment_myr',
                                              'acc_tawidh_payment_repayment_fc',
                                              'acc_tawidh_payment_repayment_myr',
-                                             'position_as_at']].rename(columns={'Account':'finance_sap_number'}),
+                                             'position_as_at']].rename(columns={'Account':'finance_sap_number'}).merge(LDB_cum_group,
                                              on='finance_sap_number',
                                              how='outer',
                                              indicator=True)
-    
-    combine3['acc_cumulative_others_charge_payment_fc'] = combine3['acc_others_charges_payment_fc'].fillna(0) + combine3['acc_cumulative_others_charge_payment_fc'].fillna(0)
-    combine3['acc_cumulative_others_charge_payment_myr'] = combine3['acc_others_charges_payment_myr'].fillna(0) + combine3['acc_cumulative_others_charge_payment_myr'].fillna(0)
-    combine3['acc_cumulative_interest_repayment_fc'] = combine3['acc_interest_repayment_fc'].fillna(0) + combine3['acc_cumulative_interest_repayment_fc'].fillna(0)
-    combine3['acc_cumulative_interest_repayment_myr'] = combine3['acc_interest_repayment_myr'].fillna(0) + combine3['acc_cumulative_interest_repayment_myr'].fillna(0)
-    combine3['acc_cumulative_tawidh_payment_repayment_fc'] = combine3['acc_tawidh_payment_repayment_fc'].fillna(0) + combine3['acc_cumulative_tawidh_payment_repayment_fc'].fillna(0)
-    combine3['acc_cumulative_tawidh_payment_repayment_myr'] = combine3['acc_tawidh_payment_repayment_myr'].fillna(0) + combine3['acc_cumulative_tawidh_payment_repayment_myr'].fillna(0)
-    
-    combine3 = combine3[['finance_sap_number','cif_name','_merge',
-                         'acc_others_charges_payment_fc','acc_others_charges_payment_myr','acc_cumulative_others_charge_payment_fc','acc_cumulative_others_charge_payment_myr',
-                         'acc_interest_repayment_fc','acc_interest_repayment_myr','acc_cumulative_interest_repayment_fc','acc_cumulative_interest_repayment_myr',
-                         'acc_tawidh_payment_repayment_fc','acc_tawidh_payment_repayment_myr','acc_cumulative_tawidh_payment_repayment_fc','acc_cumulative_tawidh_payment_repayment_myr',
-                         'position_as_at']]#.fillna(0)#.sort_values(by='_merge',ascending=True)
-
     combine3['position_as_at'] = reportingDate
-    combine3['cif_name'].fillna('Only Exist in FAD',inplace=True)
+    #combine3['cif_name'].fillna('Only Exist in FAD',inplace=True)
     combine3['acc_others_charges_payment_fc'].fillna(0,inplace=True)
     combine3['acc_cumulative_others_charge_payment_fc'].fillna(0,inplace=True)
     combine3['acc_others_charges_payment_myr'].fillna(0,inplace=True)
@@ -716,14 +717,37 @@ try:
     combine3['acc_cumulative_tawidh_payment_repayment_fc'].fillna(0,inplace=True)
     combine3['acc_tawidh_payment_repayment_myr'].fillna(0,inplace=True)
     combine3['acc_cumulative_tawidh_payment_repayment_myr'].fillna(0,inplace=True)
+        
+    # LDB_cum_group.finance_sap_number.value_counts()
+    # LDB_cum_group.iloc[np.where(LDB_cum_group.finance_sap_number=='501166')]
+    # LDB_cum_group.head(1)
     
+    # combine3.head(1)
+    # sum(combine3.acc_others_charges_payment_myr)
+    # combine3.iloc[np.where(combine3.acc_others_charges_payment_myr>0)]
+
+    combine3['acc_cumulative_others_charge_payment_fc'] = combine3['acc_others_charges_payment_fc'].fillna(0) + combine3['acc_cumulative_others_charge_payment_fc'].fillna(0)
+    combine3['acc_cumulative_others_charge_payment_myr'] = combine3['acc_others_charges_payment_myr'].fillna(0) + combine3['acc_cumulative_others_charge_payment_myr'].fillna(0)
+    combine3['acc_cumulative_interest_repayment_fc'] = combine3['acc_interest_repayment_fc'].fillna(0) + combine3['acc_cumulative_interest_repayment_fc'].fillna(0)
+    combine3['acc_cumulative_interest_repayment_myr'] = combine3['acc_interest_repayment_myr'].fillna(0) + combine3['acc_cumulative_interest_repayment_myr'].fillna(0)
+    combine3['acc_cumulative_tawidh_payment_repayment_fc'] = combine3['acc_tawidh_payment_repayment_fc'].fillna(0) + combine3['acc_cumulative_tawidh_payment_repayment_fc'].fillna(0)
+    combine3['acc_cumulative_tawidh_payment_repayment_myr'] = combine3['acc_tawidh_payment_repayment_myr'].fillna(0) + combine3['acc_cumulative_tawidh_payment_repayment_myr'].fillna(0)
+    
+    combine3 = combine3[['finance_sap_number',#'cif_name',
+                         '_merge',
+                         'acc_others_charges_payment_fc','acc_others_charges_payment_myr','acc_cumulative_others_charge_payment_fc','acc_cumulative_others_charge_payment_myr',
+                         'acc_interest_repayment_fc','acc_interest_repayment_myr','acc_cumulative_interest_repayment_fc','acc_cumulative_interest_repayment_myr',
+                         'acc_tawidh_payment_repayment_fc','acc_tawidh_payment_repayment_myr','acc_cumulative_tawidh_payment_repayment_fc','acc_cumulative_tawidh_payment_repayment_myr',
+                         'position_as_at']]#.fillna(0)#.sort_values(by='_merge',ascending=True)
+
+
     # combine2.shape
     # combine3._merge.value_counts()
     # combine3.head(1)
     # LDB_cum_filtered.position_as_at.value_counts()
     # LDB_cum_group.finance_sap_number.value_counts()
 
-
+    #---------------------------------------------exception--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     LDB_name = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
 
@@ -796,6 +820,12 @@ try:
                                           'acc_interest_repayment_myr_Sap',
                                           'acc_interest_repayment_myr_Mis',
                                           'diff_profit_payment_myr']]
+
+    # combine3.head(1)
+    # sum(combine3.acc_others_charges_payment_fc)
+    # sum(combine3.acc_others_charges_payment_myr)
+    # sum(combine3.acc_tawidh_payment_repayment_fc)
+    # sum(combine3.acc_tawidh_payment_repayment_myr)
 
     # Extract
     writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Data_Mirror_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')

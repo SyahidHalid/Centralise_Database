@@ -162,8 +162,8 @@ try:
     #df1 = documentName #"Allowance_0625(MIS).xlsx"
     
     #import config
-    # documentName = "CR_Allowance_0625.xlsx"
-    # reportingDate = "2025-06-30"
+    # documentName = "Allowance_0725v3(MIS2).xlsx.xlsx.xlsx"
+    # reportingDate = "2025-07-31"
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
     #df1 = r"D:\\mis_doc\\PythonProjects\\misPython\\misPython_doc\\Allowance_1024_Adjusted.xlsx" #"Data Mirror October 2024.xlsx"
@@ -361,11 +361,25 @@ try:
 
     merge = pd.concat([IA_Conv_1,IA_Isl_1,IA_IIS_1,CnC_Conv_1,CnC_Isl_1,Imp_Conv_1,Imp_Isl_1,CnC_Acc_Receiv_1])
 
+    # sum(IA_Conv_1.LAF_ECL_MYR)  
+    # sum(IA_Isl_1.LAF_ECL_MYR)  
+    # sum(IA_IIS_1.LAF_ECL_MYR)  
+    # sum(Imp_Conv_1.LAF_ECL_MYR)  
+    # sum(Imp_Isl_1.LAF_ECL_MYR)  
+    # sum(IA_Conv_1.LAF_ECL_MYR)+sum(IA_Isl_1.LAF_ECL_MYR)+sum(IA_IIS_1.LAF_ECL_MYR)+sum(Imp_Conv_1.LAF_ECL_MYR)+sum(Imp_Isl_1.LAF_ECL_MYR)  
+    
+
+    merge['Loan_Acc_'] = merge['Loan_Acc_'].astype(str)
+    merge['Loan_Acc_'] = merge['Loan_Acc_'].str[0:6]
+    #merge = merge.iloc[np.where(merge['Loan_Acc_'].astype(str).str.len() == 6)]
+    
+    # merge = merge.iloc[np.where(merge.Loan_Acc_.str[:6])]
     merge.fillna(0, inplace=True)
+    # sum(merge.LAF_ECL_MYR)
 
     #merge.iloc[np.where(merge.Loan_Acc_==500204)]
-    
-    merge['Loan_Acc_'] = merge['Loan_Acc_'].astype(str)
+
+    #merge['Loan_Acc_'] = merge['Loan_Acc_'].astype(int)
     #mergee['Ccy'] = merge['Ccy'].astype(float)
     #mergee['Borrower'] = merge['Borrower'].astype(float)
     #mergee['Type_of_Financing'] = merge['Type_of_Financing'].astype(float)
@@ -373,12 +387,16 @@ try:
     merge['LAF_ECL_MYR'] = merge['LAF_ECL_MYR'].astype(float)
     merge['CnC_ECL_FC'] = merge['CnC_ECL_FC'].astype(float)
     merge['CnC_ECL_MYR'] = merge['CnC_ECL_MYR'].astype(float)
-
+    merge['AR_ECL_FC'] = merge['AR_ECL_FC'].astype(float)
+    merge['AR_ECL_MYR'] = merge['AR_ECL_MYR'].astype(float)
+    
     appendfinal = merge.fillna(0).groupby(['Loan_Acc_'\
     ,'Borrower','Ccy','Type_of_Financing'])[['LAF_ECL_FC'\
-    ,'LAF_ECL_MYR','CnC_ECL_FC','CnC_ECL_MYR',
-                                              'AR_ECL_FC',
-                                              'AR_ECL_MYR']].sum().reset_index().drop_duplicates('Loan_Acc_', keep='first')
+    ,'LAF_ECL_MYR','CnC_ECL_FC','CnC_ECL_MYR','AR_ECL_FC','AR_ECL_MYR']].sum().reset_index()#.drop_duplicates('Loan_Acc_', keep='first')
+
+    # sum(appendfinal.LAF_ECL_MYR)
+    # appendfinal.Account.value_counts()
+    # appendfinal.iloc[np.where(appendfinal1.Account=='500962.0')]
 
     appendfinal.rename(columns={'Loan_Acc_':'Account'},inplace=True)
     appendfinal['Account'] = appendfinal['Account'].astype(str)
@@ -410,57 +428,58 @@ try:
                                               'AR_ECL_FC',
                                               'AR_ECL_MYR'])
 
-    appendfinal = pd.concat([appendfinal, df_add_Humm])
+    appendfinal1 = pd.concat([appendfinal, df_add_Humm])
     
-    appendfinal['Account'] = appendfinal['Account'].astype(str)
-    appendfinal['Borrower'] = appendfinal['Borrower'].astype(str)
-    appendfinal['Ccy'] = appendfinal['Ccy'].astype(str)
-    appendfinal['Type_of_Financing'] = appendfinal['Type_of_Financing'].astype(str)
-    appendfinal['LAF_ECL_FC'] = appendfinal['LAF_ECL_FC'].astype(float)
-    appendfinal['LAF_ECL_MYR'] = appendfinal['LAF_ECL_MYR'].astype(float)
-    appendfinal['CnC_ECL_FC'] = appendfinal['CnC_ECL_FC'].astype(float)
-    appendfinal['CnC_ECL_MYR'] = appendfinal['CnC_ECL_MYR'].astype(float)
-    appendfinal['ECL_FC'] = appendfinal['ECL_FC'].astype(float)
-    appendfinal['ECL_MYR'] = appendfinal['ECL_MYR'].astype(float)
-    appendfinal['AR_ECL_FC'] = appendfinal['CnC_ECL_FC'].astype(float)
-    appendfinal['AR_ECL_MYR'] = appendfinal['CnC_ECL_MYR'].astype(float)
+    appendfinal1['Account'] = appendfinal1['Account'].astype(str)
+    appendfinal1['Borrower'] = appendfinal1['Borrower'].astype(str)
+    appendfinal1['Ccy'] = appendfinal1['Ccy'].astype(str)
+    appendfinal1['Type_of_Financing'] = appendfinal1['Type_of_Financing'].astype(str)
+    appendfinal1['LAF_ECL_FC'] = appendfinal1['LAF_ECL_FC'].astype(float)
+    appendfinal1['LAF_ECL_MYR'] = appendfinal1['LAF_ECL_MYR'].astype(float)
+    appendfinal1['CnC_ECL_FC'] = appendfinal1['CnC_ECL_FC'].astype(float)
+    appendfinal1['CnC_ECL_MYR'] = appendfinal1['CnC_ECL_MYR'].astype(float)
+    appendfinal1['ECL_FC'] = appendfinal1['ECL_FC'].astype(float)
+    appendfinal1['ECL_MYR'] = appendfinal1['ECL_MYR'].astype(float)
+    appendfinal1['AR_ECL_FC'] = appendfinal1['AR_ECL_FC'].astype(float)
+    appendfinal1['AR_ECL_MYR'] = appendfinal1['AR_ECL_MYR'].astype(float)
 
-    a_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['LAF_ECL_FC'])
-    b_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['LAF_ECL_MYR'])
-    c_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['CnC_ECL_FC'])
-    d_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['CnC_ECL_MYR'])
-    e_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['ECL_FC'])
-    f_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['ECL_MYR'])
-    c_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['AR_ECL_FC'])
-    d_humm = sum(appendfinal.fillna(0).iloc[np.where(appendfinal['Account']=='500776')]['AR_ECL_MYR'])
+    a_humm = sum(appendfinal1.fillna(0).iloc[np.where(appendfinal1['Account']=='500776')]['LAF_ECL_FC'])
+    b_humm = sum(appendfinal1.fillna(0).iloc[np.where(appendfinal1['Account']=='500776')]['LAF_ECL_MYR'])
+    c_humm = sum(appendfinal1.fillna(0).iloc[np.where(appendfinal1['Account']=='500776')]['CnC_ECL_FC'])
+    d_humm = sum(appendfinal1.fillna(0).iloc[np.where(appendfinal1['Account']=='500776')]['CnC_ECL_MYR'])
+    e_humm = sum(appendfinal1.fillna(0).iloc[np.where(appendfinal1['Account']=='500776')]['ECL_FC'])
+    f_humm = sum(appendfinal1.fillna(0).iloc[np.where(appendfinal1['Account']=='500776')]['ECL_MYR'])
+    c_humm = sum(appendfinal1.fillna(0).iloc[np.where(appendfinal1['Account']=='500776')]['AR_ECL_FC'])
+    d_humm = sum(appendfinal1.fillna(0).iloc[np.where(appendfinal1['Account']=='500776')]['AR_ECL_MYR'])
 
-    appendfinal.loc[(appendfinal['Account']=='500776'),'LAF_ECL_FC'] = 0.79*a_humm
-    appendfinal.loc[(appendfinal['Account']=='500776'),'LAF_ECL_MYR'] = 0.79*b_humm
-    appendfinal.loc[(appendfinal['Account']=='500776'),'CnC_ECL_FC'] = 0.79*c_humm
-    appendfinal.loc[(appendfinal['Account']=='500776'),'CnC_ECL_MYR'] = 0.79*d_humm
-    appendfinal.loc[(appendfinal['Account']=='500776'),'ECL_FC'] = 0.79*e_humm
-    appendfinal.loc[(appendfinal['Account']=='500776'),'ECL_MYR'] = 0.79*f_humm
-    appendfinal.loc[(appendfinal['Account']=='500776'),'AR_ECL_FC'] = 0.79*c_humm
-    appendfinal.loc[(appendfinal['Account']=='500776'),'AR_ECL_MYR'] = 0.79*d_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776'),'LAF_ECL_FC'] = 0.79*a_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776'),'LAF_ECL_MYR'] = 0.79*b_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776'),'CnC_ECL_FC'] = 0.79*c_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776'),'CnC_ECL_MYR'] = 0.79*d_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776'),'ECL_FC'] = 0.79*e_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776'),'ECL_MYR'] = 0.79*f_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776'),'AR_ECL_FC'] = 0.79*c_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776'),'AR_ECL_MYR'] = 0.79*d_humm
     
-    appendfinal.loc[(appendfinal['Account']=='500776A'),'LAF_ECL_FC'] = 0.21*a_humm
-    appendfinal.loc[(appendfinal['Account']=='500776A'),'LAF_ECL_MYR'] = 0.21*b_humm
-    appendfinal.loc[(appendfinal['Account']=='500776A'),'CnC_ECL_FC'] = 0.21*c_humm
-    appendfinal.loc[(appendfinal['Account']=='500776A'),'CnC_ECL_MYR'] = 0.21*d_humm
-    appendfinal.loc[(appendfinal['Account']=='500776A'),'ECL_FC'] = 0.21*e_humm
-    appendfinal.loc[(appendfinal['Account']=='500776A'),'ECL_MYR'] = 0.21*f_humm
-    appendfinal.loc[(appendfinal['Account']=='500776A'),'AR_ECL_FC'] = 0.21*c_humm
-    appendfinal.loc[(appendfinal['Account']=='500776A'),'AR_ECL_MYR'] = 0.21*d_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776A'),'LAF_ECL_FC'] = 0.21*a_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776A'),'LAF_ECL_MYR'] = 0.21*b_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776A'),'CnC_ECL_FC'] = 0.21*c_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776A'),'CnC_ECL_MYR'] = 0.21*d_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776A'),'ECL_FC'] = 0.21*e_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776A'),'ECL_MYR'] = 0.21*f_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776A'),'AR_ECL_FC'] = 0.21*c_humm
+    appendfinal1.loc[(appendfinal1['Account']=='500776A'),'AR_ECL_MYR'] = 0.21*d_humm
     
     convert_time = str(current_time).replace(":","-")
-    appendfinal['position_as_at'] = reportingDate
+    appendfinal1['position_as_at'] = reportingDate
 
    
 
     # 30952 is Impaired
     LDB_name = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
    
-    LDB_hist_before = pd.read_sql_query("SELECT * FROM col_facilities_application_master where position_as_at = ? and acc_status NOT IN (30947,30948,30949,30950);", conn, params=(reportingDate,))
+    # LDB_hist_before = pd.read_sql_query("SELECT * FROM col_facilities_application_master where position_as_at = ? and acc_status NOT IN (30947,30948,30949,30950);", conn, params=(reportingDate,))
+    LDB_hist_before = pd.read_sql_query("SELECT * FROM col_facilities_application_master;", conn)
     #(30947,30948,30949,30950) active overdue watchlist overdue
     #(30952,30953) impaired partial write off
     LDB_hist = LDB_hist_before.merge(LDB_name[['finance_sap_number','cif_name']], on='finance_sap_number', how='left')
@@ -488,7 +507,7 @@ try:
     # appendfinal.head(1)
     # appendfinal.shape
 
-    exception_report = appendfinal.rename(columns={'Account':'finance_sap_number'}).merge(LDB_hist1, on='finance_sap_number', how='outer', suffixes=('_Sap','_Mis'),indicator=True)
+    exception_report = appendfinal1.rename(columns={'Account':'finance_sap_number'}).merge(LDB_hist1, on='finance_sap_number', how='outer', suffixes=('_Sap','_Mis'),indicator=True)
 
     # exception_report.head(1)
 
@@ -536,11 +555,31 @@ try:
                                                                                'acc_credit_loss_cnc_ecl_myr':'CnC_ECL_MYR_MIS',
                                                                                'acc_credit_loss_acc_receiv_ecl':'AR_ECL_FC_MIS',
                                                                                'acc_credit_loss_acc_receiv_ecl_myr':'AR_ECL_MYR_MIS'})
+    # exception_report1.Mapping.value_counts()
+    # exception_report1.iloc[np.where(exception_report1.Mapping=='left_only')]
+
+    # sum(appendfinal1.LAF_ECL_FC)  
+    # sum(IA_Conv_1.LAF_ECL_FC)+sum(IA_Isl_1.LAF_ECL_FC)+sum(IA_IIS_1.LAF_ECL_FC)+sum(Imp_Conv_1.LAF_ECL_FC)+sum(Imp_Isl_1.LAF_ECL_FC)
+
+    # sum(appendfinal1.LAF_ECL_MYR)
+    # sum(IA_Conv_1.LAF_ECL_MYR)+sum(IA_Isl_1.LAF_ECL_MYR)+sum(IA_IIS_1.LAF_ECL_MYR)+sum(Imp_Conv_1.LAF_ECL_MYR)+sum(Imp_Isl_1.LAF_ECL_MYR)
+
+    # sum(appendfinal1.CnC_ECL_FC)
+    # sum(CnC_Conv_1.CnC_ECL_FC)+sum(CnC_Isl_1.CnC_ECL_FC)
+
+    # sum(appendfinal1.CnC_ECL_MYR)
+    # sum(CnC_Conv_1.CnC_ECL_MYR)+sum(CnC_Isl_1.CnC_ECL_MYR)
+
+    # sum(appendfinal1.AR_ECL_FC)
+    # sum(CnC_Acc_Receiv_1.AR_ECL_FC)
+
+    # sum(appendfinal1.AR_ECL_MYR)
+    # sum(CnC_Acc_Receiv_1.AR_ECL_MYR)
 
     # Extract
     writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Allowance_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
 
-    appendfinal.to_excel(writer2, sheet_name='Result', index = False)
+    appendfinal1.to_excel(writer2, sheet_name='Result', index = False)
 
     exception_report1.to_excel(writer2, sheet_name='Exception', index = False)
 
@@ -654,15 +693,30 @@ except Exception as e:
 
 try:
 
+    # appendfinal1.Account.value_counts()
+    # appendfinal1.iloc[np.where(appendfinal1.Account=='500962')]
+
+    appendfinal1 = appendfinal1.groupby(['Account',
+                                         'position_as_at'])[['LAF_ECL_FC',
+                                                             'LAF_ECL_MYR',
+                                                             'CnC_ECL_FC',
+                                                             'CnC_ECL_MYR',
+                                                             'AR_ECL_FC',
+                                                             'AR_ECL_MYR',
+                                                             'ECL_FC',
+                                                             'ECL_MYR']].sum().reset_index()
+    
+    # sum(appendfinal1.LAF_ECL_MYR)
+
     # Assuming 'combine2' is a DataFrame
     column_types = []
-    for col in appendfinal.columns:
+    for col in appendfinal1.columns:
         # You can choose to map column types based on data types in the DataFrame, for example:
-        if appendfinal[col].dtype == 'object':  # String data type
+        if appendfinal1[col].dtype == 'object':  # String data type
             column_types.append(f"{col} VARCHAR(255)")
-        elif appendfinal[col].dtype == 'int64':  # Integer data type
+        elif appendfinal1[col].dtype == 'int64':  # Integer data type
             column_types.append(f"{col} INT")
-        elif appendfinal[col].dtype == 'float64':  # Float data type
+        elif appendfinal1[col].dtype == 'float64':  # Float data type
             column_types.append(f"{col} FLOAT")
         else:
             column_types.append(f"{col} VARCHAR(255)")  # Default type for others
@@ -672,39 +726,42 @@ try:
     # Execute the query
     cursor.execute(create_table_query)
 
-    for row in appendfinal.iterrows():
-        sql = "INSERT INTO A_ALLOWANCE({}) VALUES ({})".format(','.join(appendfinal.columns), ','.join(['?']*len(appendfinal.columns)))
+    for row in appendfinal1.iterrows():
+        sql = "INSERT INTO A_ALLOWANCE({}) VALUES ({})".format(','.join(appendfinal1.columns), ','.join(['?']*len(appendfinal1.columns)))
         cursor.execute(sql, tuple(row[1]))
     conn.commit()
 
-    cursor.execute("""WITH CTE AS (
-            SELECT Account,
-                MAX(LAF_ECL_FC) AS LAF_ECL_FC,
-                MAX(LAF_ECL_MYR) AS LAF_ECL_MYR,
-                MAX(CnC_ECL_FC) AS CnC_ECL_FC,
-                MAX(CnC_ECL_MYR) AS CnC_ECL_MYR,
-                MAX(ECL_FC) AS ECL_FC,
-                MAX(ECL_MYR) AS ECL_MYR,
-                MAX(AR_ECL_FC) AS AR_ECL_FC,
-                MAX(AR_ECL_MYR) AS AR_ECL_MYR,
-                MAX(position_as_at) AS position_as_at
-            FROM A_ALLOWANCE
-            GROUP BY Account
-        )
-        MERGE INTO col_facilities_application_master AS target
-        USING CTE AS source
-        ON target.finance_sap_number = source.Account
-        WHEN MATCHED AND target.position_as_at = ? THEN
-            UPDATE SET target.acc_credit_loss_laf_ecl = source.LAF_ECL_FC,
-                    target.acc_credit_loss_laf_ecl_myr = source.LAF_ECL_MYR,
-                    target.acc_credit_loss_cnc_ecl = source.CnC_ECL_FC,
-                    target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR,
-                    target.acc_credit_loss_acc_receiv_ecl = source.AR_ECL_FC,
-                    target.acc_credit_loss_acc_receiv_ecl_myr = source.AR_ECL_MYR;
-    """, (reportingDate,))
+    cursor.execute("""
+    WITH CTE AS (
+        SELECT 
+            Account,
+            MAX(LAF_ECL_FC) AS LAF_ECL_FC,
+            MAX(LAF_ECL_MYR) AS LAF_ECL_MYR,
+            MAX(CnC_ECL_FC) AS CnC_ECL_FC,
+            MAX(CnC_ECL_MYR) AS CnC_ECL_MYR,
+            MAX(ECL_FC) AS ECL_FC,
+            MAX(ECL_MYR) AS ECL_MYR,
+            MAX(AR_ECL_FC) AS AR_ECL_FC,
+            MAX(AR_ECL_MYR) AS AR_ECL_MYR
+        FROM A_ALLOWANCE
+        GROUP BY Account
+    )
+    MERGE col_facilities_application_master AS target
+    USING CTE AS source
+    ON target.finance_sap_number = source.Account
+    WHEN MATCHED THEN
+        UPDATE SET 
+            target.acc_credit_loss_laf_ecl = source.LAF_ECL_FC,
+            target.acc_credit_loss_laf_ecl_myr = source.LAF_ECL_MYR,
+            target.acc_credit_loss_cnc_ecl = source.CnC_ECL_FC,
+            target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR,
+            target.acc_credit_loss_acc_receiv_ecl = source.AR_ECL_FC,
+            target.acc_credit_loss_acc_receiv_ecl_myr = source.AR_ECL_MYR;
+    """)
     conn.commit() 
 
-
+    #    """, (reportingDate,))
+    #AND target.position_as_at = ?
                     # target.acc_credit_loss_lafcnc_ecl = source.ECL_FC,
                     # target.acc_credit_loss_lafcnc_ecl_myr = source.ECL_MYR
     
