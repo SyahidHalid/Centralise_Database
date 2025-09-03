@@ -982,6 +982,8 @@ try:
     WITH DistinctSource AS (
         SELECT 
             finance_sap_number,
+            acc_interest_repayment_myr,
+            acc_cumulative_interest_repayment_myr,
             acc_tawidh_payment_repayment_fc,
             acc_tawidh_payment_repayment_myr,
             acc_cumulative_tawidh_payment_repayment_fc,
@@ -998,6 +1000,8 @@ try:
     ON target.finance_sap_number = source.finance_sap_number
     WHEN MATCHED AND target.position_as_at = ? THEN
         UPDATE SET 
+            target.acc_interest_repayment_myr = source.acc_interest_repayment_myr
+            target.acc_cumulative_interest_repayment_myr = source.acc_cumulative_interest_repayment_myr
             target.acc_tawidh_payment_repayment_fc = source.acc_tawidh_payment_repayment_fc,
             target.acc_tawidh_payment_repayment_myr = source.acc_tawidh_payment_repayment_myr,
             target.acc_cumulative_tawidh_payment_repayment_fc = source.acc_cumulative_tawidh_payment_repayment_fc,
