@@ -738,7 +738,7 @@ try:
                          'acc_others_charges_payment_fc','acc_others_charges_payment_myr','acc_cumulative_others_charge_payment_fc','acc_cumulative_others_charge_payment_myr',
                          'acc_interest_repayment_fc','acc_interest_repayment_myr','acc_cumulative_interest_repayment_fc','acc_cumulative_interest_repayment_myr',
                          'acc_tawidh_payment_repayment_fc','acc_tawidh_payment_repayment_myr','acc_cumulative_tawidh_payment_repayment_fc','acc_cumulative_tawidh_payment_repayment_myr',
-                         'position_as_at']]#.fillna(0)#.sort_values(by='_merge',ascending=True)
+                         'position_as_at']].drop_duplicates('finance_sap_number',keep='first')#.fillna(0)#.sort_values(by='_merge',ascending=True)
 
 
     # combine2.shape
