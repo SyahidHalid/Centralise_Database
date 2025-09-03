@@ -437,7 +437,7 @@ try:
                                              'acc_drawdown_myr',
                                              'acc_repayment_fc',
                                              'acc_repayment_myr',
-                                             'position_as_at']].rename(columns={'Account':'finance_sap_number'}),
+                                             'position_as_at']].drop_duplicates('Account',keep='first').rename(columns={'Account':'finance_sap_number'}),
                                              on='finance_sap_number',
                                              how='outer',
                                              indicator=True)
