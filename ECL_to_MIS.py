@@ -199,8 +199,6 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit()
-    print(f"Upload Excel ECL to MIS Error: {e}")
-    sys.exit(f"Upload Excel ECL to MIS Error: {str(e)}")
     #sys.exit(1) 
 
     #==============================================================================================
@@ -241,6 +239,8 @@ except Exception as e:
     conn.commit() 
     cursor.execute("drop table A_download_error")
     conn.commit() 
+    print(f"Upload Excel ECL to MIS Error: {e}")
+    sys.exit(f"Upload Excel ECL to MIS Error: {str(e)}")
 
 #------------------------------------------------------------------------------------------------
 
@@ -507,8 +507,6 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit()
-    print(f"Process Excel ECL to MIS Error: {e}")
-    sys.exit(f"Process Excel ECL to MIS Error: {str(e)}")
 
     #==============================================================================================
 
@@ -548,6 +546,8 @@ except Exception as e:
     conn.commit() 
     cursor.execute("drop table A_download_error")
     conn.commit() 
+    print(f"Process Excel ECL to MIS Error: {e}")
+    sys.exit(f"Process Excel ECL to MIS Error: {str(e)}")
 
     #sys.exit(1) 
 
@@ -571,6 +571,8 @@ try:
         else:
             column_types.append(f"{col} VARCHAR(255)")  # Default type for others
 
+    cursor.execute("DROP TABLE IF EXISTS A_ECL_TO_MIS")
+    conn.commit()
 
     # Generate the CREATE TABLE statement
     create_table_query = "CREATE TABLE A_ECL_TO_MIS (" + ', '.join(column_types) + ")"
@@ -691,8 +693,6 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit()
-    print(f"Update Database ECL to MIS Error: {e}")
-    sys.exit(f"Update Database ECL to MIS Error: {str(e)}")
 
     #==============================================================================================
 
@@ -732,6 +732,8 @@ except Exception as e:
     conn.commit() 
     cursor.execute("drop table A_download_error")
     conn.commit() 
+    print(f"Update Database ECL to MIS Error: {e}")
+    sys.exit(f"Update Database ECL to MIS Error: {str(e)}")
 
     #sys.exit(1)
 #except Exception as e:

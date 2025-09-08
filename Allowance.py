@@ -217,8 +217,7 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit()
-    print(f"Upload Excel Allowance Error: {e}")
-    sys.exit(f"Upload Excel Allowance Error: {str(e)}")
+
     #sys.exit(1)
     
     #==============================================================================================
@@ -259,7 +258,8 @@ except Exception as e:
     conn.commit() 
     cursor.execute("drop table A_download_error")
     conn.commit() 
-
+    print(f"Upload Excel Allowance Error: {e}")
+    sys.exit(f"Upload Excel Allowance Error: {str(e)}")
 #------------------------------------------------------------------------------------------------
 
 #process
@@ -640,8 +640,7 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit()
-    print(f"Process Excel Allowance Error: {e}")
-    sys.exit(f"Process Excel Allowance Error: {str(e)}")
+
     #sys.exit(1) 
     
     #==============================================================================================
@@ -683,6 +682,8 @@ except Exception as e:
     cursor.execute("drop table A_download_error")
     conn.commit() 
 
+    print(f"Process Excel Allowance Error: {e}")
+    sys.exit(f"Process Excel Allowance Error: {str(e)}")
 # uploadedByEmail = 'syahidhalid@exim.com.my'
 #---------------------------------------------Download-------------------------------------------------------------
 
@@ -720,6 +721,9 @@ try:
             column_types.append(f"{col} FLOAT")
         else:
             column_types.append(f"{col} VARCHAR(255)")  # Default type for others
+
+    cursor.execute("DROP TABLE IF EXISTS A_ALLOWANCE")
+    conn.commit()
 
     # Generate the CREATE TABLE statement
     create_table_query = "CREATE TABLE A_ALLOWANCE (" + ', '.join(column_types) + ")"
@@ -870,8 +874,7 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit() 
-    print(f"Update Database Allowance Error: {e}")
-    sys.exit(f"Update Database Allowance Error: {str(e)}")
+
 
     #==============================================================================================
 
@@ -912,6 +915,8 @@ except Exception as e:
     cursor.execute("drop table A_download_error")
     conn.commit() 
 
+    print(f"Update Database Allowance Error: {e}")
+    sys.exit(f"Update Database Allowance Error: {str(e)}")
     #sys.exit(1)
 #except Exception as e:
 #    print(f"Python Error: {e}")

@@ -184,8 +184,6 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit()
-    print(f"Upload Excel Disbursement & Repayment Error: {e}")
-    sys.exit(f"Upload Excel Disbursement & Repayment Error: {str(e)}")
     #sys.exit(1) 
 
     #==============================================================================================
@@ -226,6 +224,8 @@ except Exception as e:
     conn.commit() 
     cursor.execute("drop table A_download_error")
     conn.commit() 
+    print(f"Upload Excel Disbursement & Repayment Error: {e}")
+    sys.exit(f"Upload Excel Disbursement & Repayment Error: {str(e)}")
 
 #------------------------------------------------------------------------------------------------
 
@@ -302,7 +302,8 @@ try:
     LDB_prev['acc_cumulative_repayment'].fillna(0,inplace=True)
     LDB_prev['acc_cumulative_repayment_myr'].fillna(0,inplace=True)
 
-    appendfinal_ldb = merge.merge(LDB_prev.iloc[np.where(~(LDB_prev['finance_sap_number'].isna()))][['finance_sap_number',
+    appendfinal_ldb = merge.merge(LDB_prev.iloc[np.where(~(LDB_prev['finance_sap_number'].isna())&
+                                                   (LDB_prev.acc_status.isin(['30947','30948','30949','30950','30952'])))][['finance_sap_number',
                                                                                                     'acc_drawdown_fc',
                                                                                                     'acc_drawdown_myr',
                                                                                                     'acc_cumulative_drawdown',
@@ -625,8 +626,6 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit() 
-    print(f"Process Excel Disbursement & Repayment Error: {e}")
-    sys.exit(f"Process Excel Disbursement & Repayment Error: {str(e)}")
     #sys.exit(1) 
 
     #==============================================================================================
@@ -667,6 +666,8 @@ except Exception as e:
     conn.commit() 
     cursor.execute("drop table A_download_error")
     conn.commit() 
+    print(f"Process Excel Disbursement & Repayment Error: {e}")
+    sys.exit(f"Process Excel Disbursement & Repayment Error: {str(e)}")
 
 #--------------------------------------------------------connect ngan database-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -692,6 +693,8 @@ try:
         else:
             column_types.append(f"{col} VARCHAR(255)")  # Default type for others
 
+    cursor.execute("DROP TABLE IF EXISTS A_DIS_N_REPAYMENT")
+    conn.commit()
 
     # Generate the CREATE TABLE statement
     create_table_query = "CREATE TABLE A_DIS_N_REPAYMENT (" + ', '.join(column_types) + ")"
@@ -817,8 +820,7 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit()
-    print(f"Update Database Disbursement & Repayment Error: {e}")
-    sys.exit(f"Update Database Disbursement & Repayment Error: {str(e)}")
+
 
     #==============================================================================================
 
@@ -859,6 +861,8 @@ except Exception as e:
     cursor.execute("drop table A_download_error")
     conn.commit() 
     
+    print(f"Update Database Disbursement & Repayment Error: {e}")
+    sys.exit(f"Update Database Disbursement & Repayment Error: {str(e)}")    
     #sys.exit(1)
 #except Exception as e:
 #    print(f"Python Error: {e}")

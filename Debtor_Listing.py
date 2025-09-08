@@ -218,8 +218,6 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit()
-    print(f"Upload Excel Debtor Listing Error: {e}")
-    sys.exit(f"Upload Excel Debtor Listing Error: {str(e)}")
     #sys.exit(1) 
 
     #==============================================================================================
@@ -260,6 +258,8 @@ except Exception as e:
     conn.commit() 
     cursor.execute("drop table A_download_error")
     conn.commit() 
+    print(f"Upload Excel Debtor Listing Error: {e}")
+    sys.exit(f"Upload Excel Debtor Listing Error: {str(e)}")
 
 #------------------------------------------------------------------------------------------------
 
@@ -1295,8 +1295,6 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit()
-    print(f"Process Excel Debtor Listing Error: {e}")
-    sys.exit(f"Process Excel Debtor Listing Error: {str(e)}")
     #sys.exit(1) 
 
     #==============================================================================================
@@ -1337,6 +1335,8 @@ except Exception as e:
     conn.commit() 
     cursor.execute("drop table A_download_error")
     conn.commit() 
+    print(f"Process Excel Debtor Listing Error: {e}")
+    sys.exit(f"Process Excel Debtor Listing Error: {str(e)}")
 
 #--------------------------------------------------------connect ngan database-----------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1359,7 +1359,10 @@ try:
             column_types.append(f"{col} VARCHAR(255)")  # Default type for others
 
     #cursor.execute("CREATE TABLE A_DEBTOR ({})".format(','.join(appendfinal3.columns)))
-    
+
+    cursor.execute("DROP TABLE IF EXISTS A_DEBTOR")
+    conn.commit()
+
     # Generate the CREATE TABLE statement
     create_table_query = "CREATE TABLE A_DEBTOR (" + ', '.join(column_types) + ")"
     # Execute the query
@@ -1512,8 +1515,6 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit()
-    print(f"Update Database Debtor Listing Error: {e}")
-    sys.exit(f"Update Database Debtor Listing Error: {str(e)}")
 
     #==============================================================================================
 
@@ -1553,6 +1554,8 @@ except Exception as e:
     conn.commit() 
     cursor.execute("drop table A_download_error")
     conn.commit() 
+    print(f"Update Database Debtor Listing Error: {e}")
+    sys.exit(f"Update Database Debtor Listing Error: {str(e)}")
     
     #sys.exit(1)
 #except Exception as e:

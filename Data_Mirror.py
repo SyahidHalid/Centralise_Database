@@ -117,7 +117,7 @@ try:
 except Exception as e:
     print(f"Library Error: {e}")
     sys.exit(f"Library Error: {str(e)}")
-    #sys.exit(1)
+    sys.exit(1)
         
 #----------------------------------------------------------------------------------------------------
 
@@ -143,7 +143,7 @@ try:
 except Exception as e:
     print(f"Connect to Database Error: {e}")
     sys.exit(f"Connect to Database Error: {str(e)}")
-    #sys.exit(1)
+    sys.exit(1)
         
 #----------------------------------------------------------------------------------------------------
 
@@ -154,8 +154,8 @@ try:
     #E:mis_doc\\PythonProjects\\misPython\\misPython_doc
     #df1 = documentName #"Data Mirror October 2024.xlsx"
     #import config
-    #   documentName = "DataMirrorJuly2025.xlsx.xlsx"
-    #   reportingDate = "2025-07-31"
+    #   documentName = "DataMirrorAugust2025.xlsx.xlsx"
+    #   reportingDate = "2025-08-31"
 
     df1 = os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
 
@@ -204,9 +204,6 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit()
-    print(f"Upload Excel Data Mirror Error: {e}")
-    sys.exit(f"Upload Excel Data Mirror Error: {str(e)}")
-    #sys.exit(1) 
 
     #==============================================================================================
 
@@ -246,6 +243,10 @@ except Exception as e:
     conn.commit() 
     cursor.execute("drop table A_download_error")
     conn.commit() 
+
+    print(f"Upload Excel Data Mirror Error: {e}")
+    sys.exit(f"Upload Excel Data Mirror Error: {str(e)}")
+    sys.exit(1)
 
 #------------------------------------------------------------------------------------------------
 
@@ -676,9 +677,11 @@ try:
     LDB_cum_filtered['penalty_repayment'] = LDB_cum_filtered['penalty_repayment'].astype(float)
     LDB_cum_filtered['penalty_repayment_myr'] = LDB_cum_filtered['penalty_repayment_myr'].astype(float)
     
+    # LDB_cum_filtered.acc_status.dtypes
     LDB_cum_group = LDB_cum_filtered.iloc[np.where(~(LDB_cum_filtered.finance_sap_number.isna())&
                                                    (LDB_cum_filtered.finance_sap_number!='')&
-                                                   (LDB_cum_filtered.finance_sap_number!='NEW ACCOUNT'))].groupby(['finance_sap_number'])[['other_charges_payment_myr',
+                                                   (LDB_cum_filtered.finance_sap_number!='NEW ACCOUNT')&
+                                                   (LDB_cum_filtered.acc_status.isin(['30947','30948','30949','30950','30952'])))].groupby(['finance_sap_number'])[['other_charges_payment_myr',
                                                                       'other_charges_payment',
                                                                       'acc_interest_repayment_myr',
                                                                       'acc_interest_repayment_fc',
@@ -742,6 +745,7 @@ try:
 
 
     # combine2.shape
+    # combine3.iloc[np.where(combine3._merge=="right_only")]
     # combine3._merge.value_counts()
     # combine3.head(1)
     # LDB_cum_filtered.position_as_at.value_counts()
@@ -898,8 +902,7 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit()
-    print(f"Process Excel Data Mirror Error: {e}")
-    sys.exit(f"Process Excel Data Mirror Error: {str(e)}")
+
     #sys.exit(1) 
 
     #==============================================================================================
@@ -940,7 +943,9 @@ except Exception as e:
     conn.commit() 
     cursor.execute("drop table A_download_error")
     conn.commit() 
-
+    
+    print(f"Process Excel Data Mirror Error: {e}")
+    sys.exit(f"Process Excel Data Mirror Error: {str(e)}")
 #--------------------------------------------------------connect ngan database-----------------------------------------------------------------------------------------------------------------------------------------------------
 
 #smpi sini
@@ -953,7 +958,7 @@ try:
 
 
     #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+    # combine3.finance_sap_number.value_counts()
     # Assuming 'combine2' is a DataFrame
     column_types = []
     for col in combine3.columns:
@@ -967,6 +972,8 @@ try:
         else:
             column_types.append(f"{col} VARCHAR(255)")  # Default type for others
 
+    cursor.execute("DROP TABLE IF EXISTS A_PROFIT_N_OTHER_PAYMENT")
+    conn.commit()
 
     # Generate the CREATE TABLE statement
     create_table_query = "CREATE TABLE A_PROFIT_N_OTHER_PAYMENT (" + ', '.join(column_types) + ")"
@@ -979,40 +986,30 @@ try:
     conn.commit()
 
     cursor.execute("""
-    WITH DistinctSource AS (
-        SELECT 
-            finance_sap_number,
-            acc_interest_repayment_myr,
-            acc_cumulative_interest_repayment_myr,
-            acc_tawidh_payment_repayment_fc,
-            acc_tawidh_payment_repayment_myr,
-            acc_cumulative_tawidh_payment_repayment_fc,
-            acc_cumulative_tawidh_payment_repayment_myr,
-            acc_others_charges_payment_fc,
-            acc_others_charges_payment_myr,
-            acc_cumulative_others_charge_payment_fc,
-            acc_cumulative_others_charge_payment_myr,
-            ROW_NUMBER() OVER (PARTITION BY finance_sap_number ORDER BY finance_sap_number) AS rn
-        FROM A_PROFIT_N_OTHER_PAYMENT
-    )
-    MERGE INTO col_facilities_application_master AS target
-    USING (SELECT * FROM DistinctSource WHERE rn = 1) AS source
-    ON target.finance_sap_number = source.finance_sap_number
-    WHEN MATCHED AND target.position_as_at = ? THEN
-        UPDATE SET 
-            target.acc_interest_repayment_myr = source.acc_interest_repayment_myr
-            target.acc_cumulative_interest_repayment_myr = source.acc_cumulative_interest_repayment_myr
-            target.acc_tawidh_payment_repayment_fc = source.acc_tawidh_payment_repayment_fc,
-            target.acc_tawidh_payment_repayment_myr = source.acc_tawidh_payment_repayment_myr,
-            target.acc_cumulative_tawidh_payment_repayment_fc = source.acc_cumulative_tawidh_payment_repayment_fc,
-            target.acc_cumulative_tawidh_payment_repayment_myr = source.acc_cumulative_tawidh_payment_repayment_myr,
-            target.acc_others_charges_payment_fc = source.acc_others_charges_payment_fc,
-            target.acc_others_charges_payment_myr = source.acc_others_charges_payment_myr,
-            target.acc_cumulative_others_charge_payment_fc = source.acc_cumulative_others_charge_payment_fc,
-            target.acc_cumulative_others_charge_payment_myr = source.acc_cumulative_others_charge_payment_myr;
-    """, (reportingDate,))
-    conn.commit() 
-
+        WITH deduped_source AS (
+            SELECT *,
+                ROW_NUMBER() OVER (PARTITION BY finance_sap_number ORDER BY position_as_at DESC) AS rn
+            FROM A_PROFIT_N_OTHER_PAYMENT
+        )
+        MERGE INTO col_facilities_application_master AS target
+        USING (
+            SELECT * FROM deduped_source WHERE rn = 1
+        ) AS source
+        ON target.finance_sap_number = source.finance_sap_number
+        AND target.position_as_at = source.position_as_at
+        WHEN MATCHED THEN
+            UPDATE SET 
+                acc_interest_repayment_myr = source.acc_interest_repayment_myr,
+                acc_cumulative_interest_repayment_myr = source.acc_cumulative_interest_repayment_myr,
+                acc_tawidh_payment_repayment_fc = source.acc_tawidh_payment_repayment_fc,
+                acc_tawidh_payment_repayment_myr = source.acc_tawidh_payment_repayment_myr,
+                acc_cumulative_tawidh_payment_repayment_fc = source.acc_cumulative_tawidh_payment_repayment_fc,
+                acc_cumulative_tawidh_payment_repayment_myr = source.acc_cumulative_tawidh_payment_repayment_myr,
+                acc_others_charges_payment_fc = source.acc_others_charges_payment_fc,
+                acc_others_charges_payment_myr = source.acc_others_charges_payment_myr,
+                acc_cumulative_others_charge_payment_fc = source.acc_cumulative_others_charge_payment_fc,
+                acc_cumulative_others_charge_payment_myr = source.acc_cumulative_others_charge_payment_myr;
+    """)
     # # incase manual
     # cursor.execute("""MERGE INTO dbase_account_hist AS target USING A_PROFIT_N_OTHER_PAYMENT AS source
     # ON target.finance_sap_number = source.Account
@@ -1143,8 +1140,7 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit()
-    print(f"Update Database Data Mirror Error: {e}")
-    sys.exit(f"Update Database Data Mirror Error: {str(e)}")
+
 
     #==============================================================================================
 
@@ -1185,6 +1181,8 @@ except Exception as e:
     cursor.execute("drop table A_download_error")
     conn.commit() 
 
+    print(f"Update Database Data Mirror Error: {e}")
+    sys.exit(f"Update Database Data Mirror Error: {str(e)}")
     #sys.exit(1)
 #except Exception as e:
 #    print(f"Python Error: {e}")
