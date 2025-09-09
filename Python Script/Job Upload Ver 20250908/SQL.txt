@@ -1,0 +1,74 @@
+update by:
+
+select param_id from param_system_param where param_code='PY002'
+
+target.processed_status_id = (select param_id from param_system_param where param_code=source.processed_status_id)
+
+param:
+
+SELECT TOP (1000) [param_id]
+      ,[param_id_vc]
+      ,[param_code]
+      ,[param_name]
+      ,[parent_param_id]
+      ,[param_level]
+      ,[param_reference]
+      ,[param_root_id]
+      ,[param_haircut_percent]
+      ,[param_others_code]
+      ,[param_rating]
+  FROM [mis_db_prod_backup_2024_04_02].[dbo].[param_system_param] where param_reference like '%python%'
+
+account_trans UAT:
+
+SELECT TOP (1000) [aftd_id]
+      ,[name_original]
+      ,[name_convert]
+      ,[path_directory]
+      ,[source_type_id]
+      ,[reporting_date]
+      ,[result_file_name]
+      ,[status_id]
+      ,[remark]
+      ,[created_user_id]
+      ,[created_date]
+      ,[created_remark]
+      ,[updated_user_id]
+      ,[updated_date]
+      ,[updated_remark]
+      ,[deleted_user_id]
+      ,[deleted_date]
+      ,[deleted_remark]
+      ,[canceled_user_id]
+      ,[canceled_date]
+      ,[canceled_remark]
+      ,[uploaded_user_id]
+      ,[uploaded_date]
+      ,[uploaded_remark]
+      ,[processed_user_id]
+      ,[processed_date]
+      ,[processed_remark]
+      ,[processed_status_id]
+  FROM [mis_db_prod_backup_2024_04_02].[dbo].[account_finance_transaction_documents]
+  ORDER BY aftd_id desc
+
+log error:
+SELECT TOP (1000) [logerror_id]
+      ,[logerror_desc]
+      ,[iduser]
+      ,[dateerror]
+      ,[page]
+      ,[user_name]
+  FROM [mis_db_prod_backup_2024_04_02].[dbo].[log_apps_error]
+  ORDER BY logerror_id desc
+
+job python:
+
+SELECT TOP (1000) [jobId]
+      ,[jobName]
+      ,[jobStatus]
+      ,[jobStartDate]
+      ,[jobCompleted]
+      ,[PythonFileName]
+      ,[jobErrDetail]
+  FROM [mis_db_prod_backup_2024_04_02].[dbo].[jobPython]

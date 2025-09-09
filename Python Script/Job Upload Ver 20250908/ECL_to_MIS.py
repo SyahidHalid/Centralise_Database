@@ -1,26 +1,20 @@
+#view dependency
+#account need unique
+
+# python ECL_to_MIS.py 9,"ECL 1024 - MIS v1.xlsx","ECL to MIS","Pending Processing","0","syahidhalid@exim.com.my","2024-03-29"
+
 # python ECL_to_MIS.py 9 "ECL S1 S2 May-2025 working (AIN2).xlsx" "ECL to MIS" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
 
-#   Library
+# position_as_at
+
+# documentId = 9
+#tmbh update result table
+
+#try:
 import os
 import sys
 import pyodbc
 import config
-import pandas as pd
-import numpy as np
-import datetime as dt
-#from sqlalchemy import create_engine
-#from sqlalchemy import Table, MetaData
-#from sqlalchemy import update
-#from sqlalchemy.orm import sessionmaker
-#   Display
-#warnings.filterwarnings('ignore')
-pd.set_option("display.max_columns", None) 
-pd.set_option("display.max_colwidth", 1000) #huruf dlm column
-pd.set_option("display.max_rows", 100)
-pd.set_option("display.precision", 2) #2 titik perpuluhan
-
-#   Timestamp
-current_time = pd.Timestamp.now()
 
 print("Arguments passed:", sys.argv)
 
@@ -103,6 +97,32 @@ if __name__ == "__main__":
 #----------------------------------------------------------------------------------------------------
 
 try:
+    #   Library
+    import pandas as pd
+    import numpy as np
+    import pyodbc
+    import datetime as dt
+    #from sqlalchemy import create_engine
+    #from sqlalchemy import Table, MetaData
+    #from sqlalchemy import update
+    #from sqlalchemy.orm import sessionmaker
+    #   Display
+    #warnings.filterwarnings('ignore')
+    pd.set_option("display.max_columns", None) 
+    pd.set_option("display.max_colwidth", 1000) #huruf dlm column
+    pd.set_option("display.max_rows", 100)
+    pd.set_option("display.precision", 2) #2 titik perpuluhan
+
+    #   Timestamp
+    current_time = pd.Timestamp.now()
+except Exception as e:
+    print(f"Library Error: {e}")
+    sys.exit(f"Library Error: {str(e)}")
+    #sys.exit(1)
+        
+#----------------------------------------------------------------------------------------------------
+
+try:
     #   pyodbc
     conn = pyodbc.connect(config.CONNECTION_STRING)
     #conn = pyodbc.connect("Driver={ODBC Driver 17 for SQL Server};"+
@@ -130,11 +150,13 @@ except Exception as e:
 
 #process
 try:
-    #   Excel File
+    #    #E:\PythonProjects\misPython\misPython_doc
+    #documentName = "a"
+    #uploadedByEmail = "a"
+    
+    # documentName = "ECLS1S2July-2025working.xlsxv213.8.2025.xlsx.xlsx"
 
-    # documentName = "ECLS1S2Aug-2025working.xlsx.xlsx"
-    # reportingDate = "2025-08-31"
-    # df1 = r"C:\\Users\\syahidhalid\\Syahid_PC\\Analytics - ITD\\05. Interactive Dashboard\\Closing 202508\\Job Upload\\"+str(documentName) 
+    # reportingDate = "2025-07-31"
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
     

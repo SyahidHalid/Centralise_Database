@@ -1,31 +1,16 @@
 # python Allowance.py 13,"Allowance_1024_Adjusted.xlsx","Allowance","Pending Processing","0","syahidhalid@exim.com.my","2024-03-29"
+# python Allowance.py 13 "Allowance_1024_Adjusted.xlsx" "Allowance" "Pending Processing" "0" "syahidhalid@exim.com.my" "2024-03-29"
+# python Allowance.py 13 CR_Allowance_0625.xlsx" "Allowance" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-06-30"
 
-#   Library
+# position_as_at
+# aftd_id = DocumentId
+# tmbh update result table
+
+#try:
 import os
 import sys
 import pyodbc
 import config
-import pandas as pd
-import numpy as np
-import datetime as dt
-#from sqlalchemy import create_engine
-#from sqlalchemy import Table, MetaData
-#from sqlalchemy import update
-#from sqlalchemy.orm import sessionmaker
-#import streamlit as st
-#import base64
-#from PIL import Image
-#import plotly.express as px
-
-#   Display
-#warnings.filterwarnings('ignore')
-pd.set_option("display.max_columns", None) 
-pd.set_option("display.max_colwidth", 1000) #huruf dlm column
-pd.set_option("display.max_rows", 100)
-pd.set_option("display.precision", 2) #2 titik perpuluhan
-
-#   Timestamp
-current_time = pd.Timestamp.now()
 
 print("Arguments passed:", sys.argv)
 
@@ -109,7 +94,37 @@ if __name__ == "__main__":
             connection.close()
             print("Database connection closed.")
         
-  
+#----------------------------------------------------------------------------------------------------
+
+try:
+    #   Library
+    import pandas as pd
+    import numpy as np
+    import pyodbc
+    import datetime as dt
+    #from sqlalchemy import create_engine
+    #from sqlalchemy import Table, MetaData
+    #from sqlalchemy import update
+    #from sqlalchemy.orm import sessionmaker
+    #import streamlit as st
+    #import base64
+    #from PIL import Image
+    #import plotly.express as px
+
+    #   Display
+    #warnings.filterwarnings('ignore')
+    pd.set_option("display.max_columns", None) 
+    pd.set_option("display.max_colwidth", 1000) #huruf dlm column
+    pd.set_option("display.max_rows", 100)
+    pd.set_option("display.precision", 2) #2 titik perpuluhan
+
+    #   Timestamp
+    current_time = pd.Timestamp.now()
+except Exception as e:
+    print(f"Library Error: {e}")
+    sys.exit(f"Library Error: {str(e)}")
+    #sys.exit(1)
+        
 #----------------------------------------------------------------------------------------------------
 
 try:
@@ -141,14 +156,18 @@ except Exception as e:
 
 #upload excel
 try:
-    #   Excel File
+    #   Excel File Name
 
-    # documentName = "Allowance_0825(MIS).xlsx.xlsx"
-    # reportingDate = "2025-08-31"
-    # df1 = r"C:\\Users\\syahidhalid\\Syahid_PC\\Analytics - ITD\\05. Interactive Dashboard\\Closing 202508\\Job Upload\\"+str(documentName) 
+    #E:mis_doc\\PythonProjects\\misPython\\misPython_doc
+    #df1 = documentName #"Allowance_0625(MIS).xlsx"
+    
+    #import config
+    # documentName = "Allowance_0725v3(MIS2).xlsx.xlsx.xlsx"
+    # reportingDate = "2025-07-31"
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
-    
+    #df1 = r"D:\\mis_doc\\PythonProjects\\misPython\\misPython_doc\\Allowance_1024_Adjusted.xlsx" #"Data Mirror October 2024.xlsx"
+
     D1 = "IA-Conv"
     D2 = "IA-Islamic"
     D3 = "IA-IIS"
@@ -199,6 +218,10 @@ except Exception as e:
     cursor.execute(sql_error)
     conn.commit()
 
+    #sys.exit(1)
+    
+    #==============================================================================================
+
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
     data = [(documentId,"Not Applicable",'PY004','PY004')] #,36961,36961
     download_error = pd.DataFrame(data,columns=columns)
@@ -233,10 +256,8 @@ except Exception as e:
                         target.status_id = (select param_id from param_system_param where param_code=source.status_id);    
     """)
     conn.commit() 
-
     cursor.execute("drop table A_download_error")
     conn.commit() 
-
     print(f"Upload Excel Allowance Error: {e}")
     sys.exit(f"Upload Excel Allowance Error: {str(e)}")
 #------------------------------------------------------------------------------------------------
@@ -452,7 +473,6 @@ try:
     convert_time = str(current_time).replace(":","-")
     appendfinal1['position_as_at'] = reportingDate
 
-    # appendfinal1.iloc[np.where(appendfinal1['Account']=='500204')]
    
 
     # 30952 is Impaired
@@ -556,9 +576,6 @@ try:
     # sum(appendfinal1.AR_ECL_MYR)
     # sum(CnC_Acc_Receiv_1.AR_ECL_MYR)
 
-    # exception_report1.iloc[np.where(exception_report1['finance_sap_number']=='500204')]
-
-
     # Extract
     writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Allowance_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
 
@@ -624,6 +641,9 @@ except Exception as e:
     cursor.execute(sql_error)
     conn.commit()
 
+    #sys.exit(1) 
+    
+    #==============================================================================================
 
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
     data = [(documentId,"Not Applicable",'PY004','PY004')] #,36961,36961
@@ -659,26 +679,23 @@ except Exception as e:
                         target.status_id = (select param_id from param_system_param where param_code=source.status_id);    
     """)
     conn.commit() 
-
     cursor.execute("drop table A_download_error")
     conn.commit() 
 
     print(f"Process Excel Allowance Error: {e}")
     sys.exit(f"Process Excel Allowance Error: {str(e)}")
+# uploadedByEmail = 'syahidhalid@exim.com.my'
+#---------------------------------------------Download-------------------------------------------------------------
 
-
-    # uploadedByEmail = 'syahidhalid@exim.com.my'
-    #---------------------------------------------Download-------------------------------------------------------------
-
-    # cntrl + K + C untuk comment kn sume 
-    # cntrl + K + U untuk comment kn sume 
+# cntrl + K + C untuk comment kn sume 
+# cntrl + K + U untuk comment kn sume 
 
 
 
 try:
 
     # appendfinal1.Account.value_counts()
-    # appendfinal1.iloc[np.where(appendfinal1.Account=='500204')]
+    # appendfinal1.iloc[np.where(appendfinal1.Account=='500962')]
 
     appendfinal1 = appendfinal1.groupby(['Account',
                                          'position_as_at'])[['LAF_ECL_FC',
@@ -718,51 +735,63 @@ try:
         cursor.execute(sql, tuple(row[1]))
     conn.commit()
 
-    # cursor.execute("""
-    # WITH CTE AS (
-    #     SELECT 
-    #         Account,
-    #         MAX(LAF_ECL_FC) AS LAF_ECL_FC,
-    #         MAX(LAF_ECL_MYR) AS LAF_ECL_MYR,
-    #         MAX(CnC_ECL_FC) AS CnC_ECL_FC,
-    #         MAX(CnC_ECL_MYR) AS CnC_ECL_MYR,
-    #         MAX(ECL_FC) AS ECL_FC,
-    #         MAX(ECL_MYR) AS ECL_MYR,
-    #         MAX(AR_ECL_FC) AS AR_ECL_FC,
-    #         MAX(AR_ECL_MYR) AS AR_ECL_MYR
-    #     FROM A_ALLOWANCE
-    #     GROUP BY Account
-    # )
-    # MERGE col_facilities_application_master AS target
-    # USING CTE AS source
-    # ON target.finance_sap_number = source.Account
-    # WHEN MATCHED THEN
-    #     UPDATE SET 
-    #         target.acc_credit_loss_laf_ecl = source.LAF_ECL_FC,
-    #         target.acc_credit_loss_laf_ecl_myr = source.LAF_ECL_MYR,
-    #         target.acc_credit_loss_cnc_ecl = source.CnC_ECL_FC,
-    #         target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR,
-    #         target.acc_credit_loss_acc_receiv_ecl = source.AR_ECL_FC,
-    #         target.acc_credit_loss_acc_receiv_ecl_myr = source.AR_ECL_MYR;
-    # """)
-    # conn.commit() 
+    cursor.execute("""
+    WITH CTE AS (
+        SELECT 
+            Account,
+            MAX(LAF_ECL_FC) AS LAF_ECL_FC,
+            MAX(LAF_ECL_MYR) AS LAF_ECL_MYR,
+            MAX(CnC_ECL_FC) AS CnC_ECL_FC,
+            MAX(CnC_ECL_MYR) AS CnC_ECL_MYR,
+            MAX(ECL_FC) AS ECL_FC,
+            MAX(ECL_MYR) AS ECL_MYR,
+            MAX(AR_ECL_FC) AS AR_ECL_FC,
+            MAX(AR_ECL_MYR) AS AR_ECL_MYR
+        FROM A_ALLOWANCE
+        GROUP BY Account
+    )
+    MERGE col_facilities_application_master AS target
+    USING CTE AS source
+    ON target.finance_sap_number = source.Account
+    WHEN MATCHED THEN
+        UPDATE SET 
+            target.acc_credit_loss_laf_ecl = source.LAF_ECL_FC,
+            target.acc_credit_loss_laf_ecl_myr = source.LAF_ECL_MYR,
+            target.acc_credit_loss_cnc_ecl = source.CnC_ECL_FC,
+            target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR,
+            target.acc_credit_loss_acc_receiv_ecl = source.AR_ECL_FC,
+            target.acc_credit_loss_acc_receiv_ecl_myr = source.AR_ECL_MYR;
+    """)
+    conn.commit() 
 
     #    """, (reportingDate,))
     #AND target.position_as_at = ?
                     # target.acc_credit_loss_lafcnc_ecl = source.ECL_FC,
                     # target.acc_credit_loss_lafcnc_ecl_myr = source.ECL_MYR
     
-    cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_ALLOWANCE AS source
-    ON target.finance_sap_number = source.Account
-    WHEN MATCHED AND target.position_as_at = ? THEN
-        UPDATE SET target.acc_credit_loss_laf_ecl = source.LAF_ECL_FC,
-            target.acc_credit_loss_laf_ecl_myr = source.LAF_ECL_MYR,
-            target.acc_credit_loss_cnc_ecl = source.CnC_ECL_FC,
-            target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR,
-            target.acc_credit_loss_acc_receiv_ecl = source.AR_ECL_FC,
-            target.acc_credit_loss_acc_receiv_ecl_myr = source.AR_ECL_MYR;
-    """, (reportingDate,))
-    conn.commit() 
+    # # #incase manual upload
+    # cursor.execute("""WITH CTE AS (
+    #         SELECT Account,
+    #             MAX(LAF_ECL_FC) AS LAF_ECL_FC,
+    #             MAX(LAF_ECL_MYR) AS LAF_ECL_MYR,
+    #             MAX(CnC_ECL_FC) AS CnC_ECL_FC,
+    #             MAX(CnC_ECL_MYR) AS CnC_ECL_MYR,
+    #             MAX(ECL_FC) AS ECL_FC,
+    #             MAX(ECL_MYR) AS ECL_MYR,
+    #             MAX(position_as_at) AS position_as_at
+    #         FROM A_ALLOWANCE
+    #         GROUP BY Account
+    #     )
+    #     MERGE INTO dbase_account_hist AS target
+    #     USING CTE AS source
+    #     ON target.finance_sap_number = source.Account
+    #     WHEN MATCHED AND target.position_as_at = '2025-05-31' THEN
+    #         UPDATE SET target.acc_credit_loss_laf_ecl = source.LAF_ECL_FC,
+    #                 target.acc_credit_loss_laf_ecl_myr = source.LAF_ECL_MYR,
+    #                 target.acc_credit_loss_cnc_ecl = source.CnC_ECL_FC,
+    #                 target.acc_credit_loss_cnc_ecl_myr = source.CnC_ECL_MYR;
+    # """)
+    # conn.commit() 
 
     cursor.execute("drop table A_ALLOWANCE")
     conn.commit() 
@@ -773,6 +802,8 @@ try:
                 """
     cursor.execute(sql_query4)
     conn.commit() 
+
+
 
     #table        
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
@@ -809,7 +840,6 @@ try:
                         target.status_id = (select param_id from param_system_param where param_code=source.status_id);    
     """)
     conn.commit() 
-
     cursor.execute("drop table A_download_result")
     conn.commit() 
 
@@ -844,6 +874,9 @@ except Exception as e:
                 """
     cursor.execute(sql_error)
     conn.commit() 
+
+
+    #==============================================================================================
 
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
     data = [(documentId,"Not Applicable",'PY004','PY004')] #,36961,36961
@@ -884,11 +917,10 @@ except Exception as e:
 
     print(f"Update Database Allowance Error: {e}")
     sys.exit(f"Update Database Allowance Error: {str(e)}")
-    
     #sys.exit(1)
-    #except Exception as e:
-    #    print(f"Python Error: {e}")
-    #    sys.exit(f"Python Error: {str(e)}")
-    #    sys.exit(1)
+#except Exception as e:
+#    print(f"Python Error: {e}")
+#    sys.exit(f"Python Error: {str(e)}")
+#    sys.exit(1)
 
-    # documentId = 1
+# documentId = 1
