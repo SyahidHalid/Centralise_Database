@@ -1,7 +1,6 @@
 # python Calculation_ECL_Computation.py 13 "ECL.xlsx" "ECL" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-01-31"
 
-# 
-#reportingDate = '2025-05-31'
+# reportingDate = '2025-08-31'
 
 #try:
 import os
@@ -731,22 +730,22 @@ try:
 
     ECL_Group = ECL_Filter1.groupby(["facility_exim_account_num","Finance (SAP) Number",
                                     "Borrower name",
-                                    "Currency",
-                                    "Principal payment frequency",
-                                    "Interest payment frequency",
-                                    "Watchlist (Yes/No)",
-                                    "Reporting date",
-                                    "Maturity date",
-                                    "PD segment",]).agg(
-                                        AVG_outstanding=("Total outstanding (base currency)",'mean'),
-                                        AVG_Principal=("Principal payment (base currency)",'mean'),
-                                        AVG_Interest=("Interest payment (base currency)",'mean'),
-                                        AVG_Undrawn=("Undrawn amount (base currency)",'mean'),
-                                        AVG_EAD=("EAD",'mean'),
-                                        AVG_PD_PERCENTAGE=("PD_PERCENTAGE",'mean'),
-                                        AVG_LGD=("LGD rate",'mean'),
-                                        AVG_EIR=("Profit Rate/ EIR",'mean'),
-                                        AVG_EIR_ADJ=("EIR adj",'mean'),
+                                    # "Currency",
+                                    # "Principal payment frequency",
+                                    # "Interest payment frequency",
+                                    # "PD segment",
+                                    # "Reporting date",
+                                    # "Maturity date",
+                                    "Watchlist (Yes/No)",]).agg(
+                                        # AVG_outstanding=("Total outstanding (base currency)",'mean'),
+                                        # AVG_Principal=("Principal payment (base currency)",'mean'),
+                                        # AVG_Interest=("Interest payment (base currency)",'mean'),
+                                        # AVG_Undrawn=("Undrawn amount (base currency)",'mean'),
+                                        # AVG_EAD=("EAD",'mean'),
+                                        # AVG_PD_PERCENTAGE=("PD_PERCENTAGE",'mean'),
+                                        # AVG_LGD=("LGD rate",'mean'),
+                                        # AVG_EIR=("Profit Rate/ EIR",'mean'),
+                                        # AVG_EIR_ADJ=("EIR adj",'mean'),
                                         Total_ECL_FC_LAF=("Total ECL FC (LAF)",'sum'),
                                         Total_ECL_MYR_LAF=("Total ECL MYR (LAF)",'sum'),
                                         Total_ECL_FC_CNC=("Total ECL FC (C&C)",'sum'),
@@ -774,9 +773,11 @@ try:
     # Extract
     writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Calculation_ECL_Computation_"+str(reportingDate)[:19]+".xlsx"),engine='xlsxwriter')
 
+    ECL_Group.to_excel(writer2, sheet_name='ECL_SUMMARY', index = False)
+
     ECL_Filter1.to_excel(writer2, sheet_name='ECL_CALCULATOR', index = False)
 
-    ECL_Group.to_excel(writer2, sheet_name='ECL_SUMMARY', index = False)
+    Active.drop(['YOB','month_ends','adjusted_month_ends'],axis=1).to_excel(writer2, sheet_name='ECL_REPORT_DATA', index = False)
 
     writer2.close()
 
