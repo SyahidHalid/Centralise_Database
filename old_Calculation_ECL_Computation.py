@@ -331,7 +331,8 @@ try:
 
     extended_Active['Cummulative_Cal_Interest_payment'] = extended_Active.groupby('Finance (SAP) Number')['Cal_Interest_payment'].cumsum()
 
-
+    # extended_Active.iloc[np.where(extended_Active["Finance (SAP) Number"]=="501260")].head(10)
+    # ECL_Filter1.iloc[np.where(ECL_Filter1["Finance (SAP) Number"]=="501260")].head(10)
     #Undrawn
     #=IF(D30=0,0,
     #   IF($D$12=0,0,
@@ -339,19 +340,18 @@ try:
     #       IF(AND($D$10="Revolving",D30<=12,$D$9>12),$D$12/12,IF(AND($D$10="Revolving",D30<=($D$9-1),$D$9<=12),
     #         IFERROR(($D$12/($D$9-1)),$D$12/$D$9),0)))))
 
+    extended_Active["Undrawn_balance"]=extended_Active["Undrawn amount (base currency)"]/extended_Active["YOB"]
 
-    # extended_Active.iloc[np.where(extended_Active["Finance (SAP) Number"]=="501260")].head(10)
-    # ECL_Filter1.iloc[np.where(ECL_Filter1["Finance (SAP) Number"]=="501260")].head(10
+    extended_Active.loc[extended_Active["Undrawn amount (base currency)"]==0,"Undrawn_balance"] = 0
 
-
-    extended_Active.loc[(extended_Active["Revolving/Non-revolving"]=="Non-Revolving")&(extended_Active["Sequence"]<=extended_Active["YOB"]),"Undrawn_balance"] = extended_Active["Undrawn amount (base currency)"]/extended_Active["YOB"]
-    extended_Active.loc[(extended_Active["Revolving/Non-revolving"]=="Revolving")&(extended_Active["Sequence"]<=12)&(extended_Active["YOB"]>12),"Undrawn_balance"] = extended_Active["Undrawn amount (base currency)"]/(extended_Active["YOB"])
+    # extended_Active.loc[(extended_Active["Revolving/Non-revolving"]=="Non-revolving")&(extended_Active["Sequence"]<=extended_Active["YOB"]),"Undrawn_balance"] = extended_Active["Undrawn amount (base currency)"]/extended_Active["YOB"]
+    # extended_Active.loc[(extended_Active["Revolving/Non-revolving"]=="Revolving")&(extended_Active["Sequence"]<=12)&(extended_Active["YOB"]>12),"Undrawn_balance"] = extended_Active["Undrawn amount (base currency)"]/(extended_Active["YOB"])
     extended_Active.loc[(extended_Active["Revolving/Non-revolving"]=="Revolving")&(extended_Active["Sequence"]<=extended_Active["YOB"]-1)&(extended_Active["YOB"]<=12),"Undrawn_balance"] = extended_Active["Undrawn amount (base currency)"]/(extended_Active["YOB"]-1)
     extended_Active["Undrawn_balance"].fillna(0, inplace=True)
-    extended_Active.loc[extended_Active["Undrawn amount (base currency)"]==0,"Undrawn_balance"] = 0
 
     extended_Active.loc[extended_Active["Sequence"]==0,"Undrawn_balance"] = 0
     extended_Active['Cummulative_Undrawn_balance'] = extended_Active.groupby('Finance (SAP) Number')['Undrawn_balance'].cumsum()
+    
     
 
     #Installment
