@@ -1,4 +1,11 @@
-# python Allowance.py 13,"Allowance_1024_Adjusted.xlsx","Allowance","Pending Processing","0","syahidhalid@exim.com.my","2024-03-29"
+# python Allowance.py 13,
+# "Allowance_1024_Adjusted.xlsx",
+# "Allowance",
+# "Pending Processing",
+# "0",
+# "syahidhalid@exim.com.my",
+# "2024-09-30"
+
 
 #   Library
 import os
