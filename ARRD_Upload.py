@@ -394,7 +394,7 @@ try:
     
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_ARRD_Upload AS source
     ON target.finance_sap_number = source.SAP_number
-    WHEN MATCHED AND target.position_as_at = ? THEN
+    WHEN MATCHED AND source.position_as_at = ? THEN
         UPDATE SET target.int_month_in_arrears = source.int_month_in_arrears;
     """, (reportingDate,))
     conn.commit() 
