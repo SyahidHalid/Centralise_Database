@@ -1,6 +1,6 @@
 # python Calculation_ECL_Computation.py 13 "ECL.xlsx" "ECL" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-01-31"
 
-# reportingDate = '2025-08-31'
+# reportingDate = '2025-10-31'
 
 #try:
 import os

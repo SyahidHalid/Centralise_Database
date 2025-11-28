@@ -211,16 +211,65 @@ try:
     #ARRD.SAP_number.dtypes
     #ARRD.Customer_Name.value_counts()
 
-    ARRD1 = ARRD[['Customer_Name','SAP_number','Position_Date','Months_in_arrears']].iloc[np.where((ARRD.SAP_number != 0) & (ARRD.SAP_number.astype(str).str.len() == 6))].rename(columns={'Months_in_arrears':'int_month_in_arrears'})
+    ARRD1 = ARRD[['Customer_Name',
+                  'SAP_number',
+                  'Position_Date',
+                  'Months_in_arrears',
+                  'Effective_cost_of_borrowings',
+                  'Interest_Margin',
+                  'Profit/Interest_Rate',
+                  'Penalty_Rate']].iloc[np.where((ARRD.SAP_number != 0) & (ARRD.SAP_number.astype(str).str.len() == 6))].rename(columns={'Months_in_arrears':'int_month_in_arrears',
+                                                                                                                 'Effective_cost_of_borrowings':'acc_effective_cost_borrowings',
+                                                                                                                 'Interest_Margin':'acc_margin',
+                                                                                                                 'Profit/Interest_Rate':'acc_average_interest_rate',
+                                                                                                                 'Penalty_Rate':'acc_tadwih_compensation'})
 
+    
+    ARRD1['acc_margin'] = ARRD1['acc_margin'].replace("-",0).astype(float)
+    ARRD1['acc_average_interest_rate'] = ARRD1['acc_average_interest_rate'].replace("-",0).astype(float)
+    ARRD1['acc_tadwih_compensation'] = ARRD1['acc_tadwih_compensation'].replace("-",0).astype(float)
+
+    ARRD1['acc_effective_cost_borrowings'] = ARRD1['acc_effective_cost_borrowings'].str.upper()
+    ARRD1['acc_effective_cost_borrowings'] = ARRD1['acc_effective_cost_borrowings'].str.replace(' ', '')
+
+    
+    param = pd.read_sql_query("SELECT * FROM param_system_param where parent_param_id = 31212;", conn)
+
+    param_table = ARRD1[['acc_effective_cost_borrowings']].drop_duplicates().reset_index(drop=True)
+
+    param_table['acc_effective_cost_borrowings'] = param_table['acc_effective_cost_borrowings'].str.upper()
+    param_table['acc_effective_cost_borrowings'] = param_table['acc_effective_cost_borrowings'].str.replace(' ', '')
+
+    param['param_name'] = param['param_name'].str.upper()
+    
+    param_merge = param_table.rename(columns={'acc_effective_cost_borrowings':'param_name'}).merge(param[['param_id','param_name']],on='param_name',how='left')
+
+
+    ARRD2 = ARRD1.merge(param_merge.rename(columns={'param_name':'acc_effective_cost_borrowings'}),on='acc_effective_cost_borrowings',how='left')
+
+    # ARRD2.param_id.dtypes
+    # LDB_prev.acc_effective_cost_borrowings.dtypes
+    #ARRD2.param_id.value_counts()
+    
+    ARRD2['param_id'] = ARRD2['param_id'].fillna(0).astype(int)    
+    ARRD2['param_id'] = ARRD2['param_id'].astype(str)
+    ARRD2['param_id'] = ARRD2['param_id'].str.replace(0, '')  
+    
+    # ARRD2.iloc[np.where(ARRD2['param_id']==0)]
     #ARRD1.head(1)
     #ARRD1.shape
+    #ARRD1.dtypes
 
     #Exception
 
     #LDB_name = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
     
-    LDB_prev1 = LDB_prev[['finance_sap_number','int_month_in_arrears']].iloc[np.where((LDB_prev.finance_sap_number.astype(str).str.len() == 6))]
+    LDB_prev1 = LDB_prev[['finance_sap_number',
+                          'int_month_in_arrears',
+                          'acc_effective_cost_borrowings',
+                          'acc_margin',
+                          'acc_average_interest_rate',
+                          'acc_tadwih_compensation']].iloc[np.where((LDB_prev.finance_sap_number.astype(str).str.len() == 6))]
 
 
     #   LDB_prev1.iloc[np.where(LDB_prev1['finance_sap_number'].str.contains('B'))]
@@ -230,13 +279,24 @@ try:
     # LDB_prev1.finance_sap_number.dtypes
 
     LDB_prev1.finance_sap_number = LDB_prev1.finance_sap_number.astype(str)
-    ARRD1.SAP_number = ARRD1.SAP_number.astype(str)
+    ARRD2.SAP_number = ARRD2.SAP_number.astype(str)
 
-    exception_report = ARRD1.rename(columns={'SAP_number':'finance_sap_number'}).merge(LDB_prev1, on=['finance_sap_number'], how='outer', suffixes=('_Manual','_Mis'),indicator=True)
+    exception_report = ARRD2.rename(columns={'SAP_number':'finance_sap_number'}).merge(LDB_prev1, on=['finance_sap_number'], how='outer', suffixes=('_Manual','_Mis'),indicator=True)
 
     #exception_report._merge.value_counts()
 
     exception_report["diff_MIA"] = exception_report["int_month_in_arrears_Manual"].fillna(0) - exception_report["int_month_in_arrears_Mis"].fillna(0)
+    
+
+    exception_report["diff_COST_BORROWING"] = np.where(
+        exception_report["acc_effective_cost_borrowings_Manual"] == exception_report["acc_effective_cost_borrowings_Mis"],
+        "Y",
+        "N"
+    )
+
+    exception_report["diff_MARGIN"] = exception_report["acc_margin_Manual"].fillna(0) - exception_report["acc_margin_Mis"].fillna(0)
+    exception_report["diff_INTEREST_RATE"] = exception_report["acc_average_interest_rate_Manual"].fillna(0) - exception_report["acc_average_interest_rate_Mis"].fillna(0)
+    exception_report["diff_PENALTY_RATE"] = exception_report["acc_tadwih_compensation_Manual"].fillna(0) - exception_report["acc_tadwih_compensation_Mis"].fillna(0)
 
     convert_time = str(current_time).replace(":","-")
     exception_report.Position_Date.fillna(reportingDate,inplace=True)
@@ -247,7 +307,19 @@ try:
                                             '_merge',
                                             'int_month_in_arrears_Manual',
                                             'int_month_in_arrears_Mis',
-                                            'diff_MIA']].rename(columns={'Position_Date':'position_as_at'})
+                                            'diff_MIA',
+                                            'acc_effective_cost_borrowings_Manual',
+                                            'acc_effective_cost_borrowings_Mis',
+                                            'diff_COST_BORROWING',
+                                            'acc_margin_Manual',
+                                            'acc_margin_Mis',
+                                            'diff_MARGIN',
+                                            'acc_average_interest_rate_Manual',
+                                            'acc_average_interest_rate_Mis',
+                                            'diff_INTEREST_RATE',
+                                            'acc_tadwih_compensation_Manual',
+                                            'acc_tadwih_compensation_Mis',
+                                            'diff_PENALTY_RATE']].rename(columns={'Position_Date':'position_as_at'})
     
     #LDB_prev1.finance_sap_number.value_counts()
     #LDB_prev.head(1)
@@ -255,13 +327,13 @@ try:
     # Extract
     writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_ARRD_Upload_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
 
-    ARRD1.to_excel(writer2, sheet_name='Result', index = False)
+    ARRD2.to_excel(writer2, sheet_name='Result', index = False)
 
     exception_report1.to_excel(writer2, sheet_name='Exception', index = False)
 
     writer2.close()
 
-
+    
     # cursor.execute("DROP TABLE IF EXISTS Exception_ARRD_Upload")
     # conn.commit()
 
@@ -358,11 +430,16 @@ except Exception as e:
 
 
 try:
+    # ARRD2.head()
+    # ARRD2.SAP_number.value_counts()
+    # ARRD2.iloc[np.where(ARRD2.SAP_number=='500204')]
 
-    # ARRD1.SAP_number.value_counts()
-    # ARRD1.iloc[np.where(ARRD1.SAP_number=='500204')]
-
-    ARRD2 = ARRD1.rename(columns={'Position_Date':'position_as_at'}).groupby(['SAP_number','position_as_at'])[['int_month_in_arrears']].sum().reset_index()
+    ARRD2 = ARRD2.rename(columns={'Position_Date':'position_as_at',
+                                  'param_id':'acc_effective_cost_borrowings',
+                                  'acc_effective_cost_borrowings':'name'}).groupby(['SAP_number','position_as_at','acc_effective_cost_borrowings','name'])[['int_month_in_arrears',
+                                                                                                                                               'acc_margin',
+                                                                                                                                               'acc_average_interest_rate',
+                                                                                                                                               'acc_tadwih_compensation']].sum().reset_index()
     
     # sum(appendfinal1.LAF_ECL_MYR)
 
@@ -395,7 +472,11 @@ try:
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_ARRD_Upload AS source
     ON target.finance_sap_number = source.SAP_number
     WHEN MATCHED AND target.position_as_at = ? THEN
-        UPDATE SET target.int_month_in_arrears = source.int_month_in_arrears;
+        UPDATE SET target.int_month_in_arrears = source.int_month_in_arrears,
+                   target.acc_effective_cost_borrowings = source.acc_effective_cost_borrowings,
+                   target.acc_margin = source.acc_margin,
+                   target.acc_average_interest_rate = source.acc_average_interest_rate,
+                   target.acc_tadwih_compensation = source.acc_tadwih_compensation;
     """, (reportingDate,))
     conn.commit() 
 
