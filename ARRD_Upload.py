@@ -209,7 +209,7 @@ try:
     ARRD.columns = ARRD.columns.str.replace(".", "_")
 
     #ARRD.SAP_number.dtypes
-    #ARRD.Customer_Name.value_counts()
+    #ARRD.acc_effective_cost_borrowings.value_counts()
 
     ARRD1 = ARRD[['Customer_Name',
                   'SAP_number',
@@ -230,7 +230,12 @@ try:
     ARRD1['acc_tadwih_compensation'] = ARRD1['acc_tadwih_compensation'].replace("-",0).astype(float)
 
     ARRD1['acc_effective_cost_borrowings'] = ARRD1['acc_effective_cost_borrowings'].str.upper()
-    ARRD1['acc_effective_cost_borrowings'] = ARRD1['acc_effective_cost_borrowings'].str.replace(' ', '')
+    ARRD1['acc_effective_cost_borrowings'] = ARRD1['acc_effective_cost_borrowings'].str.replace(' ','')
+    ARRD1.loc[ARRD1['acc_effective_cost_borrowings'] == 'FIX', 'acc_effective_cost_borrowings'] = 'FIXED'
+
+    #   ARRD1.acc_effective_cost_borrowings.value_counts()
+    #   ARRD1.iloc[np.where(ARRD1.acc_effective_cost_borrowings=='FIXED')]
+    #   param_merge.iloc[np.where(param_merge.param_name=='FIXED')]
 
     
     param = pd.read_sql_query("SELECT * FROM param_system_param where parent_param_id = 31212;", conn)
@@ -248,12 +253,16 @@ try:
     ARRD2 = ARRD1.merge(param_merge.rename(columns={'param_name':'acc_effective_cost_borrowings'}),on='acc_effective_cost_borrowings',how='left')
 
     # ARRD2.param_id.dtypes
+    # ARRD1.shape
     # LDB_prev.acc_effective_cost_borrowings.dtypes
-    #ARRD2.param_id.value_counts()
+
+    # ARRD2.param_id.value_counts()
+    # param_merge.param_name.value_counts()
     
     ARRD2['param_id'] = ARRD2['param_id'].fillna(0).astype(int)    
     ARRD2['param_id'] = ARRD2['param_id'].astype(str)
-    ARRD2['param_id'] = ARRD2['param_id'].str.replace(0, '')  
+    ARRD2.loc[ARRD2['param_id'] == '0', 'param_id'] = ''
+    
     
     # ARRD2.iloc[np.where(ARRD2['param_id']==0)]
     #ARRD1.head(1)
@@ -434,7 +443,7 @@ try:
     # ARRD2.SAP_number.value_counts()
     # ARRD2.iloc[np.where(ARRD2.SAP_number=='500204')]
 
-    ARRD2 = ARRD2.rename(columns={'Position_Date':'position_as_at',
+    ARRD3 = ARRD2.rename(columns={'Position_Date':'position_as_at',
                                   'param_id':'acc_effective_cost_borrowings',
                                   'acc_effective_cost_borrowings':'name'}).groupby(['SAP_number','position_as_at','acc_effective_cost_borrowings','name'])[['int_month_in_arrears',
                                                                                                                                                'acc_margin',
@@ -445,13 +454,13 @@ try:
 
     # Assuming 'combine2' is a DataFrame
     column_types = []
-    for col in ARRD2.columns:
+    for col in ARRD3.columns:
         # You can choose to map column types based on data types in the DataFrame, for example:
-        if ARRD2[col].dtype == 'object':  # String data type
+        if ARRD3[col].dtype == 'object':  # String data type
             column_types.append(f"{col} VARCHAR(255)")
-        elif ARRD2[col].dtype == 'int64':  # Integer data type
+        elif ARRD3[col].dtype == 'int64':  # Integer data type
             column_types.append(f"{col} INT")
-        elif ARRD2[col].dtype == 'float64':  # Float data type
+        elif ARRD3[col].dtype == 'float64':  # Float data type
             column_types.append(f"{col} FLOAT")
         else:
             column_types.append(f"{col} VARCHAR(255)")  # Default type for others
@@ -464,8 +473,8 @@ try:
     # Execute the query
     cursor.execute(create_table_query)
 
-    for row in ARRD2.iterrows():
-        sql = "INSERT INTO A_ARRD_Upload({}) VALUES ({})".format(','.join(ARRD2.columns), ','.join(['?']*len(ARRD2.columns)))
+    for row in ARRD3.iterrows():
+        sql = "INSERT INTO A_ARRD_Upload({}) VALUES ({})".format(','.join(ARRD3.columns), ','.join(['?']*len(ARRD3.columns)))
         cursor.execute(sql, tuple(row[1]))
     conn.commit()
     
@@ -490,7 +499,8 @@ try:
     cursor.execute(sql_query4)
     conn.commit() 
 
-    #table        
+    #table    
+    # documentId = 1    
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
     data = [(documentId,"Result_ARRD_Upload_"+str(convert_time)[:19]+".xlsx",'PY005','PY002')] #cari pakai code jgn pakai id ,36978,36960
     download_result = pd.DataFrame(data,columns=columns)
