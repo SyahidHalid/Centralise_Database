@@ -1,456 +1,617 @@
-import streamlit as st
+# python CCRIS_Template.py 1, "a", "CCRIS Template", "Pending Processing", "0", "syahidhalid@exim.com.my","2025-07-31"
+
+#   reportingDate = '2025-07-31'
+#   documentId = 1
+
+#   Library
+import os
+import sys
+import pyodbc
+import config
 import pandas as pd
 import numpy as np
-#import base64
-#from PIL import Image
-#import plotly.express as px
+import datetime as dt
 
-#warnings.filterwarnings('ignore')
-#pd.set_option("display.max_columns", None) 
-#pd.set_option("display.max_colwidth", 1000) #huruf dlm column
-#pd.set_option("display.max_rows", 100)
-#pd.set_option("display.precision", 2) #2 titik perpuluhan
+#   Display
+pd.set_option("display.max_columns", None) 
+pd.set_option("display.max_colwidth", 1000) #huruf dlm column
+pd.set_option("display.max_rows", 100)
+pd.set_option("display.precision", 2) #2 titik perpuluhan
 
-#----------------------nama kat web atas yg newtab (png sahajer)--------------------
-st.set_page_config(
-  page_title = 'Loan Database - Automation',
-  page_icon = "EXIM.png",
-  layout="wide"
-  )
+#   Timestamp
+current_time = pd.Timestamp.now()
 
-#to show code kat website
+print("Arguments passed:", sys.argv)
 
-#with st.echo():
-#  def sum(a, b):
-#    return a + b
+# Database connection setup
+def connect_to_mssql():
+    try:   
+        #connection = pyodbc.connect(
+        #    'DRIVER={ODBC Driver 17 for SQL Server};'
+        #    'SERVER=10.32.1.51,1455;'
+        #    'DATABASE=mis_db_prod_backup_2024_04_02;'
+        #    'UID=mis_admin;'
+        #    'PWD=Exim1234;'
+        #    'Encrypt=yes;TrustServerCertificate=yes'  # Use if you encounter SSL issues
+        #)
 
-#----------------------header
-html_template = """
-<div style="display: flex; align-items: center;">
-    <img src="https://www.exim.com.my/wp-content/uploads/2022/07/video-thumbnail-preferred-financier.png" alt="EXIM Logo" style="width: 200px; height: 72px; margin-right: 10px;">
-    <h1>CCRIS Uploading</h1>
-</div>
-"""
-st.markdown(html_template, unsafe_allow_html=True)
-#st.header('asd')
-st.subheader("Reminder to copy data to template before start:")
-#----------------------------Title--------------------------------------------------------------------
+        connection = pyodbc.connect(config.CONNECTION_STRING)
 
-#st.write('# Income Statement')
-st.write('Please fill in the form below to auto run by uploading latest loan database received in xlsx format below:')
+        print("Connected to MSSQL database successfully.")
+        
+        return connection
+    except Exception as e:
+        print(f"Error connecting to MSSQL database: {e}")
+        
+        sys.exit(f"Error connecting to MSSQL database: {str(e)}")
+        #sys.exit(1)
 
-#----------------------------Input--------------------------------------------------------------------
-#X = st.text_input("Input Date (i.e. 202409):")
-#Y = st.text_input("Input Name (i.e. 09. Income statement Sep 2024):")
+#----------------------------------------------------------------------------------------------------
 
-# klau nk user isi dlu bru boleh forward
-#if not X:
-#  st.warning("Enter Date!")
-#  st.stop()
-#st.success("Go ahead")
 
-#if not Y:
-#  st.warning("Enter Name!")
-#  st.stop()
-#st.success("Go ahead")
+# Main function
+if __name__ == "__main__":
+    try:
+        # Ensure we have the correct number of arguments
+        if len(sys.argv) != 8:
+            print("Usage: python testPython.py <documentId> <documentName> <jobName> <statusName> <uploadedById> <uploadedByEmail> <reportingDate>")
+            sys.exit(1)
 
-#----------------------------Form--------------------------------------------------------------------
+        # Parse command-line arguments
+        documentId = int(sys.argv[1])
+        documentName = sys.argv[2]
+        jobName = sys.argv[3]
+        statusName = sys.argv[4]
+        uploadedById = int(sys.argv[5])
+        uploadedByEmail = sys.argv[6]
+        reportingDate = sys.argv[7] # YYYY-MM-DD
 
-form = st.form("Basic form")
-#name = form.text_input("Name")
+        print(f"Arguments received: {documentId}, {documentName}, {jobName}, {statusName}, {uploadedById}, {uploadedByEmail}, {reportingDate}")
 
-#date_format = form.text_input("Input Date (i.e. 202409):")
+        # Connect to MSSQL
+        connection = connect_to_mssql()
 
-year = form.slider("Year", min_value=2020, max_value=2030, step=1)
-month = form.slider("Month", min_value=1, max_value=12, step=1)
-#sheet = form.text_input("Input sheet Name ")
-sheet = "Loan Database"
+        # Call the set_user function with the parsed arguments
+        #set_user(connection, documentId, documentName, jobName, statusName, uploadedById, uploadedByEmail, reportingDate)
 
-#age = form.slider("Age", min_value=18, max_value=100, step=1)
-#date = form.date_input("Date", value=dt.date.today())
+    except Exception as e:
+        print(f"Script failed with exception: {e}")
+        sys.exit(f"Script failed with exception: {str(e)}")
+        #sys.exit(1)  # Exit the script with a failure code
+    finally:
+        if 'connection' in locals() and connection is not None:
+            connection.close()
+            print("Database connection closed.")
+        
+#----------------------------------------------------------------------------------------------------
 
-df1 = form.file_uploader(label= "Upload Latest Loan Database:")
 
-if df1:
-  df1 = pd.read_excel(df1, sheet_name=sheet, header=1)
-  #st.write(df1.head(1))
+#   Library
+try:
+    import pandas as pd
+    import numpy as np
+    import pyodbc
+    import datetime as dt
+    import xlsxwriter
 
-submitted = form.form_submit_button("Submit")
-if submitted:
-  #st.write("Submitted")
-  #st.write(year, month)
+    pd.set_option("display.max_columns", None) 
+    pd.set_option("display.max_colwidth", 1000) #huruf dlm column
+    pd.set_option("display.max_rows", 100)
+    pd.set_option("display.precision", 2) #2 titik perpuluhan
 
-  st.write(f"File submitted for : "+str(year)+"-"+str(month))
-  #st.write(f"All file submitted for :{str(year)+str(month)}")
+except Exception as e:
+    print(f"Library Error: {e}")
+    sys.exit(f"Library Error: {str(e)}")
+    #sys.exit(1)
+        
+#----------------------------------------------------------------------------------------------------
 
-  LDB1 = df1.iloc[np.where(~df1['CIF Number'].isna())]
-  
-  #st.write(LDB1.head(3))
 
-  LDB1.columns = LDB1.columns.str.strip()
-  LDB1.columns = LDB1.columns.str.replace("\n", "")
-  
-  LDB1['LGD'] = ""
-  LDB1['Risk Category'] = ""
-  LDB1['Prudential Limit (%)'] = ""
-  LDB1["EXIMs Shareholder Fund as at"] = ""
-  LDB1["EXIMs Shareholder Fund as at (MYR)"] = ""
-  LDB1['Single Customer Exposure Limit (SCEL)(MYR)'] = ""
-  LDB1['Percentage of Total Banking Exposure(MYR) to SCEL (MYR)'] = ""
-  LDB1['Percentage of Total Overall Banking Exposure (MYR) to SCEL (MYR) (%)'] = ""
-  LDB1['EXIM Main Sector'] = ""
-  LDB1['SME Commercial Corporate'] = ""
-  LDB1['PF'] = ""
-  LDB1['Risk Analyst'] = ""
-  LDB1['Ownership'] = ""
-  LDB1['Officer in Charge'] = ""
+#   pyodbc
+try:
+    #conn = pyodbc.connect("Driver={ODBC Driver 17 for SQL Server};"+
+    #                    "Server=10.32.1.51,1455;"+
+    #                    "Database=mis_db_prod_backup_2024_04_02;"+
+    #                    "Trusted_Connection=no;"+
+    #                    "uid=mis_admin;"+
+    #                    "pwd=Exim1234")
+    conn = pyodbc.connect(config.CONNECTION_STRING)
+    
+    cursor = conn.cursor()
 
-  LDB2 = LDB1[['CIF Number',
-             'EXIM Account No.',
-                     'Application System Code',
-                     'CCRIS Master Account Number',
-                     'CCRIS Sub Account Number',
-                            'Finance(SAP) Number',
-                            'Company Group',
-                            'Customer Name',
-                            'Relationship Manager (RM)',
-                            'Team', #Banking Team',
-                            'Ownership',
-                            'Officer in Charge',
-                            'Syndicated / Club Deal',
-                            'Nature of Account',
-                            'Facility',
-                            'Facility Currency',
-                            'Type of Financing',
-                            'Shariah Contract / Concept',
-                            'Status',
-                            'Post Approval Stage',
-                            'Date of Ready for Utilization (RU)',
-                            #'Restructured / Rescheduled(Y/N)',
-                            'Amount Approved / Facility Limit (Facility Currency)',
-                            'Amount Approved / Facility Limit (MYR)',
-                            'Cost/Principal Outstanding (Facility Currency)',
-                            'Cost/Principal Outstanding (MYR)',
-                            'Contingent Liability Letter of Credit (Facility Currency)',
-                            'Contingent Liability Letter of Credit (MYR)',
-                            'Contingent Liability (Facility Currency)',
-                            'Contingent Liability (MYR)',
-                            'Account Receivables/Past Due Claims (Facility Currency)',
-                            'Account Receivable/Past Due Claims (MYR)',
-                            'Total Banking Exposure (Facility Currency)',
-                            'Total Banking Exposure (MYR)',
-                            'Accrued Profit/Interest of the month (Facility Currency)',
-                            'Accrued Profit/Interest of the month (MYR)',
-                            'Modification of Loss (Facility Currency)',
-                            'Modification of Loss (MYR)',
-                            'Cumulative Accrued Profit/Interest (Facility Currency)',
-                            'Cumulative Accrued Profit/Interest (MYR)',                            
-                            'Penalty/Ta`widh (Facility Currency)',
-                            'Penalty/Ta`widh (MYR)',
-                            'Income/Interest in Suspense (Facility Currency)',
-                            'Income/Interest in Suspense (MYR)',
-                            'Other Charges (Facility Currency)',
-                            'Other Charges (MYR)',
-                            'Total Loans Outstanding (Facility Currency)',
-                            'Total Loans Outstanding (MYR)',
-             'Expected Credit Loss (ECL) LAF (Facility Currency)',
-             'Expected Credit Loss LAF (ECL) (MYR)',
-             'Expected Credit Loss C&C (ECL) (Facility Currency)',
-             'Expected Credit Loss C&C (ECL) (MYR)',
-                            'Disbursement/Drawdown Status',
-                            'Unutilised/Undrawn Amount (Facility Currency)',
-                            'Unutilised/Undrawn Amount (MYR)',
-                            'Disbursement/Drawdown (Facility Currency)',
-                            'Disbursement/Drawdown (MYR)',
-                            'Cumulative Disbursement/Drawdown (Facility Currency)',
-                            'Cumulative Disbursement/Drawdown (MYR)',
-                            'Cost Payment/Principal Repayment (Facility Currency)',
-                            'Cost Payment/Principal Repayment (MYR)',                            
-                            'Cumulative Cost Payment/Principal Repayment (Facility Currency)',
-                            'Cumulative Cost Payment/Principal Repayment (MYR)',
-                            'Profit Payment/Interest Repayment (Facility Currency)',
-                            'Profit Payment/Interest Repayment (MYR)',
-                            'Cumulative Profit Payment/Interest Repayment (Facility Currency)',
-                            'Cumulative Profit Payment/Interest Repayment (MYR)',
-                            'Ta`widh Payment/Penalty Repayment (Facility Currency)',
-                            'Ta`widh Payment/Penalty Repayment  (MYR)',
-                            'Cumulative Ta`widh Payment/Penalty Repayment (Facility Currency)',
-                            'Cumulative Ta`widh Payment/Penalty Repayment  (MYR)',
-                            'Other Charges Payment (Facility Currency)',
-                            'Other Charges Payment (MYR)',
-                            'Cumulative Other Charges Payment (Facility Currency)',
-                            'Cumulative Other Charges Payment (MYR)',
-                            'Rating at Origination',
-                            'Internal Credit Rating (PD/PF)', #bru  #'PD',
-                            'PF',
-             'LGD',
-                            'CRMS Obligor Risk Rating',
-                            #'CRMS CG Rating', 'CCPT Classification',
-                            'PD (%)',
-                            'LGD (%)',
-            'Risk Category',
-            "Prudential Limit (%)",
-            "EXIMs Shareholder Fund as at",
-            "EXIMs Shareholder Fund as at (MYR)",
-            "Single Customer Exposure Limit (SCEL)(MYR)",
-            "Percentage of Total Banking Exposure(MYR) to SCEL (MYR)",
-            "Percentage of Total Overall Banking Exposure (MYR) to SCEL (MYR) (%)",
-                            'Risk Analyst',
-                            'MFRS9 Staging',
-                            'BNM Main Sector',
-                            'BNM Sub Sector',
-                            'EXIM Main Sector',
-                            'Industry (Risk)',
-                            'Industry Classification',
-                            'Purpose of Financing',
-                            'Date Approved at Origination',
-                            'Approval Authority',
-                            'LO issuance Date',
-                            'Date of LO Acceptance',
-                            '1st Disbursement Date / 1st Drawdown Date',
-                            '1st Payment/Repayment Date',
-                            'Expiry of Availability Period',
-                            'Facility Agreement Date',
-                            'Annual Review Date',
-                            'Watchlist Review Date',
-                            'Maturity/Expired Date',
-                            'Grace Period (Month)',
-                            'Moratorium Period (Month)',
-                            'Start Moratorium Date',
-        'Fund Type',
-                            'Tenure (Month)',
-                            'Payment/Repayment Frequency (Profit/Interest)',
-                            'Payment/Repayment Frequency (Cost/Principal)',
-                            'Effective cost of borrowings',
-                            'Profit/Interest Margin',
-                            'Effective Interest Rate (EIR)', #bru  #'Average Profit/Interest Rate',
-                            'Ta`widh Compensation/Penalty Rate',
-                            'Operation Country',
-                            'Country Exposure',
-                            'Country Rating',
-                            'Region',
-                            'Market Type',
-                            'Classification of Entity / Customer Type',
-                            'Entity / Customer Type',
-                            'Classification of Residency Status',
-                            'Residency Status',#'Main Residency Status',
-                            'Corporate Type',
-                            'SME Commercial Corporate', #tukar
-                            'Corporate Status',
-                            'Justification on Corporate Status',
-                            'Restructured / Rescheduled',
-                            'Date of Approval Restructured / Rescheduled',
-                            'Effective Date ( R&R )',
-                            'Reason Restructured & Resheduled',
-                            #'Date Untagged from R&R',
-                            #'Justification for Untagged',
-                            'Frequency of R&R',
-                            'Date of Overdue',
-             'Overdue (Days)',
-             'Month in Arrears',
-             'Overdue Amount (Facility Currency)',
-             'Overdue Amount (MYR)',
-                            'Date Classified as Watchlist',
-                            'Watchlist Reason',
-                            'Date Declassified from Watchlist',
-                            'Date Impaired',
-                            'Reason for Impairment',
-                            'Partial Write off Date',
-                            'Write off Date',
-                            'Cancellation Date/Fully Settled Date','Position as At']]
-  
-  LDB2['Finance(SAP) Number'] = LDB2['Finance(SAP) Number'].astype(str)
 
-  LDB2.loc[(LDB2['Finance(SAP) Number'].isin(['BG-I','BG','500724'])),'Expected Credit Loss C&C (ECL) (MYR)'] = 0
-  LDB2.loc[(LDB2['Finance(SAP) Number'].isin(['BG-I','BG','500724'])),'Expected Credit Loss C&C (ECL) (Facility Currency)'] = 0
+    Active_before = pd.read_sql_query(
+        "SELECT * FROM dbase_account_hist WHERE position_as_at = ?",
+        conn,
+        params=(reportingDate,)
+    )
 
-  LDB2['Expected Credit Loss LAF (ECL) (MYR) 2'] = LDB2['Expected Credit Loss LAF (ECL) (MYR)'].fillna(0) + LDB2['Expected Credit Loss C&C (ECL) (MYR)'].fillna(0)
-  LDB2['Expected Credit Loss (ECL) LAF (Facility Currency) 2'] = LDB2['Expected Credit Loss (ECL) LAF (Facility Currency)'].fillna(0) + LDB2['Expected Credit Loss C&C (ECL) (Facility Currency)'].fillna(0)
+    sql_query1 = """UPDATE [jobPython]
+    SET [jobStartDate] = getdate(), [jobStatus]= 'PY001', [PythonFileName]='CCRIS_Template.py',[jobCompleted] = NULL
+    WHERE [jobName] = 'CCRIS Template';
+                """
+    cursor.execute(sql_query1)
+    conn.commit() 
+except Exception as e:
+    print(f"Connect to Database Error: {e}")
+    sys.exit(f"Connect to Database Error: {str(e)}")
+    #sys.exit(1)
 
-  LDB3 = LDB2.drop(['Expected Credit Loss C&C (ECL) (MYR)','Expected Credit Loss C&C (ECL) (Facility Currency)'],axis=1)
-  
-  #st.write(LDB2.iloc[np.where(LDB2['Finance(SAP) Number'].isin(['500204']))])
+#------------------------------------------------------------------------------------------------
 
-  LDB4 = LDB3[['CIF Number',
-             'EXIM Account No.',
-                     'Application System Code',
-                     'CCRIS Master Account Number',
-                     'CCRIS Sub Account Number',
-                            'Finance(SAP) Number',
-                            'Company Group',
-                            'Customer Name',
-                            'Relationship Manager (RM)',
-                            'Team', #Banking Team',
-                            'Ownership',
-                            'Officer in Charge',
-                            'Syndicated / Club Deal',
-                            'Nature of Account',
-                            'Facility',
-                            'Facility Currency',
-                            'Type of Financing',
-                            'Shariah Contract / Concept',
-                            'Status',
-                            'Post Approval Stage',
-                            'Date of Ready for Utilization (RU)',
-                            #'Restructured / Rescheduled(Y/N)',
-                            'Amount Approved / Facility Limit (Facility Currency)',
-                            'Amount Approved / Facility Limit (MYR)',
-                            'Cost/Principal Outstanding (Facility Currency)',
-                            'Cost/Principal Outstanding (MYR)',
-                            'Contingent Liability Letter of Credit (Facility Currency)',
-                            'Contingent Liability Letter of Credit (MYR)',
-                            'Contingent Liability (Facility Currency)',
-                            'Contingent Liability (MYR)',
-                            'Account Receivables/Past Due Claims (Facility Currency)',
-                            'Account Receivable/Past Due Claims (MYR)',
-                            'Total Banking Exposure (Facility Currency)',
-                            'Total Banking Exposure (MYR)',
-                            'Accrued Profit/Interest of the month (Facility Currency)',
-                            'Accrued Profit/Interest of the month (MYR)',
-                            'Modification of Loss (Facility Currency)',
-                            'Modification of Loss (MYR)',
-                            'Cumulative Accrued Profit/Interest (Facility Currency)',
-                            'Cumulative Accrued Profit/Interest (MYR)',                            
-                            'Penalty/Ta`widh (Facility Currency)',
-                            'Penalty/Ta`widh (MYR)',
-                            'Income/Interest in Suspense (Facility Currency)',
-                            'Income/Interest in Suspense (MYR)',
-                            'Other Charges (Facility Currency)',
-                            'Other Charges (MYR)',
-                            'Total Loans Outstanding (Facility Currency)',
-                            'Total Loans Outstanding (MYR)',
-             'Expected Credit Loss (ECL) LAF (Facility Currency) 2',
-             'Expected Credit Loss LAF (ECL) (MYR) 2',
-            #             'Expected Credit Loss C&C (ECL) (Facility Currency)',
-            #             'Expected Credit Loss C&C (ECL) (MYR)',
-                            'Disbursement/Drawdown Status',
-                            'Unutilised/Undrawn Amount (Facility Currency)',
-                            'Unutilised/Undrawn Amount (MYR)',
-                            'Disbursement/Drawdown (Facility Currency)',
-                            'Disbursement/Drawdown (MYR)',
-                            'Cumulative Disbursement/Drawdown (Facility Currency)',
-                            'Cumulative Disbursement/Drawdown (MYR)',
-                            'Cost Payment/Principal Repayment (Facility Currency)',
-                            'Cost Payment/Principal Repayment (MYR)',                            
-                            'Cumulative Cost Payment/Principal Repayment (Facility Currency)',
-                            'Cumulative Cost Payment/Principal Repayment (MYR)',
-                            'Profit Payment/Interest Repayment (Facility Currency)',
-                            'Profit Payment/Interest Repayment (MYR)',
-                            'Cumulative Profit Payment/Interest Repayment (Facility Currency)',
-                            'Cumulative Profit Payment/Interest Repayment (MYR)',
-                            'Ta`widh Payment/Penalty Repayment (Facility Currency)',
-                            'Ta`widh Payment/Penalty Repayment  (MYR)',
-                            'Cumulative Ta`widh Payment/Penalty Repayment (Facility Currency)',
-                            'Cumulative Ta`widh Payment/Penalty Repayment  (MYR)',
-                            'Other Charges Payment (Facility Currency)',
-                            'Other Charges Payment (MYR)',
-                            'Cumulative Other Charges Payment (Facility Currency)',
-                            'Cumulative Other Charges Payment (MYR)',
-                            'Rating at Origination',
-                            'Internal Credit Rating (PD/PF)',  #'PD',
-                            'PF',
-             'LGD',
-                            'CRMS Obligor Risk Rating',
-                            #'CRMS CG Rating', 'CCPT Classification',
-                            'PD (%)',
-                            'LGD (%)',
-            'Risk Category',
-            "Prudential Limit (%)",
-            "EXIMs Shareholder Fund as at",
-            "EXIMs Shareholder Fund as at (MYR)",
-            "Single Customer Exposure Limit (SCEL)(MYR)",
-            "Percentage of Total Banking Exposure(MYR) to SCEL (MYR)",
-            "Percentage of Total Overall Banking Exposure (MYR) to SCEL (MYR) (%)",
-                            'Risk Analyst',
-                            'MFRS9 Staging',
-                            'BNM Main Sector',
-                            'BNM Sub Sector',
-                            'EXIM Main Sector',
-                            'Industry (Risk)',
-                            'Industry Classification',
-                            'Purpose of Financing',
-                            'Date Approved at Origination',
-                            'Approval Authority',
-                            'LO issuance Date',
-                            'Date of LO Acceptance',
-                            '1st Disbursement Date / 1st Drawdown Date',
-                            '1st Payment/Repayment Date',
-                            'Expiry of Availability Period',
-                            'Facility Agreement Date',
-                            'Annual Review Date',
-                            'Watchlist Review Date',
-                            'Maturity/Expired Date',
-                            'Grace Period (Month)',
-                            'Moratorium Period (Month)',
-                            'Start Moratorium Date',
-             'Fund Type',
-                            'Tenure (Month)',
-                            'Payment/Repayment Frequency (Profit/Interest)',
-                            'Payment/Repayment Frequency (Cost/Principal)',
-                            'Effective cost of borrowings',
-                            'Profit/Interest Margin',
-                            'Effective Interest Rate (EIR)', #'Average Profit/Interest Rate',
-                            'Ta`widh Compensation/Penalty Rate',
-                            'Operation Country',
-                            'Country Exposure',
-                            'Country Rating',
-                            'Region',
-                            'Market Type',
-                            'Classification of Entity / Customer Type',
-                            'Entity / Customer Type',
-                            'Classification of Residency Status',
-                            'Residency Status',#'Main Residency Status',
-                            'Corporate Type',
-                            'SME Commercial Corporate',
-                            'Corporate Status',
-                            'Justification on Corporate Status',
-                            'Restructured / Rescheduled',
-                            'Date of Approval Restructured / Rescheduled',
-                            'Effective Date ( R&R )',
-                            'Reason Restructured & Resheduled',
-                            #'Date Untagged from R&R',
-                            #'Justification for Untagged',
-                            'Frequency of R&R',
-                            'Date of Overdue',
-             'Overdue (Days)',
-             'Month in Arrears',
-             'Overdue Amount (Facility Currency)',
-             'Overdue Amount (MYR)',
-                            'Date Classified as Watchlist',
-                            'Watchlist Reason',
-                            'Date Declassified from Watchlist',
-                            'Date Impaired',
-                            'Reason for Impairment',
-                            'Partial Write off Date',
-                            'Write off Date',
-                            'Cancellation Date/Fully Settled Date',
-                            'Position as At']]
-  
-  LDB4.fillna(0,inplace=True)
-  
-  #---------------------------------------------Details-------------------------------------------------------------
-  
-  st.write(LDB4)
 
-  st.write("Column checking: ")
-  st.write(LDB4.shape)
 
-  st.write("")
-  st.write("Download file: ")
-  st.download_button("Download CSV",
-                   LDB4.to_csv(index=False),
-                   file_name='Loan Database as at '+str(year)+"-"+str(month)+' - CCRIS RAW.csv',
-                   mime='text/csv')
-  
-  #st.write("Amount checking: ")
-  #st.write(LDB4.fillna(0).groupby(['Status'])[['Amount Approved / Facility Limit (MYR)',
-  #                          'Cost/Principal Outstanding (MYR)',
-  #                          'Total Banking Exposure (MYR)',
-  #                          'Total Loans Outstanding (MYR)',
-  #           'Expected Credit Loss LAF (ECL) (MYR) 2']].sum().reset_index())
-  
-  #st.write("Account duplicate checking: ")
-  #st.write(LDB4['EXIM Account No.'].value_counts())
+#upload excel
+try:
+    #   Active_before.head(1)
+    
+    Active_before['Ownership'] = ""
+    Active_before['Officer in Charge'] = ""
+    Active_before['Restructured / Rescheduled (Y/N)'] = "" ##################
+    Active_before['PF'] = ""
+    Active_before['LGD'] = ""
+    Active_before['Column1'] = "" ##################
+    Active_before['Risk Category'] = ""
+    Active_before['Prudential Limit (%) '] = ""
+    Active_before["EXIM's Shareholder Fund as at"] = ""
+    Active_before["EXIM's Shareholder Fund as at  (MYR)"] = ""
+    Active_before['Single Customer Exposure Limit (SCEL)(MYR)'] = ""
+    Active_before['Percentage of Total Banking Exposure(MYR) to SCEL (MYR)'] = ""
+    Active_before['Percentage of Total Overall Banking Exposure (MYR) to SCEL (MYR) (%)'] = ""
+    Active_before['Risk Analyst'] = ""
+    Active_before['SME Commercial Corporate'] = ""
+    Active_before['EXIM Main Sector'] = ""
+    Active_before['Industry (Risk)'] = ""
+    Active_before['Industry Classification'] = ""
 
-  #st.write(LDB4.iloc[np.where(LDB4['EXIM Account No.']==value)])
+    LDB2 = Active_before[["cif_number",
+    "facility_exim_account_num",
+    "facility_application_sys_code",
+    "facility_ccris_master_account_num",
+    "facility_ccris_sub_account_num",
+    "finance_sap_number",
+    "cif_company_group",
+    "cif_name",
+    "acc_relationship_manager_rm",
+    "acc_banking_team",
+    "Ownership",
+    "Officer in Charge",
+    "syndicated_deal",
+    "acc_nature_acc",
+    "facility_type_id",
+    "facility_ccy_id",
+    "financing_type",
+    "shariah_concept",
+    "acc_status",
+    "ca_post_approval_stage",
+    "date_ready_utilization",
+    "Restructured / Rescheduled (Y/N)",
+    "facility_amount_approved",
+    "facility_amount_approved_myr",
+    "facility_amount_outstanding",
+    "acc_principal_amount_outstanding",
+    "acc_contingent_liability_letter_credit_fc",
+    "acc_contingent_liability_letter_credit_myr",
+    "acc_contingent_liability_ori",
+    "acc_contingent_liability_myr",
+    "acc_receivables_past_due_claim_fc",
+    "acc_receivable_past_due_claim_myr",
+    "acc_total_banking_exposure_fc",
+    "acc_total_banking_exposure_myr",
+    "acc_accrued_interest_month_fc",
+    "acc_accrued_interest_month_myr",
+    "modification_of_loss_fc",
+    "modification_of_loss_myr",
+    "acc_accurate_interest",
+    "acc_accrued_interest_myr",
+    "acc_penalty",
+    "acc_penalty_myr",
+    "acc_suspended_interest",
+    "acc_interest_suspense_myr",
+    "acc_other_charges",
+    "acc_other_charges_myr",
+    "acc_balance_outstanding_audited_fc",
+    "acc_balance_outstanding_audited_myr",
+    "acc_credit_loss_laf_ecl",
+    "acc_credit_loss_laf_ecl_myr",
+    "acc_disbursement_status",
+    "acc_undrawn_amount_banking_ori",
+    "acc_undrawn_amount_myr",
+    "acc_drawdown_fc",
+    "acc_drawdown_myr",
+    "acc_cumulative_drawdown",
+    "acc_cumulative_drawdown_myr",
+    "acc_repayment_fc",
+    "acc_repayment_myr",
+    "acc_cumulative_repayment",
+    "acc_cumulative_repayment_myr",
+    "acc_interest_repayment_fc",
+    "acc_interest_repayment_myr",
+    "acc_cumulative_interest_repayment_fc",
+    "acc_cumulative_interest_repayment_myr",
+    "penalty_repayment",
+    "penalty_repayment_myr",
+    "cumulative_penalty",
+    "cumulative_penalty_myr",
+    "other_charges_payment",
+    "other_charges_payment_myr",
+    "cumulative_other_charges_payment",
+    "cumulative_other_charges_payment_myr",
+    "acc_rating_origination",
+    "acc_PD",
+    "PF",
+    "LGD",
+    "crms_obligator_risk_rating",
+    "pd_percent",
+    "lgd_percent",
+    "Column1",
+    "Risk Category",
+    "Prudential Limit (%) ",
+    "EXIM's Shareholder Fund as at",
+    "EXIM's Shareholder Fund as at  (MYR)",
+    "Single Customer Exposure Limit (SCEL)(MYR)",
+    "Percentage of Total Banking Exposure(MYR) to SCEL (MYR)",
+    "Percentage of Total Overall Banking Exposure (MYR) to SCEL (MYR) (%)",
+    "Risk Analyst",
+    "acc_MFRS9_staging",
+    "bnm_main_sector",
+    "bnm_sub_sector",
+    "EXIM Main Sector",
+    "Industry (Risk)",
+    "Industry Classification",
+    "purpose_financing",
+    "approved_date",
+    "approval_authority",
+    "acc_lo_issuance_date",
+    "acc_date_lo_acceptance",
+    "acc_first_disbursement_date",
+    "acc_first_repayment_date",
+    "acc_availability_period",
+    "acc_facility_agreement_date",
+    "acc_review_date",
+    "acc_watchlist_review_date_approval",
+    "acc_maturity_expired_date",
+    "acc_grace_period",
+    "moratorium_period_month",
+    "moratorium_start_date",
+    "fund_type",
+    "acc_tenure",
+    "acc_payment_frequency_interest",
+    "acc_payment_frequency_principal",
+    "acc_effective_cost_borrowings",
+    "acc_margin",
+    "acc_average_interest_rate",
+    "acc_tadwih_compensation",
+    "cif_operation_country",
+    "facility_country_id",
+    "acc_country_rating",
+    "acc_region",
+    "market_type",
+    "classification_cust_type",
+    "cif_cust_type",
+    "classification_residency_status",
+    "cif_residency_status",
+    "cif_corporate_type",
+    "SME Commercial Corporate",
+    "cif_corporate_status",
+    "justification_corporate_status",
+    "rrtag",
+    "dateapp_date",
+    "dateapp_effectivedate",
+    "dateapp_reason",
+    "frequency_rr",
+    "acc_date_overdue",
+    "acc_overdue_days",
+    "int_month_in_arrears",
+    "acc_overdue_ori",
+    "acc_overdue_amount_myr",
+    "acc_watchlist_date",
+    "acc_watchlist_reason",
+    "acc_date_delist_watchlist",
+    "acc_date_impaired",
+    "acc_reason_impairment",
+    "acc_partial_writeoff_date",
+    "acc_writeoff_date",
+    "acc_cancel_fulltsettle_date",
+    "position_as_at",
+    "acc_credit_loss_cnc_ecl","acc_credit_loss_cnc_ecl_myr"]]
 
+    # LDB2.shape
+    # LDB2['finance_sap_number'].value_counts()
+    # LDB2.iloc[np.where(LDB2['finance_sap_number'].isin(['BG-I','BG','500724']))][["acc_credit_loss_cnc_ecl","acc_credit_loss_cnc_ecl_myr"]]
+
+    LDB2.loc[(LDB2['finance_sap_number'].isin(['BG-I','BG','500724'])),'acc_credit_loss_cnc_ecl'] = 0
+    LDB2.loc[(LDB2['finance_sap_number'].isin(['BG-I','BG','500724'])),'acc_credit_loss_cnc_ecl_myr'] = 0
+
+    LDB2['acc_credit_loss_laf_ecl_new'] = LDB2['acc_credit_loss_laf_ecl'].fillna(0) + LDB2['acc_credit_loss_cnc_ecl'].fillna(0)
+    LDB2['acc_credit_loss_laf_ecl_myr_new'] = LDB2['acc_credit_loss_laf_ecl_myr'].fillna(0) + LDB2['acc_credit_loss_cnc_ecl_myr'].fillna(0)
+
+    LDB3 = LDB2.drop(['acc_credit_loss_cnc_ecl','acc_credit_loss_laf_ecl_myr'],axis=1)
+    
+    LDB3.fillna(0,inplace=True)
+
+    LDB4 = LDB3[["cif_number",
+    "facility_exim_account_num",
+    "facility_application_sys_code",
+    "facility_ccris_master_account_num",
+    "facility_ccris_sub_account_num",
+    "finance_sap_number",
+    "cif_company_group",
+    "cif_name",
+    "acc_relationship_manager_rm",
+    "acc_banking_team",
+    "Ownership",
+    "Officer in Charge",
+    "syndicated_deal",
+    "acc_nature_acc",
+    "facility_type_id",
+    "facility_ccy_id",
+    "financing_type",
+    "shariah_concept",
+    "acc_status",
+    "ca_post_approval_stage",
+    "date_ready_utilization",
+    "Restructured / Rescheduled (Y/N)",
+    "facility_amount_approved",
+    "facility_amount_approved_myr",
+    "facility_amount_outstanding",
+    "acc_principal_amount_outstanding",
+    "acc_contingent_liability_letter_credit_fc",
+    "acc_contingent_liability_letter_credit_myr",
+    "acc_contingent_liability_ori",
+    "acc_contingent_liability_myr",
+    "acc_receivables_past_due_claim_fc",
+    "acc_receivable_past_due_claim_myr",
+    "acc_total_banking_exposure_fc",
+    "acc_total_banking_exposure_myr",
+    "acc_accrued_interest_month_fc",
+    "acc_accrued_interest_month_myr",
+    "modification_of_loss_fc",
+    "modification_of_loss_myr",
+    "acc_accurate_interest",
+    "acc_accrued_interest_myr",
+    "acc_penalty",
+    "acc_penalty_myr",
+    "acc_suspended_interest",
+    "acc_interest_suspense_myr",
+    "acc_other_charges",
+    "acc_other_charges_myr",
+    "acc_balance_outstanding_audited_fc",
+    "acc_balance_outstanding_audited_myr",
+    "acc_credit_loss_laf_ecl_new",
+    "acc_credit_loss_laf_ecl_myr_new",
+    "acc_disbursement_status",
+    "acc_undrawn_amount_banking_ori",
+    "acc_undrawn_amount_myr",
+    "acc_drawdown_fc",
+    "acc_drawdown_myr",
+    "acc_cumulative_drawdown",
+    "acc_cumulative_drawdown_myr",
+    "acc_repayment_fc",
+    "acc_repayment_myr",
+    "acc_cumulative_repayment",
+    "acc_cumulative_repayment_myr",
+    "acc_interest_repayment_fc",
+    "acc_interest_repayment_myr",
+    "acc_cumulative_interest_repayment_fc",
+    "acc_cumulative_interest_repayment_myr",
+    "penalty_repayment",
+    "penalty_repayment_myr",
+    "cumulative_penalty",
+    "cumulative_penalty_myr",
+    "other_charges_payment",
+    "other_charges_payment_myr",
+    "cumulative_other_charges_payment",
+    "cumulative_other_charges_payment_myr",
+    "acc_rating_origination",
+    "acc_PD",
+    "PF",
+    "LGD",
+    "crms_obligator_risk_rating",
+    "pd_percent",
+    "lgd_percent",
+    "Column1",
+    "Risk Category",
+    "Prudential Limit (%) ",
+    "EXIM's Shareholder Fund as at",
+    "EXIM's Shareholder Fund as at  (MYR)",
+    "Single Customer Exposure Limit (SCEL)(MYR)",
+    "Percentage of Total Banking Exposure(MYR) to SCEL (MYR)",
+    "Percentage of Total Overall Banking Exposure (MYR) to SCEL (MYR) (%)",
+    "Risk Analyst",
+    "acc_MFRS9_staging",
+    "bnm_main_sector",
+    "bnm_sub_sector",
+    "EXIM Main Sector",
+    "Industry (Risk)",
+    "Industry Classification",
+    "purpose_financing",
+    "approved_date",
+    "approval_authority",
+    "acc_lo_issuance_date",
+    "acc_date_lo_acceptance",
+    "acc_first_disbursement_date",
+    "acc_first_repayment_date",
+    "acc_availability_period",
+    "acc_facility_agreement_date",
+    "acc_review_date",
+    "acc_watchlist_review_date_approval",
+    "acc_maturity_expired_date",
+    "acc_grace_period",
+    "moratorium_period_month",
+    "moratorium_start_date",
+    "fund_type",
+    "acc_tenure",
+    "acc_payment_frequency_interest",
+    "acc_payment_frequency_principal",
+    "acc_effective_cost_borrowings",
+    "acc_margin",
+    "acc_average_interest_rate",
+    "acc_tadwih_compensation",
+    "cif_operation_country",
+    "facility_country_id",
+    "acc_country_rating",
+    "acc_region",
+    "market_type",
+    "classification_cust_type",
+    "cif_cust_type",
+    "classification_residency_status",
+    "cif_residency_status",
+    "cif_corporate_type",
+    "SME Commercial Corporate",
+    "cif_corporate_status",
+    "justification_corporate_status",
+    "rrtag",
+    "dateapp_date",
+    "dateapp_effectivedate",
+    "dateapp_reason",
+    "frequency_rr",
+    "acc_date_overdue",
+    "acc_overdue_days",
+    "int_month_in_arrears",
+    "acc_overdue_ori",
+    "acc_overdue_amount_myr",
+    "acc_watchlist_date",
+    "acc_watchlist_reason",
+    "acc_date_delist_watchlist",
+    "acc_date_impaired",
+    "acc_reason_impairment",
+    "acc_partial_writeoff_date",
+    "acc_writeoff_date",
+    "acc_cancel_fulltsettle_date",
+    "position_as_at"]]
+    
+    #---------------------------------------------Details-------------------------------------------------------------
+    
+    # Extract
+    # LDB4.head(1)
+    # LDB4.shape
+    convert_time = str(current_time).replace(":","-")
+
+    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"CCRIS_Template_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
+
+    LDB4.to_excel(writer2, sheet_name='Result', index = False)
+
+    writer2.close()
+
+    sql_query4 = """UPDATE [jobPython]
+    SET [jobCompleted] = getdate(), [jobStatus]= 'PY002', [jobErrDetail]=NULL
+    WHERE [jobName] = 'CCRIS Template';
+                """
+    cursor.execute(sql_query4)
+    conn.commit() 
+
+    #table    
+    # documentId = 1    
+    columns = ['aftd_id','result_file_name','processed_status_id','status_id']
+    data = [(documentId,"CCRIS_Template_"+str(convert_time)[:19]+".xlsx",'PY005','PY002')] #cari pakai code jgn pakai id ,36978,36960
+    download_result = pd.DataFrame(data,columns=columns)
+    
+    # Assuming 'combine2' is a DataFrame
+    column_types1 = []
+    for col in download_result.columns:
+        # You can choose to map column types based on data types in the DataFrame, for example:
+        if download_result[col].dtype == 'object':  # String data type
+            column_types1.append(f"{col} VARCHAR(255)")
+        elif download_result[col].dtype == 'int64':  # Integer data type
+            column_types1.append(f"{col} INT")
+        elif download_result[col].dtype == 'float64':  # Float data type
+            column_types1.append(f"{col} FLOAT")
+        else:
+            column_types1.append(f"{col} VARCHAR(255)")  # Default type for others
+
+    create_table_query_result = "CREATE TABLE A_download_result (" + ', '.join(column_types1) + ")"
+    cursor.execute(create_table_query_result)
+
+    for row in download_result.iterrows():
+        sql_result = "INSERT INTO A_download_result({}) VALUES ({})".format(','.join(download_result.columns), ','.join(['?']*len(download_result.columns)))
+        cursor.execute(sql_result, tuple(row[1]))
+    conn.commit()
+
+    cursor.execute("""MERGE INTO account_finance_transaction_documents AS target 
+                    USING A_download_result AS source
+                    ON target.aftd_id = source.aftd_id
+                    WHEN MATCHED THEN 
+                        UPDATE SET target.result_file_name = source.result_file_name,
+                        target.processed_status_id = (select param_id from param_system_param where param_code=source.processed_status_id),
+                        target.status_id = (select param_id from param_system_param where param_code=source.status_id);    
+    """)
+    conn.commit() 
+
+    cursor.execute("drop table A_download_result")
+    conn.commit() 
+
+    #target.processed_status_id = (select param_id from param_system_param where param_code=source.processed_status_id)
+    #target.processed_status_id = source.processed_status_id
+
+    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    print("Data updated successfully at "+str(current_time))
+    conn.close()
+
+except Exception as e:
+    print(f"Process Excel Error: {e}")
+    sql_query3 = """INSERT INTO [log_apps_error] (
+                    [logerror_desc],
+                    [iduser],
+                    [dateerror],
+                    [page],
+                    [user_name]
+                )
+                VALUES
+                    (?,  
+                    0,  
+                    getdate(),  
+                    ?,  
+                    ?
+                    )
+                """
+    cursor.execute(sql_query3,(str(e)+" ["+str(documentName)+"]","Process Excel CCRIS Template",uploadedByEmail))
+    conn.commit()
+    sql_error = """UPDATE [jobPython]
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY004', [jobErrDetail]= 'Process Excel CCRIS Template'
+    WHERE [jobName] = 'CCRIS Template';
+                """
+    cursor.execute(sql_error)
+    conn.commit()
+
+
+    columns = ['aftd_id','result_file_name','processed_status_id','status_id']
+    data = [(documentId,"Not Applicable",'PY004','PY004')] #,36961,36961
+    download_error = pd.DataFrame(data,columns=columns)
+    
+    # Assuming 'combine2' is a DataFrame
+    column_types1 = []
+    for col in download_error.columns:
+        # You can choose to map column types based on data types in the DataFrame, for example:
+        if download_error[col].dtype == 'object':  # String data type
+            column_types1.append(f"{col} VARCHAR(255)")
+        elif download_error[col].dtype == 'int64':  # Integer data type
+            column_types1.append(f"{col} INT")
+        elif download_error[col].dtype == 'float64':  # Float data type
+            column_types1.append(f"{col} FLOAT")
+        else:
+            column_types1.append(f"{col} VARCHAR(255)")  # Default type for others
+
+    create_table_query_result = "CREATE TABLE A_download_error (" + ', '.join(column_types1) + ")"
+    cursor.execute(create_table_query_result)
+
+    for row in download_error.iterrows():
+        sql_result = "INSERT INTO A_download_error({}) VALUES ({})".format(','.join(download_error.columns), ','.join(['?']*len(download_error.columns)))
+        cursor.execute(sql_result, tuple(row[1]))
+    conn.commit()
+
+    cursor.execute("""MERGE INTO account_finance_transaction_documents AS target 
+                    USING A_download_error AS source
+                    ON target.aftd_id = source.aftd_id
+                    WHEN MATCHED THEN 
+                        UPDATE SET target.result_file_name = source.result_file_name,
+                        target.processed_status_id = (select param_id from param_system_param where param_code=source.processed_status_id),
+                        target.status_id = (select param_id from param_system_param where param_code=source.status_id);    
+    """)
+    conn.commit() 
+
+    cursor.execute("drop table A_download_error")
+    conn.commit() 
+
+    print(f"Process Excel CCRIS TemplateError: {e}")
+    sys.exit(f"Process Excel CCRIS Template Error: {str(e)}")
