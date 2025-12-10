@@ -5,8 +5,8 @@ import os
 CONNECTION_STRING = (
     'DRIVER={ODBC Driver 17 for SQL Server};'
     'SERVER=10.32.1.51,1455;'
-    'DATABASE=mis_db_prod13082025;'
-    'UID=mis_admin;'
+    'DATABASE=mis_db_prod_30092025;'
+    'UID=sa;'
     'PWD=Exim1234;'
     'Encrypt=yes;TrustServerCertificate=yes;'
 )

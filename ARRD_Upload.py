@@ -123,7 +123,7 @@ try:
     #   Excel File
 
     # documentName = "ARRD-MIA.xlsx"
-    # reportingDate = "2025-07-31"
+    # reportingDate = "2025-09-30"
     # df1 = r"C:\\Users\\syahidhalid\\Syahid_PC\\Analytics - ITD\\05. Interactive Dashboard\\Closing 202508\\Job Upload\\"+str(documentName) 
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
@@ -293,6 +293,7 @@ try:
     exception_report = ARRD2.rename(columns={'SAP_number':'finance_sap_number'}).merge(LDB_prev1, on=['finance_sap_number'], how='outer', suffixes=('_Manual','_Mis'),indicator=True)
 
     #exception_report._merge.value_counts()
+    # exception_report1.iloc[np.where(exception_report1.finance_sap_number=='500577')]
 
     exception_report["diff_MIA"] = exception_report["int_month_in_arrears_Manual"].fillna(0) - exception_report["int_month_in_arrears_Mis"].fillna(0)
     
@@ -440,15 +441,17 @@ except Exception as e:
 
 try:
     # ARRD2.head()
-    # ARRD2.SAP_number.value_counts()
-    # ARRD2.iloc[np.where(ARRD2.SAP_number=='500204')]
+    # ARRD3.head()
+   
+    # ARRD3.SAP_number.value_counts()
+    # ARRD3.iloc[np.where(ARRD3.SAP_number==500577)]
 
     ARRD3 = ARRD2.rename(columns={'Position_Date':'position_as_at',
                                   'param_id':'acc_effective_cost_borrowings',
-                                  'acc_effective_cost_borrowings':'name'}).groupby(['SAP_number','position_as_at','acc_effective_cost_borrowings','name'])[['int_month_in_arrears',
-                                                                                                                                               'acc_margin',
-                                                                                                                                               'acc_average_interest_rate',
-                                                                                                                                               'acc_tadwih_compensation']].sum().reset_index()
+                                   'acc_effective_cost_borrowings':'name'}).drop(['Customer_Name','name'],axis=1).fillna(0)#.groupby(['SAP_number','position_as_at','acc_effective_cost_borrowings','name'])[['int_month_in_arrears',
+                                #                                                                                                                'acc_margin',
+                                #                                                                                                                'acc_average_interest_rate',
+                                #                                                                                                                'acc_tadwih_compensation']].sum().reset_index()
     
     # sum(appendfinal1.LAF_ECL_MYR)
 
