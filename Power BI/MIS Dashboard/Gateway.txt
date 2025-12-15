@@ -1,0 +1,5 @@
+Services
+
+On-premises data gateway sevice ? properties ? log pw laptop
+
+bukak apps On-premises data gateway ? restart
