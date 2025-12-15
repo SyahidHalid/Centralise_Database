@@ -1,0 +1,126 @@
+cth 
+budget_code: 510511/1
+budget_amount: 125000
+amount_utilize: 52800
+balance: 72200
+
+payment:50300
+amount_relo:2500
+actualbalance: 72200
+amount_reverse: 72200
+
+budget_after_relo: 122500
+balance_after_relo: 69700
+amount_utilize_after_relo:50300
+amount_relo:2500
+
+view_budget
+
+
+total_opex
+total_opex_reviewed
+total_finexp
+total_capex_review
+total_capex
+total_borac
+
+Payment
+Balance
+ActualBalance
+
+
+amount_approved_projection
+amount_utilize
+amount_relo
+amount_reverse
+budget_amount
+
+
+Environmental, Social and Governance
+ESG
+Sustainability
+
+Cannot:
+Green
+EV
+Solar
+
+
+budget_amount_after_relo = view_budget[budget_amount]-view_budget[amount_relo]
+
+balance_after_relo = view_budget[balance]-view_budget[amount_relo]
+
+ESG_Tag = 
+IF(
+    CONTAINSSTRING(LOWER(view_budget[budget_desc]), "esg") || 
+    CONTAINSSTRING(LOWER(view_budget[budget_desc]), "sustainability") || 
+    CONTAINSSTRING(LOWER(view_budget[budget_desc]), "environmental, social and governance") || 
+    CONTAINSSTRING(LOWER(view_budget[budget_desc]), "ev car"),
+    "ESG",
+    BLANK()
+)
+
+
+UtilizationBucket = 
+IF(
+    view_budget[UtilizationBudget] >= 1, 
+    "Fully Utilize",
+    IF(
+        view_budget[UtilizationBudget] < 1 && view_budget[UtilizationBudget] > 0, 
+        "Partially Utilize",
+        IF(
+            view_budget[UtilizationBudget] <= 0, 
+            "Not Utilize",
+            "Not Applicable"
+        )
+    )
+)
+
+UtilizationBudget = DIVIDE(view_budget[amount_utilize], view_budget[budget_amount_after_relo], 0)
+
+amendment
+
+b.budget_amount 
+- (SELECT ISNULL(SUM(amount_utilize), 0) FROM view_budget_utilize aa LEFT JOIN proc_application_master bb ON aa.proc_apps_id = bb.proc_apps_id WHERE aa.budget_id = b.budget_id AND bb.application_type = 303 AND bb.status_id = 198) 
+- (select case when sum(amount_utilize) is null then 0 else sum(amount_utilize) end  from view_budget_utilize aa 
+left outer join proc_application_master bb on aa.proc_apps_id=bb.proc_apps_id 
+where aa.budget_id=b.budget_id and bb.application_type=(select param_id from param_system_param where param_code='BL/APJT') and bb.status_id=198)
+- (select case when sum(amount_utilize) is null then 0 else sum(amount_utilize) end  from view_budget_utilize aa 
+left outer join proc_application_master bb on aa.proc_apps_id=bb.proc_apps_id 
+where aa.budget_id=b.budget_id and bb.application_type=(select param_id from param_system_param where param_code='BL/RVSL') and bb.status_id=198)
+as budget_amount
+,
+
+adjustment 
+
+budget amount - relo - reverse 
+amount utilize - relo 
+balance
+
+amount reverse
+(select case when sum(amount_utilize) is null then 0 else sum(amount_utilize) end  from view_budget_utilize aa left outer join proc_application_master bb on aa.proc_apps_id=bb.proc_apps_id where aa.budget_id=b.budget_id and bb.application_type=(select param_id from param_system_param where param_code='BL/RVSL') and bb.status_id=198) as amount_reverse
+
+amount projection
+(select case when sum(amount_utilize) is null then 0 else sum(amount_utilize) end  from view_budget_utilize aa left outer join proc_application_master bb on aa.proc_apps_id=bb.proc_apps_id where aa.budget_id=b.budget_id and bb.application_type=(select param_id from param_system_param where param_code='BL/APJT') and bb.status_id=198) as amount_approved_projection
+
+amount relo
+(select case when sum(amount_utilize) is null then 0 else sum(amount_utilize) end  from view_budget_utilize aa left outer join proc_application_master bb on aa.proc_apps_id=bb.proc_apps_id where aa.budget_id=b.budget_id and bb.application_type=303 and bb.status_id=198) as amount_relo
+
+amount utlize
+(select case when sum(amount_utilize) is null then 0 else sum(amount_utilize) end  from view_budget_utilize aa left outer join proc_application_master bb on aa.proc_apps_id=bb.proc_apps_id where aa.budget_id=b.budget_id and aa.proc_apps_id not in(select proc_apps_id from proc_application_master where application_type in (10784,10706))) as amount_utilize
+
+==========================================================================================================================================
+from
+b.budget_amount
+
+to
+b.budget_amount 
+- (SELECT ISNULL(SUM(amount_utilize), 0) FROM view_budget_utilize aa LEFT JOIN proc_application_master bb ON aa.proc_apps_id = bb.proc_apps_id WHERE aa.budget_id = b.budget_id AND bb.application_type = 303 AND bb.status_id = 198) 
+- (select case when sum(amount_utilize) is null then 0 else sum(amount_utilize) end  from view_budget_utilize aa left outer join proc_application_master bb on aa.proc_apps_id=bb.proc_apps_id where aa.budget_id=b.budget_id and bb.application_type=(select param_id from param_system_param where param_code='BL/RVSL') and bb.status_id=198) as budget_amount
+
+===========================================================================================================================================
+from
+(a.budget_amount - total_sub -a.amount_utilize -a.amount_approved_projection) as balance
+
+to
+(a.budget_amount - total_sub -a.amount_utilize) as balance

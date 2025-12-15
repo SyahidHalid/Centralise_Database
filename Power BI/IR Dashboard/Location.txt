@@ -1,0 +1,30 @@
+\\10.32.1.49\e$\mis_doc\irdashboard
+\\10.32.1.51\e$\mis_doc\PythonProjects\Dashboard
+
+Power Automate
+https://make.powerautomate.com/environments/Default-d703bd9e-2913-4bf9-8dd7-49ce1b18bd11/home?auth_upn=syahidhalid@exim.com.my&utm_source=office&utm_medium=app_launcher&utm_campaign=office_referrals
+
+
+\\10.32.1.49\e$\mis_doc\Dashboard\MIS
+
+
+Option 1: Power Automate (Recommended for Microsoft 365 users)
+Power Automate allows you to create flows that run on a schedule and upload files to SharePoint.
+Steps:
+
+Go to Power Automate.
+Click Create > Scheduled cloud flow.
+Set the schedule (e.g., daily at 8 AM).
+Add a trigger: Recurrence.
+Add an action: Get file content (from OneDrive, local folder via gateway, etc.).
+Add another action: Create file in SharePoint.
+
+Site Address: Your SharePoint site
+Folder Path: Target document library
+File Name: Name of the file
+File Content: From previous step
+
+
+
+You can also use Power Automate Desktop if the file is stored locally and needs to be uploaded via a gateway.
+
