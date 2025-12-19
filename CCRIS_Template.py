@@ -144,34 +144,37 @@ except Exception as e:
 #upload excel
 try:
     #   Active_before.head(1)
+    #   Active_before.shape
     def format_18_digit(val: str) -> str:
         val = str(val)
         if len(val) == 18 and val.isdigit():
             return f'{val[0:4]}-{val[4:9]}-{val[9:12]}-{val[12:16]}-{val[16:18]}'
         return val
 
+    Active_before['No.'] = range(1, len(Active_before) + 1)
+
     Active_before['facility_exim_account_num_new'] = Active_before['facility_exim_account_num'].map(format_18_digit)
 
-    Active_before['Ownership'] = ""
-    Active_before['Officer in Charge'] = ""
-    Active_before['Restructured / Rescheduled (Y/N)'] = "" ##################
-    Active_before['PF'] = ""
-    Active_before['LGD'] = ""
-    Active_before['Column1'] = "" ##################
-    Active_before['Risk Category'] = ""
-    Active_before['Prudential Limit (%) '] = ""
-    Active_before["EXIM's Shareholder Fund as at"] = ""
-    Active_before["EXIM's Shareholder Fund as at  (MYR)"] = ""
-    Active_before['Single Customer Exposure Limit (SCEL)(MYR)'] = ""
-    Active_before['Percentage of Total Banking Exposure(MYR) to SCEL (MYR)'] = ""
-    Active_before['Percentage of Total Overall Banking Exposure (MYR) to SCEL (MYR) (%)'] = ""
-    Active_before['Risk Analyst'] = ""
-    Active_before['SME Commercial Corporate'] = ""
-    Active_before['EXIM Main Sector'] = ""
-    Active_before['Industry (Risk)'] = ""
-    Active_before['Industry Classification'] = ""
+    Active_before['Ownership'] = "0"
+    Active_before['Officer in Charge'] = "0"
+    Active_before['Restructured / Rescheduled (Y/N)'] = "0" ##################
+    Active_before['PF'] = "0"
+    Active_before['LGD'] = "0"
+    #Active_before['Column1'] = "" ##################
+    Active_before['Risk Category'] = "0"
+    Active_before['Prudential Limit (%) '] = "0"
+    Active_before["EXIM's Shareholder Fund as at"] = "0"
+    Active_before["EXIM's Shareholder Fund as at  (MYR)"] = "0"
+    Active_before['Single Customer Exposure Limit (SCEL)(MYR)'] = "0"
+    Active_before['Percentage of Total Banking Exposure(MYR) to SCEL (MYR)'] = "0"
+    Active_before['Percentage of Total Overall Banking Exposure (MYR) to SCEL (MYR) (%)'] = "0"
+    Active_before['Risk Analyst'] = "0"
+    Active_before['SME Commercial Corporate'] = "0"
+    Active_before['EXIM Main Sector'] = "0"
+    Active_before['Industry (Risk)'] = "0"
+    Active_before['Industry Classification'] = "0"
 
-    LDB2 = Active_before[["cif_number",
+    LDB2 = Active_before[['No.',"cif_number",
     "facility_exim_account_num_new",
     "facility_application_sys_code_desc",
     "facility_ccris_master_account_num",
@@ -217,8 +220,8 @@ try:
     "acc_interest_suspense_myr",
     "acc_other_charges",
     "acc_other_charges_myr",
-    "acc_balance_outstanding_audited_fc",
-    "acc_balance_outstanding_audited_myr",
+    "acc_balance_outstanding_fc",
+    "acc_balance_outstanding_myr",
     "acc_credit_loss_laf_ecl",
     "acc_credit_loss_laf_ecl_myr",
     "acc_disbursement_status_desc",
@@ -251,7 +254,7 @@ try:
     "crms_obligator_risk_rating",
     "pd_percent",
     "lgd_percent",
-    "Column1",
+    #"Column1",
     "Risk Category",
     "Prudential Limit (%) ",
     "EXIM's Shareholder Fund as at",
@@ -337,7 +340,8 @@ try:
     
     LDB3.fillna(0,inplace=True)
 
-    LDB4 = LDB3[["cif_number",
+    #   LDB3.shape
+    LDB4 = LDB3[['No.',"cif_number",
     "facility_exim_account_num_new",
     "facility_application_sys_code_desc",
     "facility_ccris_master_account_num",
@@ -383,8 +387,8 @@ try:
     "acc_interest_suspense_myr",
     "acc_other_charges",
     "acc_other_charges_myr",
-    "acc_balance_outstanding_audited_fc",
-    "acc_balance_outstanding_audited_myr",
+    "acc_balance_outstanding_fc",
+    "acc_balance_outstanding_myr",
     "acc_credit_loss_laf_ecl_new",
     "acc_credit_loss_laf_ecl_myr_new",
     "acc_disbursement_status_desc",
@@ -417,7 +421,7 @@ try:
     "crms_obligator_risk_rating",
     "pd_percent",
     "lgd_percent",
-    "Column1",
+    #"Column1",
     "Risk Category",
     "Prudential Limit (%) ",
     "EXIM's Shareholder Fund as at",
@@ -486,7 +490,155 @@ try:
     "acc_partial_writeoff_date",
     "acc_writeoff_date",
     "acc_cancel_fulltsettle_date",
-    "position_as_at"]]
+    "position_as_at"]].rename(columns={"cif_number":"CIF Number",
+                                     "facility_exim_account_num_new":"EXIM Account No.",
+                                     "facility_application_sys_code_desc":"Application System Code",
+                                     "facility_ccris_master_account_num":"CCRIS Master Account Number",
+                                     "facility_ccris_sub_account_num":"CCRIS Sub Account Number",
+                                     "finance_sap_number":"Finance(SAP) Number",
+                                     "cif_company_group":"Company Group",
+                                     "cif_name":"Customer Name",
+                                     "acc_relationship_manager_rm":"Relationship Manager (RM)",
+                                     "acc_banking_team":"Banking Team",
+                                     "Ownership":"Ownership",
+                                     "Officer in Charge":"Officer in Charge",
+                                     "syndicated_deal_desc":"Syndicated / Club Deal",
+                                     "acc_nature_acc_desc":"Nature of Account",
+                                     "facility_type_id_desc":"Facility",
+                                     "facility_ccy_id_desc":"Facility Currency",
+                                     "financing_type_desc":"Type of Financing",
+                                     "shariah_concept_desc":"Shariah Contract / Concept",
+                                     "acc_status_desc":"Status",
+                                     "ca_post_approval_stage_desc":"Post Approval Stage",
+                                     "date_ready_utilization":"Date of Ready for Utilization (RU)",
+                                     "Restructured / Rescheduled (Y/N)":"Restructured / Rescheduled (Y/N)", #
+                                     "facility_amount_approved":"Amount Approved / Facility Limit (Facility Currency)",
+                                     "facility_amount_approved_myr":"Amount Approved / Facility Limit (MYR)",
+                                     "facility_amount_outstanding":"Cost/Principal Outstanding (Facility Currency)",
+                                     "acc_principal_amount_outstanding":"Cost/Principal Outstanding (MYR)",
+                                     "acc_contingent_liability_letter_credit_fc":"Contingent Liability Letter of Credit (Facility Currency)",
+                                     "acc_contingent_liability_letter_credit_myr":"Contingent Liability Letter of Credit (MYR)",
+                                     "acc_contingent_liability_ori":"Contingent Liability (Facility Currency)",
+                                     "acc_contingent_liability_myr":"Contingent Liability (MYR)",
+                                     "acc_receivables_past_due_claim_fc":"Account Receivables/Past Due Claims (Facility Currency)",
+                                     "acc_receivable_past_due_claim_myr":"Account Receivable/Past Due Claims (MYR)",
+                                     "acc_total_banking_exposure_fc":"Total Banking Exposure  Facility Currency)", #
+                                     "acc_total_banking_exposure_myr":"Total Banking Exposure (MYR)",
+                                     "acc_accrued_interest_month_fc":"Accrued Profit/ Interest of the month  (Facility Currency)", #
+                                     "acc_accrued_interest_month_myr":"Accrued Profit/Interest of the month (MYR)", #
+                                     "modification_of_loss_fc":"Modification of Loss (Facility Currency)",
+                                     "modification_of_loss_myr":"Modification of Loss (MYR)",
+                                     "acc_accurate_interest":"Cumulative Accrued Profit/Interest (Facility Currency)",
+                                     "acc_accrued_interest_myr":"Cumulative Accrued Profit/Interest (MYR)",
+                                     "acc_penalty":"Penalty/Ta`widh (Facility Currency)",
+                                     "acc_penalty_myr":"Penalty/Ta`widh (MYR)",
+                                     "acc_suspended_interest":"Income/Interest in Suspense (Facility Currency)",
+                                     "acc_interest_suspense_myr":"Income/Interest in Suspense (MYR)",
+                                     "acc_other_charges":"Other Charges (Facility Currency)",
+                                     "acc_other_charges_myr":"Other Charges (MYR)",
+                                     "acc_balance_outstanding_fc":"Total Loans Outstanding (Facility Currency)",
+                                     "acc_balance_outstanding_myr":"Total Loans Outstanding (MYR)",
+                                     "acc_credit_loss_laf_ecl_new":"Expected Credit Loss (ECL) LAF (Facility Currency)",
+                                     "acc_credit_loss_laf_ecl_myr_new":"Expected Credit Loss LAF (ECL) (MYR)",
+                                     "acc_disbursement_status_desc":"Disbursement/ Drawdown Status", #
+                                     "acc_undrawn_amount_banking_ori":"Unutilised/ Undrawn Amount (Facility Currency)", #
+                                     "acc_undrawn_amount_myr":"Unutilised/ Undrawn Amount (MYR)", #
+                                     "acc_drawdown_fc":"Disbursement/ Drawdown  (Facility Currency)", #
+                                     "acc_drawdown_myr":"Disbursement/Drawdown (MYR)",
+                                     "acc_cumulative_drawdown":"Cumulative Disbursement/ Drawdown  (Facility Currency)", #
+                                     "acc_cumulative_drawdown_myr":"Cumulative Disbursement/ Drawdown  (MYR)", #
+                                     "acc_repayment_fc":"Cost Payment/ Principal Repayment  (Facility Currency)", #
+                                     "acc_repayment_myr":"Cost Payment/ Principal Repayment  (MYR)", #
+                                     "acc_cumulative_repayment":"Cumulative  Cost Payment/ Principal Repayment (Facility Currency)", #
+                                     "acc_cumulative_repayment_myr":"Cumulative  Cost Payment/ Principal Repayment  (MYR)", #
+                                     "acc_interest_repayment_fc":"Profit Payment/ Interest Repayment (Facility Currency)", #
+                                     "acc_interest_repayment_myr":"Profit Payment/ Interest Repayment  (MYR)", #
+                                     "acc_cumulative_interest_repayment_fc":"Cumulative  Profit Payment/ Interest Repayment (Facility Currency)", #
+                                     "acc_cumulative_interest_repayment_myr":"Cumulative  Profit Payment/ Interest Repayment  (MYR)",
+                                     "penalty_repayment":"Ta`widh Payment/ Penalty Repayment (Facility Currency)",
+                                     "penalty_repayment_myr":"Ta`widh Payment/ Penalty Repayment   (MYR)", #
+                                     "cumulative_penalty":"Cumulative  Ta`widh Payment/ Penalty Repayment (Facility Currency)", #
+                                     "cumulative_penalty_myr":"Cumulative  Ta`widh Payment/ Penalty Repayment   (MYR)", #
+                                     "other_charges_payment":"Other Charges Payment (Facility Currency)",
+                                     "other_charges_payment_myr":"Other Charges Payment (MYR)",
+                                     "cumulative_other_charges_payment":"Cumulative Other Charges Payment (Facility Currency)",
+                                     "cumulative_other_charges_payment_myr":"Cumulative Other Charges Payment (MYR)",
+                                     "acc_rating_origination":"Rating at Origination",
+                                     "acc_PD":"PD",
+                                     "PF":"PF",
+                                     "LGD":"LGD",
+                                     "crms_obligator_risk_rating":"CRMS Obligor Risk Rating",
+                                     "pd_percent":"PD (%)",
+                                     "lgd_percent":"LGD (%)",
+                                     "Risk Category":"Risk Category",
+                                     "Prudential Limit (%) ":"Prudential Limit (%) ",
+                                     "EXIM's Shareholder Fund as at":"EXIM's Shareholder Fund as at",
+                                     "EXIM's Shareholder Fund as at  (MYR)":"EXIM's Shareholder Fund as at  (MYR)",
+                                     "Single Customer Exposure Limit (SCEL)(MYR)":"Single Customer Exposure Limit (SCEL)(MYR)",
+                                     "Percentage of Total Banking Exposure(MYR) to SCEL (MYR)":"Percentage of Total Banking Exposure(MYR) to SCEL (MYR)",
+                                     "Percentage of Total Overall Banking Exposure (MYR) to SCEL (MYR) (%)":"Percentage of Total Overall Banking Exposure (MYR) to SCEL (MYR) (%)",
+                                     "Risk Analyst":"Risk Analyst",
+                                     "acc_MFRS9_staging_desc":"MFRS9 Staging",
+                                     "bnm_main_sector_desc":"BNM Main Sector",
+                                     "bnm_sub_sector_desc":"BNM Sub Sector",
+                                     "EXIM Main Sector":"EXIM Main Sector",
+                                     "Industry (Risk)":"Industry (Risk)",
+                                     "Industry Classification":"Industry Classification",
+                                     "purpose_financing":"Purpose of Financing",
+                                     "approved_date":"Date Approved at Origination",
+                                     "approval_authority_desc":"Approval Authority",
+                                     "acc_lo_issuance_date":"LO issuance Date",
+                                     "acc_date_lo_acceptance":"Date of LO Acceptance",
+                                     "acc_first_disbursement_date":"1st Disbursement/Drawdown Date",
+                                     "acc_first_repayment_date":"1st Payment/ Repayment Date", #
+                                     "acc_availability_period":"Expiry of Availability Period",
+                                     "acc_facility_agreement_date":"Facility Agreement Date",
+                                     "acc_review_date":"Annual Review Date",
+                                     "acc_watchlist_review_date_approval":"Watchlist Review Date",
+                                     "acc_maturity_expired_date":"Maturity/Expired Date",
+                                     "acc_grace_period":"Grace Period (Month)",
+                                     "moratorium_period_month":"Moratorium Period (Month) ",
+                                     "moratorium_start_date":"Start Moratorium Date",
+                                     "fund_type_desc":"Fund Type",
+                                     "acc_tenure":"Tenure (Month)",
+                                     "acc_payment_frequency_interest":"Payment/Repayment Frequency (Profit/Interest)",
+                                     "acc_payment_frequency_principal":"Payment/Repayment Frequency (Cost/Principal)",
+                                     "acc_effective_cost_borrowings_desc":"Effective cost of borrowings",
+                                     "acc_margin":"Profit/Interest Margin",
+                                     "acc_average_interest_rate":"Effective Interest Rate (EIR)",
+                                     "acc_tadwih_compensation":"Ta`widh Compensation/Penalty Rate",
+                                     "cif_operation_country_desc":"Operation Country",
+                                     "facility_country_id_desc":"Country Exposure",
+                                     "acc_country_rating":"Country Rating",
+                                     "acc_region_desc":"Region",
+                                     "market_type_desc":"Market Type",
+                                     "classification_cust_type_desc":"Classification of Entity / Customer Type",
+                                     "cif_cust_type_desc":"Entity / Customer Type",
+                                     "classification_residency_status_desc":"Classification of Residency Status",
+                                     "cif_residency_status_desc":"Residency Status",
+                                     "cif_corporate_type_desc":"Corporate Type",
+                                     "SME Commercial Corporate":"SME Commercial Corporate",
+                                     "cif_corporate_status_desc":"Corporate Status",
+                                     "justification_corporate_status_desc":"Justification on Corporate Status ",
+                                     "rrtag_desc":"Restructured / Rescheduled",
+                                     "dateapp_date":"Date of Approval Restructured / Rescheduled",
+                                     "dateapp_effectivedate":"Effective Date",
+                                     "dateapp_reason":"Reason",
+                                     "frequency_rr":"Frequency",
+                                     "acc_date_overdue":"Date of Overdue",
+                                     "acc_overdue_days":"Overdue (Days)",
+                                     "int_month_in_arrears":"Month in Arrears",
+                                     "acc_overdue_ori":"Overdue Amount (Facility Currency)",
+                                     "acc_overdue_amount_myr":"Overdue Amount (MYR)",
+                                     "acc_watchlist_date":"Date Classified as Watchlist",
+                                     "acc_watchlist_reason":"Watchlist Reason",
+                                     "acc_date_delist_watchlist":"Date Declassified from Watchlist",
+                                     "acc_date_impaired":"Date Impaired",
+                                     "acc_reason_impairment":"Reason for Impairment",
+                                     "acc_partial_writeoff_date":"Partial Write off Date",
+                                     "acc_writeoff_date":"Write off Date",
+                                     "acc_cancel_fulltsettle_date":"Cancellation Date/Fully Settled Date",
+                                     "position_as_at":"Position as At"})
     
     #---------------------------------------------Details-------------------------------------------------------------
     
@@ -497,7 +649,7 @@ try:
 
     writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"CCRIS_Template_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
 
-    LDB4.to_excel(writer2, sheet_name='Result', index = False)
+    LDB4.to_excel(writer2, sheet_name='loandatabase', index = False, startrow=2)
 
     writer2.close()
 
