@@ -531,7 +531,7 @@ try:
                                      "acc_accurate_interest":"Cumulative Accrued Profit/Interest (Facility Currency)",
                                      "acc_accrued_interest_myr":"Cumulative Accrued Profit/Interest (MYR)",
                                      "acc_penalty":"Penalty/Ta`widh (Facility Currency)",
-                                     "acc_penalty_myr":"Penalty/Ta`widh (MYR)",
+                                     "acc_penalty_myr":"Penalty/Ta_widh (MYR)", # tukar ' jd _
                                      "acc_suspended_interest":"Income/Interest in Suspense (Facility Currency)",
                                      "acc_interest_suspense_myr":"Income/Interest in Suspense (MYR)",
                                      "acc_other_charges":"Other Charges (Facility Currency)",
@@ -542,21 +542,21 @@ try:
                                      "acc_credit_loss_laf_ecl_myr_new":"Expected Credit Loss LAF (ECL) (MYR)",
                                      "acc_disbursement_status_desc":"Disbursement/ Drawdown Status", #
                                      "acc_undrawn_amount_banking_ori":"Unutilised/ Undrawn Amount (Facility Currency)", #
-                                     "acc_undrawn_amount_myr":"Unutilised/ Undrawn Amount (MYR)", #
+                                     "acc_undrawn_amount_myr":"Unutilised/_Undrawn Amount (MYR)", # tukar alt + space jd _
                                      "acc_drawdown_fc":"Disbursement/ Drawdown  (Facility Currency)", #
                                      "acc_drawdown_myr":"Disbursement/Drawdown (MYR)",
                                      "acc_cumulative_drawdown":"Cumulative Disbursement/ Drawdown  (Facility Currency)", #
                                      "acc_cumulative_drawdown_myr":"Cumulative Disbursement/ Drawdown  (MYR)", #
                                      "acc_repayment_fc":"Cost Payment/ Principal Repayment  (Facility Currency)", #
-                                     "acc_repayment_myr":"Cost Payment/ Principal Repayment  (MYR)", #
+                                     "acc_repayment_myr":"Cost Payment/_Principal Repayment _(MYR)", # tukar alt + space jd _
                                      "acc_cumulative_repayment":"Cumulative  Cost Payment/ Principal Repayment (Facility Currency)", #
                                      "acc_cumulative_repayment_myr":"Cumulative  Cost Payment/ Principal Repayment  (MYR)", #
                                      "acc_interest_repayment_fc":"Profit Payment/ Interest Repayment (Facility Currency)", #
-                                     "acc_interest_repayment_myr":"Profit Payment/ Interest Repayment  (MYR)", #
+                                     "acc_interest_repayment_myr":"Profit Payment/_Interest Repayment _(MYR)", # ukar alt + space jd _
                                      "acc_cumulative_interest_repayment_fc":"Cumulative  Profit Payment/ Interest Repayment (Facility Currency)", #
                                      "acc_cumulative_interest_repayment_myr":"Cumulative  Profit Payment/ Interest Repayment  (MYR)",
                                      "penalty_repayment":"Ta`widh Payment/ Penalty Repayment (Facility Currency)",
-                                     "penalty_repayment_myr":"Ta`widh Payment/ Penalty Repayment   (MYR)", #
+                                     "penalty_repayment_myr":"Ta_widh Payment/_Penalty Repayment  _(MYR)", # ukar alt + space dan ' jd _
                                      "cumulative_penalty":"Cumulative  Ta`widh Payment/ Penalty Repayment (Facility Currency)", #
                                      "cumulative_penalty_myr":"Cumulative  Ta`widh Payment/ Penalty Repayment   (MYR)", #
                                      "other_charges_payment":"Other Charges Payment (Facility Currency)",
@@ -646,7 +646,7 @@ try:
     # LDB4.head(1)
     # LDB4.shape
     convert_time = str(current_time).replace(":","-")
-
+    #Loan Database
     writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"CCRIS_Template_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
 
     LDB4.to_excel(writer2, sheet_name='loandatabase', index = False, startrow=2)
