@@ -150,8 +150,8 @@ except Exception as e:
 try:
     #   Excel File
 
-    # documentName = "Allowance_0825(MIS).xlsx.xlsx"
-    # reportingDate = "2025-08-31"
+    # documentName = "Allowance_1125(MIS).xlsx.xlsx"
+    # reportingDate = "2025-11-30"
     # df1 = r"C:\\Users\\syahidhalid\\Syahid_PC\\Analytics - ITD\\05. Interactive Dashboard\\Closing 202508\\Job Upload\\"+str(documentName) 
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName

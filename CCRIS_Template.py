@@ -340,8 +340,67 @@ try:
     
     LDB3.fillna(0,inplace=True)
 
-    #   LDB3.shape
-    LDB4 = LDB3[['No.',"cif_number",
+
+    # a = LDB3.iloc[np.where(LDB3.finance_sap_number.isin(['500776','500776A']))][['facility_amount_approved']]
+
+
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'cumulative_other_charges_payment_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'cumulative_other_charges_payment_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'cumulative_other_charges_payment'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'cumulative_other_charges_payment'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'other_charges_payment_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'other_charges_payment_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'other_charges_payment'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'other_charges_payment'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'cumulative_penalty_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'cumulative_penalty_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'cumulative_penalty'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'cumulative_penalty'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'penalty_repayment_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'penalty_repayment_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'penalty_repayment'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'penalty_repayment'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_cumulative_interest_repayment_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_cumulative_interest_repayment_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_cumulative_interest_repayment_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_cumulative_interest_repayment_fc'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_interest_repayment_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_interest_repayment_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_interest_repayment_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_interest_repayment_fc'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_cumulative_repayment_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_cumulative_repayment_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_cumulative_repayment'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_cumulative_repayment'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_repayment_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_repayment_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_repayment_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_repayment_fc'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_cumulative_drawdown_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_cumulative_drawdown_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_cumulative_drawdown'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_cumulative_drawdown'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_drawdown_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_drawdown_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_drawdown_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_drawdown_fc'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_undrawn_amount_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_undrawn_amount_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_undrawn_amount_banking_ori'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_undrawn_amount_banking_ori'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_credit_loss_laf_ecl_myr_new'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_credit_loss_laf_ecl_myr_new'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_credit_loss_laf_ecl_new'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_credit_loss_laf_ecl_new'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_total_banking_exposure_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_total_banking_exposure_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_total_banking_exposure_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_total_banking_exposure_fc'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_balance_outstanding_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_balance_outstanding_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_balance_outstanding_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_balance_outstanding_fc'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_other_charges_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_other_charges_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_other_charges'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_other_charges'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_interest_suspense_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_interest_suspense_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_suspended_interest'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_suspended_interest'].sum()
+    #LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_penalty_compensation_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_penalty_compensation_myr'].sum()
+    #LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_penalty_compensation_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_penalty_compensation_fc'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_penalty_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_penalty_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_penalty'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_penalty'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_accrued_interest_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_accrued_interest_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_accurate_interest'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_accurate_interest'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'modification_of_loss_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'modification_of_loss_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'modification_of_loss_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'modification_of_loss_fc'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_accrued_interest_month_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_accrued_interest_month_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_accrued_interest_month_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_accrued_interest_month_fc'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_receivable_past_due_claim_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_receivable_past_due_claim_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_receivables_past_due_claim_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_receivables_past_due_claim_fc'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_contingent_liability_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_contingent_liability_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_contingent_liability_ori'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_contingent_liability_ori'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_contingent_liability_letter_credit_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_contingent_liability_letter_credit_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_contingent_liability_letter_credit_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_contingent_liability_letter_credit_fc'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_principal_amount_outstanding'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_principal_amount_outstanding'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'facility_amount_outstanding'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'facility_amount_outstanding'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'facility_amount_approved_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'facility_amount_approved_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'facility_amount_approved'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'facility_amount_approved'].sum()
+    
+    LDB3A = LDB3.drop(LDB3[LDB3['finance_sap_number'] == '500776A'].index)
+
+    #   LDB3.shape LDB3A.shape
+    LDB4 = LDB3A[['No.',"cif_number",
     "facility_exim_account_num_new",
     "facility_application_sys_code_desc",
     "facility_ccris_master_account_num",
