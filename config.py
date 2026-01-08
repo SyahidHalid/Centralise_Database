@@ -84,12 +84,12 @@ FOLDER_CONFIG = {
 #     "PWD=Exim1234;"
 # )
 # cursor = conn.cursor()
-# # MIS 10.20.1.19,1455 mis_admin Exim1234
-# # EFMS 10.20.1.25,1455 efms_admin Exim1234
-# # ECITS 10.20.1.27,1455 ecis_admin Exim1234
-# # ECR 10.30.1.3,1455 ecr_admin Exim1234
-# # UAT 10.32.1.51,1455 sa Exim1234
-# # MIS NEW 10.20.1.4,1455
+# # MIS 10.20.1.19,1455 mis_admin Exim1234  dah x active
+# # EFMS 10.20.1.25,1455 efms_admin Exim1234 dah x active
+# # ECITS 10.20.1.27,1455 ecis_admin Exim1234 boleh lg
+# # ECR 10.30.1.3,1455 ecr_admin Exim1234 boleh lg
+# # UAT 10.32.1.51,1455 sa Exim1234 boleh lg
+# # MIS NEW 10.20.1.4,1455 dah boleh mis_admin 
 
 # # Query to list all databases and print
 # cursor.execute("SELECT name FROM sys.databases;")
@@ -128,7 +128,9 @@ FOLDER_CONFIG = {
 
 
 
+# pip install easyocr
 
+# pip install torch torchvision torchaudio
 
 
 
