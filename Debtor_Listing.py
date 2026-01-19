@@ -155,8 +155,8 @@ except Exception as e:
 #process
 try:
 
-    #   reportingDate = "2025-05-31"
-    #   documentName = "5.DebtorsListingandCustomerBalanceReportasatMay2025.xlsx.xlsx.xlsx.xlsx"
+    #   reportingDate = "2025-12-31"
+    #   documentName = "DebtorsListingandCustomerBalanceReportasatDecember2025.xlsx(4).xlsx.xlsx.xlsx"
 
     #data_folder = os.path.join(PROJECT_ROOT, "misPython_doc")
 
@@ -193,6 +193,10 @@ try:
     Penalty = pd.read_excel(df1, sheet_name=D10, header=4)
     Ta_A = pd.read_excel(df1, sheet_name=D11, header=4)
     Ta_R = pd.read_excel(df1, sheet_name=D12, header=4)
+
+    # a = Isl_Profit.iloc[np.where(Isl_Profit['Customer\nAccount']==501018)]
+    # sum(a['Balance'])
+    
 except Exception as e:
     print(f"Upload Excel Error: {e}")
     sql_query2 = """INSERT INTO [log_apps_error] (
@@ -355,6 +359,10 @@ try:
         A003 = A003_P13
     else:
         pass
+
+    # 
+    # sum(A003.iloc[np.where(A003.Customer_Account==501018)]['Interest'])
+
     #---------------------------------Modification MORA & R&R Apr2024
 
     Mora1 = Mora.fillna(0).rename(columns={'Borrower code': 'Customer_Account',
@@ -831,6 +839,7 @@ try:
 
     appendfinal2.sort_values('Total Loans Outstanding (MYR)', ascending=False, inplace=True)#.reset_index()
 
+    # appendfinal2.iloc[np.where(appendfinal2.finance_sap_number=='501018')]
     appendfinal3 = appendfinal2[['finance_sap_number',
                                 #'Customer Name',
                                 #'Facility Currency',
@@ -1241,6 +1250,8 @@ try:
     # appendfinal3.to_excel(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"Result_Debtor_Listing_"+str(convert_time)[:19]+".xlsx"),index=False) #"ECL 1024 - MIS v1.xlsx" #documentName
 
     #df1 =  config.FOLDER_CONFIG["FTP_directory"]+documentName #"ECL 1024 - MIS v1.xlsx" #documentName
+
+    # appendfinal3.iloc[np.where(appendfinal3.finance_sap_number=='501018')]
 
     cursor.execute("DROP TABLE IF EXISTS Exception_Debtor_Listing")
     conn.commit()

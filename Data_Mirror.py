@@ -154,8 +154,8 @@ try:
     #E:mis_doc\\PythonProjects\\misPython\\misPython_doc
     #df1 = documentName #"Data Mirror October 2024.xlsx"
     #import config
-    #   documentName = "DataMirrorAugust2025.xlsx.xlsx"
-    #   reportingDate = "2025-08-31"
+    #   documentName = "DataMirrorDecember2025.xlsx(1).xlsx.xlsx"
+    #   reportingDate = "2025-12-31"
 
     df1 = os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName
 
@@ -825,6 +825,7 @@ try:
                                           'acc_interest_repayment_myr_Mis',
                                           'diff_profit_payment_myr']]
 
+    # combine3.iloc[np.where(combine3.finance_sap_number.isin(['501018','501316']))]
     # combine3.head(1)
     # sum(combine3.acc_others_charges_payment_fc)
     # sum(combine3.acc_others_charges_payment_myr)
