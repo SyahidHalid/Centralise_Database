@@ -1,4 +1,4 @@
-# python ECL_to_MIS.py 9 "ECL S1 S2 May-2025 working (AIN2).xlsx" "ECL to MIS" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
+# python ECL_to_MIS.py 13 "ECLS1S2Dec-2025working(MIS).xlsx.xlsx" "ECL to MIS" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-12-31"
 
 #   Library
 import os

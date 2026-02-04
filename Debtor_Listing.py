@@ -1,7 +1,5 @@
-# python Debtor_Listing.py 11,"Debtors Listing and Customer Balance Report as at October 2024_Adjusted.xlsx","Debtor Listing","Pending Processing","0","syahidhalid@exim.com.my","2024-03-29"
-# python Debtor_Listing.py 11 "Debtors Listing and Customer Balance Report as at October 2024_Adjusted.xlsx" "Debtor Listing" "Pending Processing" "0" "syahidhalid@exim.com.my" "2024-03-29"
-# python Debtor_Listing.py 11 "2. Debtors Listing and Customer Balance Report as at February 2025 - P13.xlsx" "Debtor Listing" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-02-28"
-# python Debtor_Listing.py 11 "5.DebtorsListingandCustomerBalanceReportasatMay2025.xlsx.xlsx.xlsx.xlsx" "Debtor Listing" "Pending Processing" "0" "syahidhalid@exim.com.my" "2025-05-31"
+# python Debtor_Listing.py 11, "DebtorsListingandCustomerBalanceReportasatDecember2025.xlsx(4) eversendai 501018.xlsx","Debtor Listing", "Pending Processing", "0", "syahidhalid@exim.com.my", "2025-07-31"
+
 
 # position_as_at
 #aftd_id = DocumentId
@@ -156,7 +154,7 @@ except Exception as e:
 try:
 
     #   reportingDate = "2025-12-31"
-    #   documentName = "DebtorsListingandCustomerBalanceReportasatDecember2025.xlsx(4).xlsx.xlsx.xlsx"
+    #   documentName = "DebtorsListingandCustomerBalanceReportasatDecember2025.xlsx(4) eversendai 501018.xlsx"
 
     #data_folder = os.path.join(PROJECT_ROOT, "misPython_doc")
 
@@ -351,7 +349,9 @@ try:
 
         A003_P13 = A003.merge(PIS_P132,on='Customer_Account',how='left', suffixes=('', '_new'))
 
-        A003_P13['Interest'] = A003_P13['Interest_new'].combine_first(A003_P13['Interest'])
+        A003_P13['Interest'] = A003_P13['Interest_new'] + A003_P13['Interest']
+
+        #A003_P13['Interest'] = A003_P13['Interest_new'].combine_first(A003_P13['Interest'])
 
         # Drop the temporary '_new' column
         A003_P13 = A003_P13.drop(columns='Interest_new')
@@ -359,9 +359,12 @@ try:
         A003 = A003_P13
     else:
         pass
+    
 
-    # 
+    #PIS_P132
+    # A003.shape
     # sum(A003.iloc[np.where(A003.Customer_Account==501018)]['Interest'])
+    # sum(A003_P13.iloc[np.where(A003_P13.Customer_Account==501018)]['Interest'])
 
     #---------------------------------Modification MORA & R&R Apr2024
 
@@ -591,7 +594,10 @@ try:
 
         C002_P13 = C002.merge(IIS_P1312,on='Customer_Account',how='left', suffixes=('', '_new'))
 
-        C002_P13['Interest'] = C002_P13['Interest_new'].combine_first(C002_P13['Interest'])
+        #C002_P13['Interest'] = C002_P13['Interest_new'].combine_first(C002_P13['Interest'])
+
+        C002_P13['Interest'] = C002_P13['Interest_new'] + C002_P13['Interest']
+
 
         # Drop the temporary '_new' column
         C002_P13 = C002_P13.drop(columns='Interest_new')

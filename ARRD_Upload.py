@@ -1,5 +1,4 @@
-# python ARRD_Upload.py 13, "ARRD-MIA.xlsx", "ARRD Upload", "Pending Processing", "0", "syahidhalid@exim.com.my","2025-07-31"
-
+# python ARRD_Upload.py 13, "ARRD-MIA.xlsx", "ARRD Upload", "Pending Processing", "0", "syahidhalid@exim.com.my","2025-12-31"
 
 #   Library
 import os
@@ -123,7 +122,7 @@ try:
     #   Excel File
 
     # documentName = "ARRD-MIA.xlsx"
-    # reportingDate = "2025-09-30"
+    # reportingDate = "2025-12-31"
     # df1 = r"C:\\Users\\syahidhalid\\Syahid_PC\\Analytics - ITD\\05. Interactive Dashboard\\Closing 202508\\Job Upload\\"+str(documentName) 
 
     df1 =  os.path.join(config.FOLDER_CONFIG["FTP_directory"],documentName) #"ECL 1024 - MIS v1.xlsx" #documentName

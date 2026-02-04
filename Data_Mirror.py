@@ -1,5 +1,5 @@
-# python Data_Mirror.py 12,"Data Mirror October 2024.xlsx","Data Mirror","Pending Processing","0","syahidhalid@exim.com.my","2024-03-29"
-# python Data_Mirror.py 12 "DataMirrorMay2025.xlsx.xlsx.xlsx" "Data Mirror" "Pending Processing" "0" "syahidhalid@exim.com.my" "2024-05-31"
+# python Data_Mirror.py 13, "DataMirrorDecember2025.xlsx(1).xlsx.xlsx", "Data Mirror", "Pending Processing", "0", "syahidhalid@exim.com.my", "2025-12-31"
+
 # position_as_at
 #aftd_id = DocumentId
 #tmbh update result table
