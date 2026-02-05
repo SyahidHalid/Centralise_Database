@@ -153,7 +153,7 @@ except Exception as e:
 #process
 try:
 
-    #   reportingDate = "2025-01-31"
+    #   reportingDate = "2026-01-31"
     #   documentName = "DebtorsListingandCustomerBalanceReportasatJanuary2026.xlsx.xlsx"
 
     #data_folder = os.path.join(PROJECT_ROOT, "misPython_doc")
@@ -368,7 +368,7 @@ try:
 
     #PIS_P132
     # A003.shape
-    # sum(A003.iloc[np.where(A003.Customer_Account==501291)]['Interest'])
+    # sum(A003.iloc[np.where(A003.Customer_Account==501116)]['Interest'])
     # sum(A003_P13.iloc[np.where(A003_P13.Customer_Account==501291)]['Interest'])
 
     #---------------------------------Modification MORA & R&R Apr2024

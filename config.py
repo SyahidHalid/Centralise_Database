@@ -20,7 +20,7 @@ CONNECTION_STRING = (
 # # #PROD
 # CONNECTION_STRING = (
 #     'DRIVER={ODBC Driver 17 for SQL Server};'
-#     'SERVER=10.20.1.19,1455;'
+#     'SERVER=10.20.1.4,1455;'
 #     'DATABASE=mis_db_prod;'
 #     'UID=mis_admin;'
 #     'PWD=Exim1234;'
