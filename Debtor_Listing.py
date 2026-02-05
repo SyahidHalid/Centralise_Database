@@ -153,8 +153,8 @@ except Exception as e:
 #process
 try:
 
-    #   reportingDate = "2025-12-31"
-    #   documentName = "DebtorsListingandCustomerBalanceReportasatDecember2025.xlsx(4) eversendai 501018.xlsx"
+    #   reportingDate = "2025-01-31"
+    #   documentName = "DebtorsListingandCustomerBalanceReportasatJanuary2026.xlsx.xlsx"
 
     #data_folder = os.path.join(PROJECT_ROOT, "misPython_doc")
 
@@ -313,6 +313,8 @@ try:
     #Isl_Profit2['Sheet'] = 'Debtors Listing Islamic (Profit)'
     Isl_Profit2['Financing_Type'] = 'Islamic'
 
+    #   A003.iloc[np.where(A003.Customer_Account==501116)]
+
     #Combine Islamic Cost+Profit
     A001 = Isl_Cost2.merge(Isl_Profit2,on=['Customer_Account','Company','Currency','Financing_Type'],how='outer',indicator=True)
 
@@ -346,6 +348,9 @@ try:
         #PIS_P132['Financing_Type'] = 'Islamic'
         
         #PIS_P132 = PIS_P132[['Customer_Account']].drop_duplicates('Customer_Account', keep='first')
+
+        #   A003_P13.iloc[np.where(A003_P13.Customer_Account==501116)]
+        # sum(A003_P13.iloc[np.where(A003_P13.Customer_Account==501116)]['Interest'])
 
         A003_P13 = A003.merge(PIS_P132,on='Customer_Account',how='left', suffixes=('', '_new'))
 
