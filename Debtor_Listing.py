@@ -313,7 +313,7 @@ try:
     #Isl_Profit2['Sheet'] = 'Debtors Listing Islamic (Profit)'
     Isl_Profit2['Financing_Type'] = 'Islamic'
 
-    #   A003.iloc[np.where(A003.Customer_Account==501116)]
+    #   A003.iloc[np.where(A003.Customer_Account==501291)]
 
     #Combine Islamic Cost+Profit
     A001 = Isl_Cost2.merge(Isl_Profit2,on=['Customer_Account','Company','Currency','Financing_Type'],how='outer',indicator=True)
@@ -354,9 +354,9 @@ try:
 
         A003_P13 = A003.merge(PIS_P132,on='Customer_Account',how='left', suffixes=('', '_new'))
 
-        A003_P13['Interest'] = A003_P13['Interest_new'] + A003_P13['Interest']
+        #A003_P13['Interest'] = A003_P13['Interest_new'].fillna(0) + A003_P13['Interest'].fillna(0)
 
-        #A003_P13['Interest'] = A003_P13['Interest_new'].combine_first(A003_P13['Interest'])
+        A003_P13['Interest'] = A003_P13['Interest_new'].combine_first(A003_P13['Interest'])
 
         # Drop the temporary '_new' column
         A003_P13 = A003_P13.drop(columns='Interest_new')
@@ -368,8 +368,8 @@ try:
 
     #PIS_P132
     # A003.shape
-    # sum(A003.iloc[np.where(A003.Customer_Account==501018)]['Interest'])
-    # sum(A003_P13.iloc[np.where(A003_P13.Customer_Account==501018)]['Interest'])
+    # sum(A003.iloc[np.where(A003.Customer_Account==501291)]['Interest'])
+    # sum(A003_P13.iloc[np.where(A003_P13.Customer_Account==501291)]['Interest'])
 
     #---------------------------------Modification MORA & R&R Apr2024
 
@@ -599,9 +599,9 @@ try:
 
         C002_P13 = C002.merge(IIS_P1312,on='Customer_Account',how='left', suffixes=('', '_new'))
 
-        #C002_P13['Interest'] = C002_P13['Interest_new'].combine_first(C002_P13['Interest'])
+        C002_P13['Interest'] = C002_P13['Interest_new'].combine_first(C002_P13['Interest'])
 
-        C002_P13['Interest'] = C002_P13['Interest_new'] + C002_P13['Interest']
+        #C002_P13['Interest'] = C002_P13['Interest_new'].fillna(0) + C002_P13['Interest'].fillna(0)
 
 
         # Drop the temporary '_new' column
