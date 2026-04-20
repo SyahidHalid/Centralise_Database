@@ -96,6 +96,8 @@ try:
     # reportingDate = "2025-06-30"
 
     LDB_prev1 = LDB_prev[['facility_exim_account_num',
+                          'acc_interest_repayment_myr',
+                          'acc_cumulative_interest_repayment_myr',
                           'acc_tawidh_payment_repayment_fc',
                           'acc_tawidh_payment_repayment_myr',
                           'acc_cumulative_tawidh_payment_repayment_fc',
@@ -104,11 +106,15 @@ try:
                           'acc_others_charges_payment_myr',
                           'acc_cumulative_others_charge_payment_fc',
                           'acc_cumulative_others_charge_payment_myr']]
-
+    
+    LDB_prev1['acc_cumulative_interest_repayment_myr'] = LDB_prev1['acc_cumulative_interest_repayment_myr'].fillna(0)- LDB_prev1['acc_interest_repayment_myr'].fillna(0)
+   
     LDB_prev1['acc_cumulative_tawidh_payment_repayment_fc'] = LDB_prev1['acc_cumulative_tawidh_payment_repayment_fc'].fillna(0)- LDB_prev1['acc_tawidh_payment_repayment_fc'].fillna(0)
     LDB_prev1['acc_cumulative_tawidh_payment_repayment_myr'] = LDB_prev1['acc_cumulative_tawidh_payment_repayment_myr'].fillna(0)- LDB_prev1['acc_tawidh_payment_repayment_myr'].fillna(0)
     LDB_prev1['acc_cumulative_others_charge_payment_fc'] = LDB_prev1['acc_cumulative_others_charge_payment_fc'].fillna(0)- LDB_prev1['acc_others_charges_payment_fc'].fillna(0)
     LDB_prev1['acc_cumulative_others_charge_payment_myr'] = LDB_prev1['acc_cumulative_others_charge_payment_myr'].fillna(0)- LDB_prev1['acc_others_charges_payment_myr'].fillna(0)
+
+    LDB_prev1['acc_interest_repayment_myr'] = 0
 
     LDB_prev1['acc_tawidh_payment_repayment_fc'] = 0
     LDB_prev1['acc_tawidh_payment_repayment_myr'] = 0
@@ -259,7 +265,10 @@ try:
     cursor.execute("""MERGE INTO col_facilities_application_master AS target USING A_DATA_MIRROR AS source
     ON target.facility_exim_account_num = source.facility_exim_account_num
     WHEN MATCHED THEN
-        UPDATE SET target.acc_tawidh_payment_repayment_fc = source.acc_tawidh_payment_repayment_fc,
+        UPDATE SET 
+                target.acc_interest_repayment_myr = source.acc_interest_repayment_myr,
+                target.acc_cumulative_interest_repayment_myr = source.acc_cumulative_interest_repayment_myr,
+                target.acc_tawidh_payment_repayment_fc = source.acc_tawidh_payment_repayment_fc,
                 target.acc_tawidh_payment_repayment_myr = source.acc_tawidh_payment_repayment_myr,
                 target.acc_cumulative_tawidh_payment_repayment_fc = source.acc_cumulative_tawidh_payment_repayment_fc,
                 target.acc_cumulative_tawidh_payment_repayment_myr = source.acc_cumulative_tawidh_payment_repayment_myr,
