@@ -400,7 +400,7 @@ try:
     LDB3A = LDB3.drop(LDB3[LDB3['finance_sap_number'] == '500776A'].index)
 
     #   LDB3.shape LDB3A.shape
-    LDB4 = LDB3A[['No.',"cif_number",
+    LDB4A = LDB3A[['No.',"cif_number",
     "facility_exim_account_num_new",
     "facility_application_sys_code_desc",
     "facility_ccris_master_account_num",
@@ -698,6 +698,36 @@ try:
                                      "acc_writeoff_date":"Write off Date",
                                      "acc_cancel_fulltsettle_date":"Cancellation Date/Fully Settled Date",
                                      "position_as_at":"Position as At"})
+    
+    LDB4 = LDB4A[['No.',
+                'CIF Number',
+                'EXIM Account No.',
+                'Application System Code',
+                'CCRIS Master Account Number',
+                'CCRIS Sub Account Number',
+                'Finance(SAP) Number',
+                'Customer Name',
+                'Status',
+                'Cost/Principal Outstanding (MYR)',
+                'Contingent Liability Letter of Credit (MYR)',
+                'Contingent Liability (MYR)',
+                'Cumulative Accrued Profit/Interest (MYR)',
+                'Penalty/Ta_widh (MYR)',
+                'Income/Interest in Suspense (MYR)',
+                'Other Charges (MYR)',
+                'Total Loans Outstanding (MYR)',
+                'Expected Credit Loss LAF (ECL) (MYR)',
+                'Unutilised/_Undrawn Amount (MYR)',
+                'Disbursement/Drawdown (MYR)',
+                'Cost Payment/_Principal Repayment _(MYR)',
+                'Profit Payment/_Interest Repayment _(MYR)',
+                'Ta_widh Payment/_Penalty Repayment  _(MYR)',
+                'Other Charges Payment (MYR)',
+                'PD (%)',
+                'LGD (%)',
+                'MFRS9 Staging',
+                'Month in Arrears',
+                'Position as At']]
     
     #---------------------------------------------Details-------------------------------------------------------------
     
