@@ -1,6 +1,5 @@
 # python Allowance.py 13, "Allowance_1225(MIS).xlsx.xlsx","Allowance","Pending Processing", "0", "syahidhalid@exim.com.my","2025-12-31"
 
-
 #   Library
 import os
 import sys
