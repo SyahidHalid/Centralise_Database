@@ -1,6 +1,6 @@
 # python CCRIS_Template.py 1, "a", "CCRIS Template", "Pending Processing", "0", "syahidhalid@exim.com.my","2025-07-31"
 
-#   reportingDate = '2025-09-30'
+#   reportingDate = '2026-06-30'
 #   documentId = 1
 
 #   Library
@@ -216,12 +216,14 @@ try:
     "acc_accrued_interest_myr",
     "acc_penalty",
     "acc_penalty_myr",
+    "acc_penalty_compensation_fc",
+    "acc_penalty_compensation_myr",
     "acc_suspended_interest",
     "acc_interest_suspense_myr",
     "acc_other_charges",
     "acc_other_charges_myr",
-    "acc_balance_outstanding_fc",
-    "acc_balance_outstanding_myr",
+    "total_loans_outstanding_fc",
+    "total_loans_outstanding_myr",
     "acc_credit_loss_laf_ecl",
     "acc_credit_loss_laf_ecl_myr",
     "acc_disbursement_status_desc",
@@ -324,22 +326,44 @@ try:
     "acc_writeoff_date",
     "acc_cancel_fulltsettle_date",
     "position_as_at",
-    "acc_credit_loss_cnc_ecl","acc_credit_loss_cnc_ecl_myr"]]
+    "acc_credit_loss_cnc_ecl","acc_credit_loss_cnc_ecl_myr","acc_credit_loss_acc_receiv_ecl","acc_credit_loss_acc_receiv_ecl_myr"]]
 
     # LDB2.shape
-    # LDB2['finance_sap_number'].value_counts()
+    # LDB2['ca_post_approval_stage_desc'].value_counts()
     # LDB2.iloc[np.where(LDB2['finance_sap_number'].isin(['BG-I','BG','500724']))][["acc_credit_loss_cnc_ecl","acc_credit_loss_cnc_ecl_myr"]]
 
     LDB2.loc[(LDB2['finance_sap_number'].isin(['BG-I','BG','500724'])),'acc_credit_loss_cnc_ecl'] = 0
     LDB2.loc[(LDB2['finance_sap_number'].isin(['BG-I','BG','500724'])),'acc_credit_loss_cnc_ecl_myr'] = 0
 
-    LDB2['acc_credit_loss_laf_ecl_new'] = LDB2['acc_credit_loss_laf_ecl'].fillna(0) + LDB2['acc_credit_loss_cnc_ecl'].fillna(0)
-    LDB2['acc_credit_loss_laf_ecl_myr_new'] = LDB2['acc_credit_loss_laf_ecl_myr'].fillna(0) + LDB2['acc_credit_loss_cnc_ecl_myr'].fillna(0)
+    LDB2['acc_credit_loss_laf_ecl_new'] = LDB2['acc_credit_loss_laf_ecl'].fillna(0) + LDB2['acc_credit_loss_cnc_ecl'].fillna(0) + LDB2['acc_credit_loss_acc_receiv_ecl'].fillna(0)
+    LDB2['acc_credit_loss_laf_ecl_myr_new'] = LDB2['acc_credit_loss_laf_ecl_myr'].fillna(0) + LDB2['acc_credit_loss_cnc_ecl_myr'].fillna(0) + LDB2['acc_credit_loss_acc_receiv_ecl_myr'].fillna(0)
+
+
+    LDB2.rename(columns={'acc_penalty':'acc_penalty_ori',
+                         'acc_penalty_myr':'acc_penalty_myr_ori'}, inplace=True)
+    
+    LDB2['acc_penalty'] = LDB2['acc_penalty_ori'].fillna(0)  + LDB2['acc_penalty_compensation_fc'].fillna(0) 
+    LDB2['acc_penalty_myr'] = LDB2['acc_penalty_myr_ori'].fillna(0)  + LDB2['acc_penalty_compensation_myr'].fillna(0) 
+
+    LDB2.loc[LDB2.acc_status_desc.isin(['Impaired','Partial Write-Off','Fully Write-Off']),'acc_accurate_interest'] = 0
+    LDB2.loc[LDB2.acc_status_desc.isin(['Impaired','Partial Write-Off','Fully Write-Off']),'acc_accrued_interest_myr'] = 0
+
+    # LDB2.loc[LDB2.acc_status_desc.isin(['Impaired','Partial Write-Off','Fully Write-Off']),'acc_accurate_interest'] = 0
+    # LDB2.loc[LDB2.acc_status_desc.isin(['Impaired','Partial Write-Off','Fully Write-Off']),'acc_accrued_interest_myr'] = 0
+
+    LDB2.loc[(LDB2.acc_status_desc.isin(['Pending Disbursement','Pending Disbursement ']))&(LDB2.ca_post_approval_stage_desc.isin(['Ready Utilize (RU)','Ready Utilize (RU) '])),'acc_MFRS9_staging_desc'] = '1'
+    LDB2.loc[LDB2.acc_status_desc.isin(['Pending Disbursement-Watchlist']),'acc_MFRS9_staging_desc'] = '2'
+    LDB2.loc[LDB2.acc_status_desc.isin(['Partial Write-Off']),'acc_MFRS9_staging_desc'] = '3'
+    LDB2.loc[LDB2.acc_status_desc.isin(['Fully Write-Off']),'acc_MFRS9_staging_desc'] = 'X'
+
+    #LDB2.acc_MFRS9_staging_desc.dtypes
+    #LDB2.acc_status_desc.value_counts()
 
     LDB3 = LDB2.drop(['acc_credit_loss_cnc_ecl','acc_credit_loss_laf_ecl_myr'],axis=1)
     
-    LDB3.fillna(0,inplace=True)
+    #LDB3.fillna(0,inplace=True)
 
+    # Active_before.iloc[np.where(Active_before['finance_sap_number'].isin(['500897','500676']))][["acc_balance_outstanding_fc","acc_balance_outstanding_myr"]]
 
     # a = LDB3.iloc[np.where(LDB3.finance_sap_number.isin(['500776','500776A']))][['facility_amount_approved']]
 
@@ -370,8 +394,8 @@ try:
     LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_credit_loss_laf_ecl_new'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_credit_loss_laf_ecl_new'].sum()
     LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_total_banking_exposure_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_total_banking_exposure_myr'].sum()
     LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_total_banking_exposure_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_total_banking_exposure_fc'].sum()
-    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_balance_outstanding_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_balance_outstanding_myr'].sum()
-    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_balance_outstanding_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_balance_outstanding_fc'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'total_loans_outstanding_fc'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'total_loans_outstanding_fc'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'total_loans_outstanding_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'total_loans_outstanding_myr'].sum()
     LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_other_charges_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_other_charges_myr'].sum()
     LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_other_charges'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_other_charges'].sum()
     LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_interest_suspense_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_interest_suspense_myr'].sum()
@@ -397,6 +421,11 @@ try:
     LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'facility_amount_approved_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'facility_amount_approved_myr'].sum()
     LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'facility_amount_approved'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'facility_amount_approved'].sum()
     
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_credit_loss_acc_receiv_ecl_myr'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_credit_loss_acc_receiv_ecl_myr'].sum()
+    LDB3.loc[(LDB3['finance_sap_number'].isin(['500776'])),'acc_credit_loss_acc_receiv_ecl'] = LDB3.loc[LDB3['finance_sap_number'].isin(['500776', '500776A']), 'acc_credit_loss_acc_receiv_ecl'].sum()
+    
+
+
     LDB3A = LDB3.drop(LDB3[LDB3['finance_sap_number'] == '500776A'].index)
 
     #   LDB3.shape LDB3A.shape
@@ -446,10 +475,10 @@ try:
     "acc_interest_suspense_myr",
     "acc_other_charges",
     "acc_other_charges_myr",
-    "acc_balance_outstanding_fc",
-    "acc_balance_outstanding_myr",
+    "total_loans_outstanding_fc",
+    "total_loans_outstanding_myr",
     "acc_credit_loss_laf_ecl_new",
-    "acc_credit_loss_laf_ecl_myr_new",
+    "acc_credit_loss_laf_ecl_myr_new","acc_credit_loss_acc_receiv_ecl","acc_credit_loss_acc_receiv_ecl_myr",
     "acc_disbursement_status_desc",
     "acc_undrawn_amount_banking_ori",
     "acc_undrawn_amount_myr",
@@ -595,10 +624,12 @@ try:
                                      "acc_interest_suspense_myr":"Income/Interest in Suspense (MYR)",
                                      "acc_other_charges":"Other Charges (Facility Currency)",
                                      "acc_other_charges_myr":"Other Charges (MYR)",
-                                     "acc_balance_outstanding_fc":"Total Loans Outstanding (Facility Currency)",
-                                     "acc_balance_outstanding_myr":"Total Loans Outstanding (MYR)",
+                                     "total_loans_outstanding_fc":"Total Loans Outstanding (Facility Currency)",
+                                     "total_loans_outstanding_myr":"Total Loans Outstanding (MYR)",
                                      "acc_credit_loss_laf_ecl_new":"Expected Credit Loss (ECL) LAF (Facility Currency)",
                                      "acc_credit_loss_laf_ecl_myr_new":"Expected Credit Loss LAF (ECL) (MYR)",
+                                     "acc_credit_loss_acc_receiv_ecl":"Expected Credit Loss (ECL) AR (Facility Currency)",
+                                     "acc_credit_loss_acc_receiv_ecl_myr":"Expected Credit Loss AR (ECL) (MYR)",
                                      "acc_disbursement_status_desc":"Disbursement/ Drawdown Status", #
                                      "acc_undrawn_amount_banking_ori":"Unutilised/ Undrawn Amount (Facility Currency)", #
                                      "acc_undrawn_amount_myr":"Unutilised/_Undrawn Amount (MYR)", # tukar alt + space jd _
@@ -717,6 +748,7 @@ try:
                 'Other Charges (MYR)',
                 'Total Loans Outstanding (MYR)',
                 'Expected Credit Loss LAF (ECL) (MYR)',
+                #'Expected Credit Loss AR (ECL) (MYR)',
                 'Unutilised/_Undrawn Amount (MYR)',
                 'Disbursement/Drawdown (MYR)',
                 'Cost Payment/_Principal Repayment _(MYR)',
@@ -727,8 +759,9 @@ try:
                 'LGD (%)',
                 'MFRS9 Staging',
                 'Month in Arrears',
-                'Position as At']]
+                'Position as At']].sort_values(by=['Status','Customer Name','Total Loans Outstanding (MYR)'], ascending=[True, True,False])
     
+
     #---------------------------------------------Details-------------------------------------------------------------
     
     # Extract
