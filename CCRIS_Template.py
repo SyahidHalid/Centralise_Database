@@ -1,6 +1,6 @@
 # python CCRIS_Template.py 1, "a", "CCRIS Template", "Pending Processing", "0", "syahidhalid@exim.com.my","2025-07-31"
 
-#   reportingDate = '2026-06-30'
+#   reportingDate = '2025-06-30'
 #   documentId = 1
 
 #   Library
@@ -729,7 +729,10 @@ try:
                                      "acc_writeoff_date":"Write off Date",
                                      "acc_cancel_fulltsettle_date":"Cancellation Date/Fully Settled Date",
                                      "position_as_at":"Position as At"})
-    
+
+    #   Active_before.head(1)
+    #   Active_before.shape
+
     LDB4 = LDB4A[['No.',
                 'CIF Number',
                 'EXIM Account No.',
@@ -761,7 +764,24 @@ try:
                 'Month in Arrears',
                 'Position as At']].sort_values(by=['Status','Customer Name','Total Loans Outstanding (MYR)'], ascending=[True, True,False])
     
+    LDB4.reset_index(drop=True, inplace=True)
 
+    LDB4['No.'] = range(1, len(LDB4) + 1)
+
+
+    #tukar str to null
+    LDB4['Finance(SAP) Number'] = pd.to_numeric(LDB4['Finance(SAP) Number'], errors='coerce').fillna(0).astype(int)
+
+    LDB4['Expected Credit Loss LAF (ECL) (MYR)'] = LDB4['Expected Credit Loss LAF (ECL) (MYR)'].astype(float)
+    
+    LDB4['PD (%)'] = (pd.to_numeric(LDB4['PD (%)'], errors='coerce').fillna(0).astype(float)/100).round(6)
+
+    LDB4['LGD (%)'] = (pd.to_numeric(LDB4['LGD (%)'], errors='coerce').fillna(0).astype(float)/100).round(6)
+
+    # LDB4.dtypes
+    # LDB4['Finance(SAP) Number'].value_counts()
+    # LDB4['PD (%)'].value_counts()
+    # LDB4['LGD (%)'].value_counts()
     #---------------------------------------------Details-------------------------------------------------------------
     
     # Extract
