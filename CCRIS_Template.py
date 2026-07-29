@@ -1,6 +1,6 @@
 # python CCRIS_Template.py 1, "a", "CCRIS Template", "Pending Processing", "0", "syahidhalid@exim.com.my","2025-07-31"
 
-#   reportingDate = '2025-06-30'
+#   reportingDate = '2026-06-30'
 #   documentId = 1
 
 #   Library

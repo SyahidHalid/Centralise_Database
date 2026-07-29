@@ -7,7 +7,7 @@ import os
 CONNECTION_STRING = (
     'DRIVER={ODBC Driver 17 for SQL Server};'
     'SERVER=10.32.1.52,1455;'
-    'DATABASE=mis_db_prod;'
+    'DATABASE=mis_db_prod_11062026;'
     'UID=sa;'
     'PWD=Exim1234;'
     'Encrypt=yes;TrustServerCertificate=yes;'
@@ -18,6 +18,7 @@ CONNECTION_STRING = (
 # }
 # mis_db_prod18062025
 # mis_db_prod_backup_2024_04_02
+
 
 # # #PROD
 # CONNECTION_STRING = (
