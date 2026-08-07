@@ -153,8 +153,8 @@ except Exception as e:
 #process
 try:
 
-    #   reportingDate = "2026-01-31"
-    #   documentName = "DebtorsListingandCustomerBalanceReportasatJanuary2026.xlsx.xlsx"
+    #   reportingDate = "2026-07-31"
+    #   documentName = "DebtorsListingandCustomerBalanceReportasatJuly2026.xlsx.xlsx"
 
     #data_folder = os.path.join(PROJECT_ROOT, "misPython_doc")
 
@@ -368,7 +368,7 @@ try:
 
     #PIS_P132
     # A003.shape
-    # sum(A003.iloc[np.where(A003.Customer_Account==501116)]['Interest'])
+    # sum(A003.iloc[np.where(A003.Customer_Account==501209)]['Interest'])
     # sum(A003_P13.iloc[np.where(A003_P13.Customer_Account==501291)]['Interest'])
 
     #---------------------------------Modification MORA & R&R Apr2024
@@ -746,8 +746,8 @@ try:
                             "Penalty_Tawidh":"Ta`widh Payment/Penalty Repayment (MYR)",
                             'Recovery_Tawidh':"Ta'widh (Compensation) (MYR)"}, inplace=True)
 
-    appendfinal.drop(columns=['Repayment','Cost_Payment','Unearned_Profit','Rental(Ijarah)'], axis=1, inplace=True)
-
+    #appendfinal.drop(columns=['Repayment','Cost_Payment','Unearned_Profit','Rental(Ijarah)'], axis=1, inplace=True)
+    appendfinal.drop(['Repayment', 'Cost_Payment', 'Unearned_Profit', 'Rental(Ijarah)'], axis=1, inplace=True)
                             #"Repayment":"1. Cost Payment/Principal Repayment (MYR)",
                             #"Cost_Payment":'2. Cost Payment/Principal Repayment (MYR)',
 
@@ -793,12 +793,12 @@ try:
     Currency['finance_sap_number'] = Currency['finance_sap_number'].astype(str)
     Currency.columns = Currency.columns.str.replace("\n", "")
 
-    sql = f"""SELECT TOP 17 param_name, r.exchange_rate, r.valuedate
+    sql = f"""SELECT param_name, r.exchange_rate, r.valuedate
     FROM [param_ccy_exchange_rate] r
     INNER JOIN param_system_param p 
         ON p.param_reference = 'Root>>Currency' 
         AND currency_id = p.param_id
-    WHERE r.valuedate <= '{reportingDate}'
+    WHERE r.valuedate = '{reportingDate}'
     ORDER BY r.valuedate DESC;
     """
     # Read filtered exchange rates from the database
@@ -1262,7 +1262,7 @@ try:
 
     #df1 =  config.FOLDER_CONFIG["FTP_directory"]+documentName #"ECL 1024 - MIS v1.xlsx" #documentName
 
-    # appendfinal3.iloc[np.where(appendfinal3.finance_sap_number=='501018')]
+    # appendfinal3.iloc[np.where(appendfinal3.finance_sap_number=='501209')]
 
     cursor.execute("DROP TABLE IF EXISTS Exception_Debtor_Listing")
     conn.commit()
