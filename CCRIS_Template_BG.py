@@ -1,7 +1,8 @@
 # python CCRIS_Template.py 1, "a", "CCRIS Template", "Pending Processing", "0", "syahidhalid@exim.com.my","2025-07-31"
 
-#   reportingDate = '2026-05-31' #UAT mis_db_prod_11062026
+#   reportingDate = '2026-07-31' 
 #   documentId = 1
+
 
 #   Library
 import os
@@ -11,6 +12,7 @@ import config
 import pandas as pd
 import numpy as np
 import datetime as dt
+import xlsxwriter
 
 #   Display
 pd.set_option("display.max_columns", None) 
@@ -82,27 +84,7 @@ if __name__ == "__main__":
         if 'connection' in locals() and connection is not None:
             connection.close()
             print("Database connection closed.")
-        
-#----------------------------------------------------------------------------------------------------
 
-
-#   Library
-try:
-    import pandas as pd
-    import numpy as np
-    import pyodbc
-    import datetime as dt
-    import xlsxwriter
-
-    pd.set_option("display.max_columns", None) 
-    pd.set_option("display.max_colwidth", 1000) #huruf dlm column
-    pd.set_option("display.max_rows", 100)
-    pd.set_option("display.precision", 2) #2 titik perpuluhan
-
-except Exception as e:
-    print(f"Library Error: {e}")
-    sys.exit(f"Library Error: {str(e)}")
-    #sys.exit(1)
         
 #----------------------------------------------------------------------------------------------------
 
@@ -120,15 +102,15 @@ try:
     cursor = conn.cursor()
 
 
-    Active_before = pd.read_sql_query(
-        "SELECT * FROM dbase_account_hist WHERE position_as_at = ?",
+    BG_Hist = pd.read_sql_query(
+        "SELECT * FROM bgHist WHERE positionAsAt = ?",
         conn,
         params=(reportingDate,)
     )
 
     sql_query1 = """UPDATE [jobPython]
-    SET [jobStartDate] = getdate(), [jobStatus]= 'PY001', [PythonFileName]='CCRIS_Template.py',[jobCompleted] = NULL
-    WHERE [jobName] = 'CCRIS Template';
+    SET [jobStartDate] = getdate(), [jobStatus]= 'PY001', [PythonFileName]='CCRIS_Template_BG.py',[jobCompleted] = NULL
+    WHERE [jobName] = 'CCRIS Template BG';
                 """
     cursor.execute(sql_query1)
     conn.commit() 
@@ -143,8 +125,25 @@ except Exception as e:
 
 #upload excel
 try:
+    #   BG_Hist.iloc[np.where(BG_Hist['Extended Expiry Date']=="")]
+    BG_Hist.loc[(BG_Hist['Extended Expiry Date']==""), 'Extended Expiry Date'] = BG_Hist['maturityDate']
+
+    BG_Hist['Extended Expiry Date'] = pd.to_datetime(BG_Hist['Extended Expiry Date'],errors='coerce')
+
+    BG_Hist1 = BG_Hist.iloc[np.where((BG_Hist['Extended Expiry Date']!="")&(BG_Hist['Extended Expiry Date']>=pd.to_datetime(reportingDate)))]
+
+    BG_Hist1['Extended Expiry Date'].value_counts()
+    BG_Hist1.shape
+
+
+
     #   Active_before.iloc[np.where(Active_before['finance_sap_number']=='501058')][['int_month_in_arrears','installment_in_arrears']]
     #   Active_before['int_month_in_arrears'].value_counts()
+
+
+
+
+
 
     Active_before.loc[Active_before['int_month_in_arrears']!=0, 'installment_in_arrears'] = Active_before['int_month_in_arrears'] + 1
 
