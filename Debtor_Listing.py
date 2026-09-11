@@ -153,8 +153,8 @@ except Exception as e:
 #process
 try:
 
-    #   reportingDate = "2026-07-31"
-    #   documentName = "DebtorsListingandCustomerBalanceReportasatJuly2026.xlsx.xlsx"
+    #   reportingDate = "2026-08-31"
+    #   documentName = "DebtorsListingandCustomerBalanceReportasatAugust2026.xlsx.xlsx"
 
     #data_folder = os.path.join(PROJECT_ROOT, "misPython_doc")
 
@@ -793,14 +793,16 @@ try:
     Currency['finance_sap_number'] = Currency['finance_sap_number'].astype(str)
     Currency.columns = Currency.columns.str.replace("\n", "")
 
-    sql = f"""SELECT param_name, r.exchange_rate, r.valuedate
+    # r.exchange_rate as exchange_rate_old, r.ccy_value,
+    sql = f"""SELECT param_name, r.exchange_rate/r.ccy_value as exchange_rate ,r.valuedate 
     FROM [param_ccy_exchange_rate] r
     INNER JOIN param_system_param p 
         ON p.param_reference = 'Root>>Currency' 
         AND currency_id = p.param_id
-    WHERE r.valuedate = '{reportingDate}'
+    WHERE r.valuedate <= '{reportingDate}'
     ORDER BY r.valuedate DESC;
     """
+
     # Read filtered exchange rates from the database
     MRate = pd.read_sql_query(sql, conn)
 
@@ -810,6 +812,7 @@ try:
 
     MRate1['exchange_rate'] = MRate1['exchange_rate'].astype(float)   
 
+    #MRate1.iloc[np.where(MRate1.param_name=='IDR')]
     #aa = pd.read_sql_query("""SELECT param_name,r.exchange_rate,r.valuedate
     #FROM [param_ccy_exchange_rate] r inner join param_system_param p on p.param_reference ='Root>>Currency' and currency_id=p.param_id
     #order by valuedate desc;""", conn)
@@ -1098,7 +1101,7 @@ try:
     # appendfinal3.shape
  
     LDB_name = pd.read_sql_query("SELECT * FROM dbase_account_hist where position_as_at = ?;", conn, params=(reportingDate,))
-   
+    
     LDB_hist_before = pd.read_sql_query("SELECT * FROM col_facilities_application_master where position_as_at = ?;", conn, params=(reportingDate,))
    
     LDB_hist = LDB_hist_before.merge(LDB_name[['finance_sap_number','cif_name']], on='finance_sap_number', how='left')
@@ -1134,8 +1137,7 @@ try:
     #condition2 = (LDB_hist.facility_amount_outstanding > 0)|(LDB_hist.acc_accrued_interest_month_fc > 0)|(LDB_hist.modification_of_loss_fc > 0)|(LDB_hist.acc_accurate_interest > 0)|(LDB_hist.acc_suspended_interest > 0)|(LDB_hist.acc_other_charges > 0)|(LDB_hist.acc_penalty > 0)|(LDB_hist.acc_penalty_compensation_fc > 0)|(LDB_hist.acc_balance_outstanding_audited_myr > 0)
     
     # LDB_hist.head(1)
-    LDB_hist1 = LDB_hist[['finance_sap_number',
-                                                                  'cif_name',
+    LDB_hist1 = LDB_hist[['finance_sap_number','cif_name',
                                                    'facility_amount_outstanding',
                                                    'acc_principal_amount_outstanding',
                                                    'acc_accrued_interest_month_fc',
@@ -1158,7 +1160,7 @@ try:
     # combine2.shape
 
     exception_report = appendfinal3.rename(columns={'Account':'finance_sap_number'}).merge(LDB_hist1, on='finance_sap_number', how='outer', suffixes=('_Sap','_Mis'),indicator=True)
-
+    
     # exception_report.head(1)
 
     exception_report["diff_principal_fc"] = exception_report["facility_amount_outstanding_Sap"].fillna(0) - exception_report["facility_amount_outstanding_Mis"].fillna(0)
@@ -1189,7 +1191,7 @@ try:
     exception_report["diff_os_myr"] = exception_report["acc_balance_outstanding_audited_myr_Sap"].fillna(0) - exception_report["acc_balance_outstanding_audited_myr_Mis"].fillna(0)
                
     exception_report.position_as_at.fillna(reportingDate,inplace=True)
-
+    
     exception_report1 = exception_report[['finance_sap_number',
                                           'cif_name',
                                           'position_as_at',
@@ -1266,10 +1268,11 @@ try:
 
     cursor.execute("DROP TABLE IF EXISTS Exception_Debtor_Listing")
     conn.commit()
-
-    exception_report1._merge = exception_report1._merge.astype(str)
-    exception_report1.fillna(0,inplace=True)
     
+    exception_report1 = exception_report1.replace({np.nan: None})
+    exception_report1.fillna(0,inplace=True)
+    exception_report1._merge = exception_report1._merge.astype(str)
+
     # Assuming 'combine2' is a DataFrame
     column_types1 = []
     for col in exception_report1.columns:

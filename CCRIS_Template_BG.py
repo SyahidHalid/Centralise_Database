@@ -101,6 +101,10 @@ try:
     
     cursor = conn.cursor()
 
+    # BG_Hist.shape
+    # BG_Hist.dtypes
+    # BG_Hist['Guarantee No.'].value_counts()
+    # BG_Hist.iloc[np.where(BG_Hist['Guarantee No.']=='EXIM/PFSB/BG-i/26/004')]
 
     BG_Hist = pd.read_sql_query(
         "SELECT * FROM bgHist WHERE positionAsAt = ?",
@@ -125,16 +129,109 @@ except Exception as e:
 
 #upload excel
 try:
-    #   BG_Hist.iloc[np.where(BG_Hist['Extended Expiry Date']=="")]
-    BG_Hist.loc[(BG_Hist['Extended Expiry Date']==""), 'Extended Expiry Date'] = BG_Hist['maturityDate']
+    #   BG_Hist['Extended Expiry Date'].value_counts()
+    BG_Hist.loc[(BG_Hist['Extended Expiry Date']==""), 'Extended Expiry Date'] = BG_Hist['Original Expiry Date']
+
+    BG_Hist['Guarantee No.'] = BG_Hist['Guarantee No.'].str.upper()
+    # BG_Hist.to_excel("a.xlsx", index=False)
 
     BG_Hist['Extended Expiry Date'] = pd.to_datetime(BG_Hist['Extended Expiry Date'],errors='coerce')
 
-    BG_Hist1 = BG_Hist.iloc[np.where((BG_Hist['Extended Expiry Date']!="")&(BG_Hist['Extended Expiry Date']>=pd.to_datetime(reportingDate)))]
+    BG_Hist1 = BG_Hist.iloc[np.where((BG_Hist['Extended Expiry Date']>=pd.to_datetime(reportingDate)))] #(BG_Hist['Extended Expiry Date']!="")&
 
-    BG_Hist1['Extended Expiry Date'].value_counts()
-    BG_Hist1.shape
+    # BG_Hist1['Guarantee No.'].value_counts()
+    # BG_Hist1.shape
+    # BG_Hist.iloc[np.xwhere(BG_Hist['Guarantee No.']=='EXIM/URBAN/PB/24/002')]
 
+
+    # Default
+    BG_Hist1["Instalment Amount (RM)"] = 0 
+    BG_Hist1["Source of Repayment"] = ""
+    BG_Hist1["Type of Repayment"] = ""
+    BG_Hist1["Impaired Loan Recovered During the Month (RM)"] = 0
+    BG_Hist1["Impaired Loan Written-off During the Month (RM)"] = 0
+    BG_Hist1["Provision for Loan Sold to Danaharta (RM)"] = 0
+    BG_Hist1["Provision Transferred to Provision for Diminution in Value of Investment (RM)"] = 0
+    BG_Hist1["Number of instalment in arrears"] = 0
+
+    BG_Hist2 = BG_Hist1[['EXIM Account Number',
+                         'Borrower','Guarantee No.',
+                         'positionAsAt',
+                         'Exposure (RM)',
+                         'Facility Limit Undrawn (MYR)',
+                         'Amount Issued (RM)',
+                         'Instalment Amount (RM)',
+                         'Source of Repayment',
+                         'Type of Repayment',
+                         'Impaired Loan Recovered During the Month (RM)',
+                         'Impaired Loan Written-off During the Month (RM)',
+                         'Provision for Loan Sold to Danaharta (RM)',
+                         'Provision Transferred to Provision for Diminution in Value of Investment (RM)']]
+
+    LDB_Hist = pd.read_sql_query("SELECT * FROM dbase_account_hist WHERE position_as_at = ?", conn, params=(reportingDate,))
+
+    LDB_Hist1 = LDB_Hist[['facility_exim_account_num',
+                          'cif_number',
+                          'facility_application_sys_code',
+                          'facility_ccris_master_account_num',
+                          'acc_accrued_interest_myr',
+                          'acc_other_charges_myr',
+                          'acc_contingent_liability_myr',
+                          'int_month_in_arrears',
+                          'acc_status_desc',
+                          'acc_drawdown_myr',
+                          'acc_repayment_myr',
+                          'acc_interest_repayment_myr',
+                          'penalty_repayment_myr',
+                          'acc_margin',
+                          'pd_percent',
+                          'lgd_percent',
+                          'acc_MFRS9_staging',
+                          'acc_credit_loss_cnc_ecl_myr']]
+
+    combine = BG_Hist2.merge(LDB_Hist1, how='left', left_on='EXIM Account Number', right_on='facility_exim_account_num', index='_combine')
+
+    combine.sort_values('Borrower',ascending=True, inplace=True)
+
+    combine['No.'] = range(1, len(combine) + 1)
+    
+                        
+    combine1 = combine[['No.',
+                        'Borrower',
+                        'cif_number',  
+                        'facility_application_sys_code',   
+                        'facility_ccris_master_account_num',  
+                         'Guarantee No.',
+                         'positionAsAt',
+                         'Exposure (RM)',
+                         'acc_accrued_interest_myr', 
+                         'acc_other_charges_myr', 
+                         'acc_contingent_liability_myr', 
+                         'int_month_in_arrears', 
+                         'Number of instalment in arrears', 
+                         'acc_status_desc', to confirm what is S and what is O 
+                         'Loan Sold to Secondary Market under SBBA (RM)',
+                         'Facility Limit Undrawn (MYR)', 
+                         'Amount Issued (RM)',
+                         'acc_drawdown_myr', 
+                         #'acc_repayment_myr + acc_interest_repayment_myr', 
+                         'Instalment Amount (RM)', 
+                         #'', penalty_repayment_myr islamic
+                         #'', penalty_repayment_myr conventional
+                         'Source of Repayment', 
+                         'Type of Repayment', 
+                         'acc_margin', 
+                         'pd_percent', 
+                         'lgd_percent', 
+                         'acc_MFRS9_staging', 
+                         'acc_credit_loss_cnc_ecl_myr', 
+                         'Impaired Loan Recovered During the Month (RM)',
+                         'Impaired Loan Written-off During the Month (RM)',
+                         'Provision for Loan Sold to Danaharta (RM)',
+                         'Provision Transferred to Provision for Diminution in Value of Investment (RM)',
+                         'EXIM Account Number']]
+    
+    BG_Hist.to_excel("a.xlsx", index=False)
 
 
     #   Active_before.iloc[np.where(Active_before['finance_sap_number']=='501058')][['int_month_in_arrears','installment_in_arrears']]
