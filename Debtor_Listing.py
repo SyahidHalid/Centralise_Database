@@ -153,9 +153,8 @@ except Exception as e:
 #process
 try:
 
-    #   reportingDate = "2026-09-30"
-    #   documentName = "DebtorsListingandCustomerBalanceReportasatSeptember2026.xlsx.xlsx"
-    #   aftd_id = 379
+    #   reportingDate = "2026-08-31"
+    #   documentName = "DebtorsListingandCustomerBalanceReportasatAugust2026.xlsx.xlsx"
 
     #data_folder = os.path.join(PROJECT_ROOT, "misPython_doc")
 
@@ -803,7 +802,7 @@ try:
     WHERE r.valuedate <= '{reportingDate}'
     ORDER BY r.valuedate DESC;
     """
-    
+
     # Read filtered exchange rates from the database
     MRate = pd.read_sql_query(sql, conn)
 
@@ -1368,9 +1367,6 @@ except Exception as e:
 
 # cntrl + K + C untuk comment kn sume 
 # cntrl + K + U untuk comment kn sume 
-#   uploadedByEmail = 'eidil@exim.com.my'
-#   documentId = aftd_id
-
 
 try:
 
