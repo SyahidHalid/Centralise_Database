@@ -126,53 +126,72 @@ except Exception as e:
 #------------------------------------------------------------------------------------------------
 
 
+#BG_combine['Borrower'].value_counts()
+#BG_combine.iloc[np.where(BG_combine['Guarantee No.']=='EXIM/PFSB/BG-I/26/004' ) ].Borrower.value_counts()
 
 #upload excel
 try:
-    #   BG_Hist['Extended Expiry Date'].value_counts()
-    BG_Hist.loc[(BG_Hist['Extended Expiry Date']==""), 'Extended Expiry Date'] = BG_Hist['Original Expiry Date']
+    # BG_Hist['Original Expiry Date'] = pd.to_datetime(BG_Hist['Original Expiry Date'],errors='coerce')
+    # BG_Hist['Extended Expiry Date'] = pd.to_datetime(BG_Hist['Extended Expiry Date'],errors='coerce')
 
-    BG_Hist['Guarantee No.'] = BG_Hist['Guarantee No.'].str.upper()
+    # Borrower
+    BG_Hist_group_name = BG_Hist[['Guarantee No.','Borrower']].drop_duplicates(subset=['Guarantee No.'], keep='last').reset_index(drop=True)
+
+    # Amount Issued
+    BG_hist_group = BG_Hist.groupby(['Guarantee No.'])[['Amount Issued']].sum().reset_index()
+
+    BG_combine = BG_hist_group.merge(BG_Hist_group_name, how='left', on='Guarantee No.')
+
+    BG_combine1 = BG_combine.iloc[np.where(BG_combine['Amount Issued']>0)]
+
+    BG_combine1['Guarantee No.'] = BG_combine1['Guarantee No.'].str.upper()
+    BG_combine1['Borrower'] = BG_combine1['Borrower'].str.upper()
+
+    
+    # BG_combine1.loc[(BG_combine1['Borrower'].str.contains('PRINSIPTEK'))&(BG_combine1['Original Expiry Date'].isnull()), 'Original Expiry Date'] = pd.to_datetime(reportingDate) + pd.DateOffset(years=1)
+    # BG_combine1.loc[(BG_combine1['Extended Expiry Date']=="")|(BG_combine1['Extended Expiry Date'].isnull()), 'Extended Expiry Date'] = BG_combine1['Original Expiry Date']
+    # BG_Hist1 = BG_combine.iloc[np.where((BG_combine['Extended Expiry Date']>=pd.to_datetime(reportingDate))&BG_combine['Amount Issued']>0)] #(BG_Hist['Extended Expiry Date']!="")&
+
+    
     # BG_Hist.to_excel("a.xlsx", index=False)
 
-    BG_Hist['Extended Expiry Date'] = pd.to_datetime(BG_Hist['Extended Expiry Date'],errors='coerce')
-
-    BG_Hist1 = BG_Hist.iloc[np.where((BG_Hist['Extended Expiry Date']>=pd.to_datetime(reportingDate)))] #(BG_Hist['Extended Expiry Date']!="")&
-
-    # BG_Hist1['Guarantee No.'].value_counts()
-    # BG_Hist1.shape
-    # BG_Hist.iloc[np.xwhere(BG_Hist['Guarantee No.']=='EXIM/URBAN/PB/24/002')]
-
-
     # Default
-    BG_Hist1["Instalment Amount (RM)"] = 0 
-    BG_Hist1["Source of Repayment"] = ""
-    BG_Hist1["Type of Repayment"] = ""
-    BG_Hist1["Impaired Loan Recovered During the Month (RM)"] = 0
-    BG_Hist1["Impaired Loan Written-off During the Month (RM)"] = 0
-    BG_Hist1["Provision for Loan Sold to Danaharta (RM)"] = 0
-    BG_Hist1["Provision Transferred to Provision for Diminution in Value of Investment (RM)"] = 0
-    BG_Hist1["Number of instalment in arrears"] = 0
+    BG_combine1["Instalment Amount (RM)"] = 0 
+    BG_combine1["Number of instalment in arrears"] = 0 
+    BG_combine1["Source of Repayment"] = ""
+    BG_combine1["Type of Repayment"] = ""
+    BG_combine1["Impaired Loan Recovered During the Month (RM)"] = 0
+    BG_combine1["Impaired Loan Written-off During the Month (RM)"] = 0
+    BG_combine1["Provision for Loan Sold to Danaharta (RM)"] = 0
+    BG_combine1["Provision Transferred to Provision for Diminution in Value of Investment (RM)"] = 0
+    BG_combine1["Number of instalment in arrears"] = 0
+    BG_combine1["Loan Sold to Secondary Market under SBBA (RM)"] = 0
+    BG_combine1["Date of Account Status"] = reportingDate
 
-    BG_Hist2 = BG_Hist1[['EXIM Account Number',
+
+    BG_Hist2 = BG_combine1[['EXIM Account Number', # pickup from BG_Hist
                          'Borrower','Guarantee No.',
-                         'positionAsAt',
-                         'Exposure (RM)',
-                         'Facility Limit Undrawn (MYR)',
-                         'Amount Issued (RM)',
+                         'positionAsAt', # pickup from BG_Hist
+                         'Exposure (RM)', # pickup from BG_Hist
+                         'Facility Limit Undrawn (MYR)', # pickup from BG_Hist
+                         'Amount Issued',
                          'Instalment Amount (RM)',
                          'Source of Repayment',
                          'Type of Repayment',
                          'Impaired Loan Recovered During the Month (RM)',
                          'Impaired Loan Written-off During the Month (RM)',
                          'Provision for Loan Sold to Danaharta (RM)',
-                         'Provision Transferred to Provision for Diminution in Value of Investment (RM)']]
+                         'Provision Transferred to Provision for Diminution in Value of Investment (RM)',
+                         "Number of instalment in arrears","Date of Account Status",'Loan Sold to Secondary Market under SBBA (RM)']]
+
+    
+    BG_Hist2['EXIM Account Number'] = BG_Hist2['EXIM Account Number'].str.replace("-", "", regex=False)
 
     LDB_Hist = pd.read_sql_query("SELECT * FROM dbase_account_hist WHERE position_as_at = ?", conn, params=(reportingDate,))
 
     LDB_Hist1 = LDB_Hist[['facility_exim_account_num',
                           'cif_number',
-                          'facility_application_sys_code',
+                          'facility_application_sys_code_desc',
                           'facility_ccris_master_account_num',
                           'acc_accrued_interest_myr',
                           'acc_other_charges_myr',
@@ -186,93 +205,58 @@ try:
                           'acc_margin',
                           'pd_percent',
                           'lgd_percent',
-                          'acc_MFRS9_staging',
-                          'acc_credit_loss_cnc_ecl_myr']]
+                          'acc_MFRS9_staging_desc',
+                          'acc_credit_loss_cnc_ecl_myr',
+                          'financing_type_desc']]
 
-    combine = BG_Hist2.merge(LDB_Hist1, how='left', left_on='EXIM Account Number', right_on='facility_exim_account_num', index='_combine')
+
+    combine = BG_Hist2.merge(LDB_Hist1, how='left', left_on='EXIM Account Number', right_on='facility_exim_account_num', indicator='_combine')
+    #   combine._combine.value_counts()
 
     combine.sort_values('Borrower',ascending=True, inplace=True)
 
-    combine['No.'] = range(1, len(combine) + 1)
+    combine['No'] = range(1, len(combine) + 1)
+
+    # combine.financing_type_desc.value_counts()
+    combine['penalty_repayment_myr_islamic'] = np.where(combine['financing_type_desc'] == 'Islamic', combine['penalty_repayment_myr'], 0)
+    combine['penalty_repayment_myr_conventional'] = np.where(combine['financing_type_desc'] == 'Conventional', combine['penalty_repayment_myr'], 0)
+
+    # combine.iloc[np.where(combine.acc_status_desc.isin(['Active','']) )]  
+    combine1 = combine[['No',
+                        'Borrower', # Customer Name
+                        'cif_number', # Customer Number
+                        'facility_application_sys_code_desc', # Application System Code
+                        'facility_ccris_master_account_num', # Master Account Number
+                        'Guarantee No.', # Sub Account Number
+                        'positionAsAt', # Position Date
+                        'Exposure (RM)', # Principal Outstanding (RM)
+                        'acc_accrued_interest_myr', # Interest / Income Outstanding (RM) 
+                        'acc_other_charges_myr', # Other Charges (RM)
+                        'acc_contingent_liability_myr', # Total Outstanding (RM)
+                        'int_month_in_arrears', # Months in arrears
+                        'Number of instalment in arrears',
+                        'acc_status_desc', # Account Status
+                        'Loan Sold to Secondary Market under SBBA (RM)',
+                        'Facility Limit Undrawn (MYR)', # Amount Undrawn (RM)
+                        'acc_drawdown_myr', # Amount Disbursed During the Month (RM)
+                        'acc_repayment_myr', # Amount Repaid During the Month (RM)
+                        'Date of Account Status',
+                        'Instalment Amount (RM)',
+                        'penalty_repayment_myr_islamic', # Late Payment Charges for Ta'widh (Compensation) During the Month (RM)
+                        'penalty_repayment_myr_conventional', # Late Payment Charges for Gharamah (Penalty) During the Month (RM)
+                        'Source of Repayment',
+                        'Type of Repayment',
+                        'acc_margin', # Type of Estimates
+                        'pd_percent', # Probability of Default (%)
+                        'lgd_percent', # Loss Given Default (%)
+                        'acc_MFRS9_staging_desc', # Classification of Exposures
+                        'acc_credit_loss_cnc_ecl_myr', # Provision Amount (RM)
+                        'Impaired Loan Recovered During the Month (RM)', 
+                        'Impaired Loan Written-off During the Month (RM)',
+                        'Provision for Loan Sold to Danaharta (RM)',
+                        'Provision Transferred to Provision for Diminution in Value of Investment (RM)']]
     
-                        
-    combine1 = combine[['No.',
-                        'Borrower',
-                        'cif_number',  
-                        'facility_application_sys_code',   
-                        'facility_ccris_master_account_num',  
-                         'Guarantee No.',
-                         'positionAsAt',
-                         'Exposure (RM)',
-                         'acc_accrued_interest_myr', 
-                         'acc_other_charges_myr', 
-                         'acc_contingent_liability_myr', 
-                         'int_month_in_arrears', 
-                         'Number of instalment in arrears', 
-                         'acc_status_desc', to confirm what is S and what is O 
-                         'Loan Sold to Secondary Market under SBBA (RM)',
-                         'Facility Limit Undrawn (MYR)', 
-                         'Amount Issued (RM)',
-                         'acc_drawdown_myr', 
-                         #'acc_repayment_myr + acc_interest_repayment_myr', 
-                         'Instalment Amount (RM)', 
-                         #'', penalty_repayment_myr islamic
-                         #'', penalty_repayment_myr conventional
-                         'Source of Repayment', 
-                         'Type of Repayment', 
-                         'acc_margin', 
-                         'pd_percent', 
-                         'lgd_percent', 
-                         'acc_MFRS9_staging', 
-                         'acc_credit_loss_cnc_ecl_myr', 
-                         'Impaired Loan Recovered During the Month (RM)',
-                         'Impaired Loan Written-off During the Month (RM)',
-                         'Provision for Loan Sold to Danaharta (RM)',
-                         'Provision Transferred to Provision for Diminution in Value of Investment (RM)',
-                         'EXIM Account Number']]
-    
-    BG_Hist.to_excel("a.xlsx", index=False)
-
-
-    #   Active_before.iloc[np.where(Active_before['finance_sap_number']=='501058')][['int_month_in_arrears','installment_in_arrears']]
-    #   Active_before['int_month_in_arrears'].value_counts()
-
-
-
-
-
-
-    Active_before.loc[Active_before['int_month_in_arrears']!=0, 'installment_in_arrears'] = Active_before['int_month_in_arrears'] + 1
-
-    Active_before1 = Active_before[['cif_name',
-                                    'finance_sap_number',
-                                    'facility_application_sys_code',
-                                    'facility_ccris_master_account_num',
-                                    'facility_ccris_master_account_num',
-                                    'position_as_at',
-                                    'acc_principal_amount_outstanding',
-                                    'acc_accrued_interest_myr',
-                                    'acc_other_charges_myr',
-                                    'total_loans_outstanding_myr',
-                                    'int_month_in_arrears'
-]]
-
-    #   Active_before.head(1)
-    #   Active_before.shape
-    def format_18_digit(val: str) -> str:
-        val = str(val)
-        if len(val) == 18 and val.isdigit():
-            return f'{val[0:4]}-{val[4:9]}-{val[9:12]}-{val[12:16]}-{val[16:18]}'
-        return val
-
-    Active_before['No.'] = range(1, len(Active_before) + 1)
-
-    
-
-
-
-
-
+    # combine1.to_excel("a.xlsx", index=False)
 
     #---------------------------------------------Details-------------------------------------------------------------
     
@@ -281,15 +265,15 @@ try:
     # LDB4.shape
     convert_time = str(current_time).replace(":","-")
     #Loan Database
-    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"CCRIS_Template_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
+    writer2 = pd.ExcelWriter(os.path.join(config.FOLDER_CONFIG["FTP_directory"],"CCRIS_Template_BG_"+str(convert_time)[:19]+".xlsx"),engine='xlsxwriter')
 
-    LDB4.to_excel(writer2, sheet_name='loandatabase', index = False, startrow=2)
+    combine1.to_excel(writer2, sheet_name='BG', index = False, startrow=7)
 
     writer2.close()
 
     sql_query4 = """UPDATE [jobPython]
     SET [jobCompleted] = getdate(), [jobStatus]= 'PY002', [jobErrDetail]=NULL
-    WHERE [jobName] = 'CCRIS Template';
+    WHERE [jobName] = 'CCRIS Template BG';
                 """
     cursor.execute(sql_query4)
     conn.commit() 
@@ -297,7 +281,7 @@ try:
     #table    
     # documentId = 1    
     columns = ['aftd_id','result_file_name','processed_status_id','status_id']
-    data = [(documentId,"CCRIS_Template_"+str(convert_time)[:19]+".xlsx",'PY005','PY002')] #cari pakai code jgn pakai id ,36978,36960
+    data = [(documentId,"CCRIS_Template_BG_"+str(convert_time)[:19]+".xlsx",'PY005','PY002')] #cari pakai code jgn pakai id ,36978,36960
     download_result = pd.DataFrame(data,columns=columns)
     
     # Assuming 'combine2' is a DataFrame
@@ -358,11 +342,11 @@ except Exception as e:
                     ?
                     )
                 """
-    cursor.execute(sql_query3,(str(e)+" ["+str(documentName)+"]","Process Excel CCRIS Template",uploadedByEmail))
+    cursor.execute(sql_query3,(str(e)+" ["+str(documentName)+"]","Process Excel CCRIS Template BG",uploadedByEmail))
     conn.commit()
     sql_error = """UPDATE [jobPython]
-    SET [jobCompleted] = NULL, [jobStatus]= 'PY004', [jobErrDetail]= 'Process Excel CCRIS Template'
-    WHERE [jobName] = 'CCRIS Template';
+    SET [jobCompleted] = NULL, [jobStatus]= 'PY004', [jobErrDetail]= 'Process Excel CCRIS Template BG'
+    WHERE [jobName] = 'CCRIS Template BG';
                 """
     cursor.execute(sql_error)
     conn.commit()
@@ -406,25 +390,5 @@ except Exception as e:
     cursor.execute("drop table A_download_error")
     conn.commit() 
 
-    print(f"Process Excel CCRIS TemplateError: {e}")
-    sys.exit(f"Process Excel CCRIS Template Error: {str(e)}")
-
-
-#  select [Master Account Number] as [CCRIS Master Account Number]
-# ,[Sub Account Number] as [CCRIS Sub Account Number]
-# ,[Amount Disbursed_During the Month (RM)] as [Disbursement/Drawdown (MYR)]
-# ,[Months in arrears] as [Month in Arrears]
-# , [Principal Outstanding_(RM)]  as [Cost/Principal Outstanding (MYR)]
-# ,[Interest / Income Outstanding (RM)] as [Cumulative Accrued Profit/Interest (MYR)]
-# , 0 as [Income/Interest in Suspense (MYR)]
-# ,[Classification of Exposures] as [MFRS9 Staging]
-# , 0 as [Expected Credit Loss LAF (ECL) (MYR)]
-# ,[Late Payment Charges for Ta'widh (Compensation) During the Month] as [Penalty/Ta'widh (MYR)]
-# ,[Other Charges (RM)] as [Other Charges (MYR)] 
-# ,[Amount Undrawn (RM)]  as [Unutilised/_Undrawn Amount (MYR)]
-# ,[Amount Disbursed_During the Month (RM)]
-# , [Amount Repaid During the Month (RM)]
-# ,[Sub Account Number]  as [Finance(SAP) Number]
-# ,[Probability of Default (%)] as [PD (%)]
-# ,[Loss Given Default (%)] as [LGD (%)]
-# from [non-trade$A8:AG] where [no] is not null and [customer Number] = 0
+    print(f"Process Excel CCRIS Template BGError: {e}")
+    sys.exit(f"Process Excel CCRIS Template BG Error: {str(e)}")

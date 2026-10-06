@@ -153,8 +153,9 @@ except Exception as e:
 #process
 try:
 
-    #   reportingDate = "2026-08-31"
-    #   documentName = "DebtorsListingandCustomerBalanceReportasatAugust2026.xlsx.xlsx"
+    #   reportingDate = "2026-09-30"
+    #   documentName = "DebtorsListingandCustomerBalanceReportasatSeptember2026.xlsx.xlsx"
+    #   aftd_id = 379
 
     #data_folder = os.path.join(PROJECT_ROOT, "misPython_doc")
 
@@ -802,7 +803,7 @@ try:
     WHERE r.valuedate <= '{reportingDate}'
     ORDER BY r.valuedate DESC;
     """
-
+    
     # Read filtered exchange rates from the database
     MRate = pd.read_sql_query(sql, conn)
 
@@ -1269,31 +1270,31 @@ try:
     cursor.execute("DROP TABLE IF EXISTS Exception_Debtor_Listing")
     conn.commit()
     
-    exception_report1 = exception_report1.replace({np.nan: None})
-    exception_report1.fillna(0,inplace=True)
-    exception_report1._merge = exception_report1._merge.astype(str)
+    # exception_report1 = exception_report1.replace({np.nan: None})
+    # exception_report1.fillna(0,inplace=True)
+    # exception_report1._merge = exception_report1._merge.astype(str)
 
-    # Assuming 'combine2' is a DataFrame
-    column_types1 = []
-    for col in exception_report1.columns:
-        # You can choose to map column types based on data types in the DataFrame, for example:
-        if exception_report1[col].dtype == 'object':  # String data type
-            column_types1.append(f"{col} VARCHAR(255)")
-        elif exception_report1[col].dtype == 'int64':  # Integer data type
-            column_types1.append(f"{col} INT")
-        elif exception_report1[col].dtype == 'float64':  # Float data type
-            column_types1.append(f"{col} FLOAT")
-        else:
-            column_types1.append(f"{col} VARCHAR(255)")  # Default type for others
+    # # Assuming 'combine2' is a DataFrame
+    # column_types1 = []
+    # for col in exception_report1.columns:
+    #     # You can choose to map column types based on data types in the DataFrame, for example:
+    #     if exception_report1[col].dtype == 'object':  # String data type
+    #         column_types1.append(f"{col} VARCHAR(255)")
+    #     elif exception_report1[col].dtype == 'int64':  # Integer data type
+    #         column_types1.append(f"{col} INT")
+    #     elif exception_report1[col].dtype == 'float64':  # Float data type
+    #         column_types1.append(f"{col} FLOAT")
+    #     else:
+    #         column_types1.append(f"{col} VARCHAR(255)")  # Default type for others
 
-    #   exception_report1.dtypes
-    create_table_query_result = "CREATE TABLE Exception_Debtor_Listing (" + ', '.join(column_types1) + ")"
-    cursor.execute(create_table_query_result)
+    # #   exception_report1.dtypes
+    # create_table_query_result = "CREATE TABLE Exception_Debtor_Listing (" + ', '.join(column_types1) + ")"
+    # cursor.execute(create_table_query_result)
 
-    for row in exception_report1.iterrows():
-        sql_result = "INSERT INTO Exception_Debtor_Listing({}) VALUES ({})".format(','.join(exception_report1.columns), ','.join(['?']*len(exception_report1.columns)))
-        cursor.execute(sql_result, tuple(row[1]))
-    conn.commit()
+    # for row in exception_report1.iterrows():
+    #     sql_result = "INSERT INTO Exception_Debtor_Listing({}) VALUES ({})".format(','.join(exception_report1.columns), ','.join(['?']*len(exception_report1.columns)))
+    #     cursor.execute(sql_result, tuple(row[1]))
+    # conn.commit()
 
 except Exception as e:
     print(f"Process Excel Error: {e}")
@@ -1367,6 +1368,9 @@ except Exception as e:
 
 # cntrl + K + C untuk comment kn sume 
 # cntrl + K + U untuk comment kn sume 
+#   uploadedByEmail = 'eidil@exim.com.my'
+#   documentId = aftd_id
+
 
 try:
 
