@@ -129,6 +129,12 @@ except Exception as e:
 #BG_combine['Borrower'].value_counts()
 #BG_combine.iloc[np.where(BG_combine['Guarantee No.']=='EXIM/PFSB/BG-I/26/004' ) ].Borrower.value_counts()
 
+# convert_time = str(current_time).replace(":","-")
+# documentName = "CCRIS_Template_BG_"+str(convert_time)[:19]+".xlsx"
+# uploadedByEmail = "asnida@exim.com.my"
+# documentId = 1
+
+
 #upload excel
 try:
     # BG_Hist['Original Expiry Date'] = pd.to_datetime(BG_Hist['Original Expiry Date'],errors='coerce')
@@ -169,11 +175,25 @@ try:
     BG_combine1["Date of Account Status"] = reportingDate
 
 
-    BG_Hist2 = BG_combine1[['EXIM Account Number', # pickup from BG_Hist
+    BG_Hist['Guarantee No.'] = BG_Hist['Guarantee No.'].str.upper()
+
+    BG_combine2 = BG_combine1.merge(BG_Hist[['Guarantee No.',
+                                             'EXIM Account Number',
+                                             'positionAsAt',
+                                             'Exposure (RM)',
+                                             'Facility Limit Undrawn (MYR)',
+                                             'AMOUNT (RM)']], how='left', on=['Guarantee No.'] , indicator='_combine') #
+
+    # BG_combine2['Guarantee No.'].value_counts()
+    # BG_combine2['_combine'].value_counts()
+
+
+    BG_Hist2 = BG_combine2[['EXIM Account Number', # pickup from BG_Hist
                          'Borrower','Guarantee No.',
                          'positionAsAt', # pickup from BG_Hist
                          'Exposure (RM)', # pickup from BG_Hist
                          'Facility Limit Undrawn (MYR)', # pickup from BG_Hist
+                         'AMOUNT (RM)', # pickup from BG_Hist
                          'Amount Issued',
                          'Instalment Amount (RM)',
                          'Source of Repayment',
@@ -232,7 +252,7 @@ try:
                         'Exposure (RM)', # Principal Outstanding (RM)
                         'acc_accrued_interest_myr', # Interest / Income Outstanding (RM) 
                         'acc_other_charges_myr', # Other Charges (RM)
-                        'acc_contingent_liability_myr', # Total Outstanding (RM)
+                        'AMOUNT (RM)', # Total Outstanding (RM)
                         'int_month_in_arrears', # Months in arrears
                         'Number of instalment in arrears',
                         'acc_status_desc', # Account Status
@@ -254,7 +274,29 @@ try:
                         'Impaired Loan Recovered During the Month (RM)', 
                         'Impaired Loan Written-off During the Month (RM)',
                         'Provision for Loan Sold to Danaharta (RM)',
-                        'Provision Transferred to Provision for Diminution in Value of Investment (RM)']]
+                        'Provision Transferred to Provision for Diminution in Value of Investment (RM)']].rename(columns={'Borrower':'Customer Name',
+                                                                                                                          'cif_number':'Customer Number',
+                                                                                                                          'facility_application_sys_code_desc':'Application System Code',
+                                                                                                                          'facility_ccris_master_account_num':'Master Account Number',
+                                                                                                                          'Guarantee No.':'Sub Account Number',
+                                                                                                                          'positionAsAt':'Position Date',
+                                                                                                                          'Exposure (RM)':'Principal Outstanding (RM)',
+                                                                                                                          'acc_accrued_interest_myr':'Interest / Income Outstanding (RM)',
+                                                                                                                          'acc_other_charges_myr':'Other Charges (RM)',
+                                                                                                                          'AMOUNT (RM)':'Total Outstanding (RM)',
+                                                                                                                          'int_month_in_arrears':'Months in arrears',
+                                                                                                                          'acc_status_desc':'Account Status',
+                                                                                                                          'Facility Limit Undrawn (MYR)':'Amount Undrawn (RM)',
+                                                                                                                          'acc_drawdown_myr':'Amount Disbursed During the Month (RM)',
+                                                                                                                          'acc_repayment_myr':'Amount Repaid During the Month (RM)',
+                                                                                                                          'penalty_repayment_myr_islamic':"Late Payment Charges for Ta'widh (Compensation) During the Month (RM)",
+                                                                                                                          'penalty_repayment_myr_conventional':'Late Payment Charges for Gharamah (Penalty) During the Month (RM)',
+                                                                                                                          'acc_margin':'Type of Estimates',
+                                                                                                                          'pd_percent':'Probability of Default (%)',
+                                                                                                                          'lgd_percent':'Loss Given Default (%)',
+                                                                                                                          'acc_MFRS9_staging_desc':'Classification of Exposures',
+                                                                                                                          'acc_credit_loss_cnc_ecl_myr':'Provision Amount (RM)',
+                                                                                                                          })
     
     # combine1.to_excel("a.xlsx", index=False)
 
