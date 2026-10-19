@@ -138,29 +138,45 @@ except Exception as e:
 #upload excel
 try:
     # BG_Hist['Original Expiry Date'] = pd.to_datetime(BG_Hist['Original Expiry Date'],errors='coerce')
-    # BG_Hist['Extended Expiry Date'] = pd.to_datetime(BG_Hist['Extended Expiry Date'],errors='coerce')
+
+    BG_Hist['Guarantee No.'] = BG_Hist['Guarantee No.'].str.upper()
+    BG_Hist['Borrower'] = BG_Hist['Borrower'].str.upper()
+
 
     # Borrower
     BG_Hist_group_name = BG_Hist[['Guarantee No.','Borrower']].drop_duplicates(subset=['Guarantee No.'], keep='last').reset_index(drop=True)
 
     # Amount Issued
-    BG_hist_group = BG_Hist.groupby(['Guarantee No.'])[['Amount Issued']].sum().reset_index()
+    BG_hist_group = BG_Hist.groupby(['Guarantee No.'])[['AMOUNT (RM)',
+                                                        'Exposure (RM)']].sum().reset_index()
 
     BG_combine = BG_hist_group.merge(BG_Hist_group_name, how='left', on='Guarantee No.')
 
-    BG_combine1 = BG_combine.iloc[np.where(BG_combine['Amount Issued']>0)]
+    BG_combine1_1 = BG_combine.iloc[np.where(BG_combine['AMOUNT (RM)']>0)]
 
-    BG_combine1['Guarantee No.'] = BG_combine1['Guarantee No.'].str.upper()
-    BG_combine1['Borrower'] = BG_combine1['Borrower'].str.upper()
-
+    # Expiry Date
+    BG_hist_expiry = BG_Hist[['Guarantee No.',
+                              'Original Expiry Date',
+                              'Extended Expiry Date']].drop_duplicates(subset=['Guarantee No.'], keep='last').reset_index(drop=True)
     
-    # BG_combine1.loc[(BG_combine1['Borrower'].str.contains('PRINSIPTEK'))&(BG_combine1['Original Expiry Date'].isnull()), 'Original Expiry Date'] = pd.to_datetime(reportingDate) + pd.DateOffset(years=1)
-    # BG_combine1.loc[(BG_combine1['Extended Expiry Date']=="")|(BG_combine1['Extended Expiry Date'].isnull()), 'Extended Expiry Date'] = BG_combine1['Original Expiry Date']
-    # BG_Hist1 = BG_combine.iloc[np.where((BG_combine['Extended Expiry Date']>=pd.to_datetime(reportingDate))&BG_combine['Amount Issued']>0)] #(BG_Hist['Extended Expiry Date']!="")&
+    #BG_combine1.loc[(BG_combine1['Borrower'].str.contains('PRINSIPTEK'))&(BG_combine1['Original Expiry Date'].isnull()), 'Original Expiry Date'] = pd.to_datetime(reportingDate) + pd.DateOffset(years=1)
 
+    BG_hist_expiry.loc[(BG_hist_expiry['Extended Expiry Date']=="")|(BG_hist_expiry['Extended Expiry Date'].isnull()), 'Extended Expiry Date'] = BG_hist_expiry['Original Expiry Date']
+
+    BG_hist_expiry['Extended Expiry Date'] = pd.to_datetime(BG_hist_expiry['Extended Expiry Date'],errors='coerce')
+    
+    BG_hist_expiry1 = BG_hist_expiry.iloc[np.where((BG_hist_expiry['Extended Expiry Date']>=pd.to_datetime(reportingDate)))] #(BG_Hist['Extended Expiry Date']!="")&
+
+    BG_hist_expiry2 = BG_hist_expiry1[['Guarantee No.']].merge(BG_Hist_group_name, how='left', on='Guarantee No.').merge(BG_hist_group, how='left', on='Guarantee No.') #, indicator='_combineA' , indicator='_combineB'
+
+    # BG_hist_expiry['Guarantee No.'].value_counts()
     
     # BG_Hist.to_excel("a.xlsx", index=False)
 
+    BG_combine1 = BG_combine1_1.merge(BG_hist_expiry2, how='outer', on=['Guarantee No.','Borrower','AMOUNT (RM)','Exposure (RM)']) #, indicator='_combine'
+
+    
+    
     # Default
     BG_combine1["Instalment Amount (RM)"] = 0 
     BG_combine1["Number of instalment in arrears"] = 0 
@@ -179,10 +195,10 @@ try:
 
     BG_combine2 = BG_combine1.merge(BG_Hist[['Guarantee No.',
                                              'EXIM Account Number',
-                                             'positionAsAt',
-                                             'Exposure (RM)',
-                                             'Facility Limit Undrawn (MYR)',
-                                             'AMOUNT (RM)']], how='left', on=['Guarantee No.'] , indicator='_combine') #
+                                             'positionAsAt'
+                                             #'Facility Limit Undrawn (MYR)',
+                                             #'AMOUNT (RM)'
+                                             ]].drop_duplicates('Guarantee No.'), how='left', on=['Guarantee No.'] , indicator='_combine') #
 
     # BG_combine2['Guarantee No.'].value_counts()
     # BG_combine2['_combine'].value_counts()
@@ -192,9 +208,9 @@ try:
                          'Borrower','Guarantee No.',
                          'positionAsAt', # pickup from BG_Hist
                          'Exposure (RM)', # pickup from BG_Hist
-                         'Facility Limit Undrawn (MYR)', # pickup from BG_Hist
+                         #'Facility Limit Undrawn (MYR)', # pickup from BG_Hist
                          'AMOUNT (RM)', # pickup from BG_Hist
-                         'Amount Issued',
+                         #'Amount Issued',
                          'Instalment Amount (RM)',
                          'Source of Repayment',
                          'Type of Repayment',
@@ -227,7 +243,7 @@ try:
                           'lgd_percent',
                           'acc_MFRS9_staging_desc',
                           'acc_credit_loss_cnc_ecl_myr',
-                          'financing_type_desc']]
+                          'financing_type_desc','acc_undrawn_amount_myr']]
 
 
     combine = BG_Hist2.merge(LDB_Hist1, how='left', left_on='EXIM Account Number', right_on='facility_exim_account_num', indicator='_combine')
@@ -257,7 +273,7 @@ try:
                         'Number of instalment in arrears',
                         'acc_status_desc', # Account Status
                         'Loan Sold to Secondary Market under SBBA (RM)',
-                        'Facility Limit Undrawn (MYR)', # Amount Undrawn (RM)
+                        'acc_undrawn_amount_myr', # Amount Undrawn (RM)
                         'acc_drawdown_myr', # Amount Disbursed During the Month (RM)
                         'acc_repayment_myr', # Amount Repaid During the Month (RM)
                         'Date of Account Status',
@@ -286,7 +302,7 @@ try:
                                                                                                                           'AMOUNT (RM)':'Total Outstanding (RM)',
                                                                                                                           'int_month_in_arrears':'Months in arrears',
                                                                                                                           'acc_status_desc':'Account Status',
-                                                                                                                          'Facility Limit Undrawn (MYR)':'Amount Undrawn (RM)',
+                                                                                                                          'acc_undrawn_amount_myr':'Amount Undrawn (RM)',
                                                                                                                           'acc_drawdown_myr':'Amount Disbursed During the Month (RM)',
                                                                                                                           'acc_repayment_myr':'Amount Repaid During the Month (RM)',
                                                                                                                           'penalty_repayment_myr_islamic':"Late Payment Charges for Ta'widh (Compensation) During the Month (RM)",
@@ -297,6 +313,14 @@ try:
                                                                                                                           'acc_MFRS9_staging_desc':'Classification of Exposures',
                                                                                                                           'acc_credit_loss_cnc_ecl_myr':'Provision Amount (RM)',
                                                                                                                           })
+    combine1['Account Status'].value_counts()
+
+    combine1.loc[(combine1['Principal Outstanding (RM)']>0),'Account Status'] = 'O'
+    combine1.loc[~(combine1['Principal Outstanding (RM)']>0),'Account Status'] = 'S'
+
+    combine1.loc[~(combine1['Principal Outstanding (RM)']>0),'Amount Undrawn (RM)'] = 0
+
+    combine1['Type of Estimates'] = 2
     
     # combine1.to_excel("a.xlsx", index=False)
 
